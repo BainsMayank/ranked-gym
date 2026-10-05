@@ -1,0 +1,9 @@
+node_modules
+.expo
+dist
+ios
+android
+coverage
+pnpm-lock.yaml
+expo-env.d.ts
+nativewind-env.d.ts

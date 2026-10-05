@@ -1,0 +1,1 @@
+-- Seed data for local Supabase. Populated from Phase 1 (exercise library lands in Phase 2).
