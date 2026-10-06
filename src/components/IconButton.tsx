@@ -19,13 +19,13 @@ export interface IconButtonProps extends Omit<PressableProps, 'children' | 'styl
 const variantClass: Record<IconButtonVariant, string> = {
   ghost: 'bg-transparent',
   surface: 'bg-surface-raised',
-  primary: 'bg-primary',
+  primary: 'bg-text',
 };
 
 const iconTone: Record<IconButtonVariant, ColorToken> = {
   ghost: 'text',
   surface: 'text',
-  primary: 'onPrimary',
+  primary: 'background',
 };
 
 const sizes = {

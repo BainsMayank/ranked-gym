@@ -1,55 +1,68 @@
-import { View } from 'react-native';
+import { useState } from 'react';
+import { Pressable, View } from 'react-native';
 
-import { Card, EmptyState, Screen, Text, type IconName } from '@/components';
+import { Button, Chip, IconButton, Screen, SectionHeader, Text } from '@/components';
 
-interface Section {
-  title: string;
-  icon: IconName;
-  emptyTitle: string;
-  description: string;
-}
+import { PlanCard } from '../components/PlanCard';
+import { RoutineCard } from '../components/RoutineCard';
+import { StartOptions } from '../components/StartOptions';
+import { routines, type Routine } from '../mocks';
 
-const SECTIONS: readonly Section[] = [
-  {
-    title: 'My Plan',
-    icon: 'calendar-outline',
-    emptyTitle: 'No plan yet',
-    description:
-      'Pick a goal, experience level, equipment, session length and training days, and get a multi-week plan. Coming in Phase 5.',
-  },
-  {
-    title: 'New Workout',
-    icon: 'flash-outline',
-    emptyTitle: 'Start training',
-    description:
-      'Start an empty workout, or generate one from the muscles, time and equipment you choose. Coming in Phase 4.',
-  },
-  {
-    title: 'Routines',
-    icon: 'list-outline',
-    emptyTitle: 'No routines yet',
-    description:
-      'Build routines like "Leg Day": set types, supersets, rep ranges, targets, RIR/RPE, rest timers and notes. Coming in Phase 3.',
-  },
-];
+const FOLDERS = ['All', 'PPL', 'Upper / Lower', 'Home'] as const;
+type Folder = (typeof FOLDERS)[number];
 
+/** Workout tab: your plan, ways to start a session, and your routines. */
 export function WorkoutScreen() {
+  const [folder, setFolder] = useState<Folder>('All');
+  const shown = routines.filter((r: Routine) => folder === 'All' || r.folder === folder);
+
   return (
-    <Screen title="Workout" scroll>
-      <View className="gap-xl">
-        {SECTIONS.map((s) => (
-          <View key={s.title} className="gap-sm">
-            <Text variant="heading">{s.title}</Text>
-            <Card padded={false}>
-              <EmptyState
-                icon={s.icon}
-                title={s.emptyTitle}
-                description={s.description}
-                className="py-xl"
-              />
-            </Card>
-          </View>
-        ))}
+    <Screen
+      title="Workout"
+      scroll
+      headerRight={
+        <IconButton icon="time-outline" accessibilityLabel="Workout history" variant="surface" />
+      }
+    >
+      <View className="gap-lg">
+        <PlanCard />
+
+        <SectionHeader title="New workout" />
+        <StartOptions />
+
+        <View className="flex-row items-center justify-between">
+          <Text variant="subheading">Routines</Text>
+          <Button
+            label="New routine"
+            icon="add"
+            variant="ghost"
+            size="sm"
+            onPress={() => undefined}
+          />
+        </View>
+        <View className="flex-row flex-wrap gap-sm">
+          {FOLDERS.map((f) => (
+            <Chip
+              key={f}
+              label={f === 'All' ? `All ${routines.length}` : f}
+              selected={f === folder}
+              onPress={() => setFolder(f)}
+            />
+          ))}
+        </View>
+        <View className="gap-sm">
+          {shown.map((r) => (
+            <RoutineCard key={r.id} routine={r} />
+          ))}
+        </View>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Browse routine library, 120 plus templates"
+          onPress={() => undefined}
+          className="min-h-12 items-center justify-center rounded-lg border border-dashed border-border active:opacity-70"
+        >
+          <Text variant="label">Browse routine library · 120+ templates</Text>
+        </Pressable>
       </View>
     </Screen>
   );

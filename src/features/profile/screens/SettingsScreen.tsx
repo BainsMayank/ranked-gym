@@ -1,9 +1,7 @@
 import { useRouter } from 'expo-router';
-import { View } from 'react-native';
 
-import { Screen } from '@/components';
+import { Icon, ListGroup, ListItem, Screen } from '@/components';
 
-import { ListRow } from '../components/ListRow';
 import { settingsSectionIds, settingsSections } from '../settingsSections';
 
 export function SettingsScreen() {
@@ -11,21 +9,21 @@ export function SettingsScreen() {
 
   return (
     <Screen edges={[]} scroll className="pt-lg">
-      <View className="gap-sm">
+      <ListGroup>
         {settingsSectionIds.map((id) => {
           const s = settingsSections[id];
           return (
-            <ListRow
+            <ListItem
               key={id}
               title={s.title}
-              icon={s.icon}
+              leading={<Icon name={s.icon} tone="textMuted" />}
               onPress={() =>
                 router.push({ pathname: '/profile/settings/[section]', params: { section: id } })
               }
             />
           );
         })}
-      </View>
+      </ListGroup>
     </Screen>
   );
 }

@@ -41,11 +41,11 @@ export function SegmentedControl<T extends string>({
             accessibilityState={{ selected, checked: selected }}
             onPress={() => onChange(opt.value)}
             className={cn(
-              'min-h-9 flex-1 items-center justify-center rounded-sm px-sm',
-              selected ? 'bg-surface' : 'active:opacity-70',
+              'min-h-10 flex-1 items-center justify-center rounded-md px-sm',
+              selected ? 'bg-text' : 'active:opacity-70',
             )}
           >
-            <Text variant="label" tone={selected ? 'default' : 'muted'}>
+            <Text variant="label" tone={selected ? 'inverse' : 'muted'}>
               {opt.label}
             </Text>
           </Pressable>

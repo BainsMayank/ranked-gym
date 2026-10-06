@@ -40,7 +40,7 @@ module.exports = {
       fontSize: Object.fromEntries(
         Object.entries(typography).map(([k, v]) => [
           k,
-          [px(v.fontSize), { lineHeight: px(v.lineHeight), fontWeight: v.fontWeight }],
+          [px(v.fontSize), { lineHeight: px(v.lineHeight), letterSpacing: px(v.letterSpacing) }],
         ]),
       ),
     },

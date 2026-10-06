@@ -1,0 +1,65 @@
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Pressable, View } from 'react-native';
+
+import { Button, Chip, Screen, Tag, Text } from '@/components';
+
+import { ExerciseEditorCard } from '../components/ExerciseEditorCard';
+import { SetTypeLegend } from '../components/SetTypeLegend';
+import { SupersetGroup } from '../components/SupersetGroup';
+import { findRoutine, type RoutineExercise } from '../mocks';
+
+/** Groups consecutive exercises that share a superset letter. */
+function groupExercises(list: RoutineExercise[]) {
+  const groups: { key: string; superset?: string; items: RoutineExercise[] }[] = [];
+  for (const e of list) {
+    const prev = groups[groups.length - 1];
+    if (e.superset && prev?.superset === e.superset) prev.items.push(e);
+    else groups.push({ key: e.id, superset: e.superset, items: [e] });
+  }
+  return groups;
+}
+
+/** Routine builder: settings, then each exercise (or superset) with its planned sets. Saving lands in Phase 3. */
+export function RoutineBuilderScreen() {
+  const router = useRouter();
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const routine = findRoutine(id);
+
+  return (
+    <Screen
+      title="Edit routine"
+      onBack={() => router.back()}
+      headerRight={<Button label="Save" size="sm" onPress={() => router.back()} />}
+      edges={['top', 'bottom']}
+      scroll
+    >
+      <View className="gap-lg">
+        <View className="gap-sm">
+          <Text variant="display">{routine.name}</Text>
+          <View className="flex-row flex-wrap gap-sm">
+            <Chip label={`Folder: ${routine.folder}`} onPress={() => undefined} />
+            <Chip label="Effort: RIR" onPress={() => undefined} />
+            <Chip label="Progression: double" onPress={() => undefined} />
+          </View>
+          <Tag label="5 exercises · 17 sets · ~62 min" tone="primary" className="self-start" />
+        </View>
+        {groupExercises(routine.exercises).map((g) =>
+          g.superset && g.items.length > 1 ? (
+            <SupersetGroup key={g.key} label={g.superset} exercises={g.items} />
+          ) : (
+            <ExerciseEditorCard key={g.key} exercise={g.items[0]!} />
+          ),
+        )}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Add exercise"
+          onPress={() => undefined}
+          className="min-h-12 items-center justify-center rounded-lg border border-dashed border-border active:opacity-70"
+        >
+          <Text variant="subheading">+ Add exercise</Text>
+        </Pressable>
+        <SetTypeLegend />
+      </View>
+    </Screen>
+  );
+}

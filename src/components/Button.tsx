@@ -1,12 +1,18 @@
-import { ActivityIndicator, Pressable, View, type PressableProps } from 'react-native';
+import { ActivityIndicator, View, type PressableProps } from 'react-native';
 
 import { cn } from '@/lib/utils';
 import { useTheme, type ColorToken } from '@/theme';
 
 import { Icon, type IconName } from './Icon';
+import { PressableScale } from './PressableScale';
 import { Text, type TextTone } from './Text';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'destructive';
+/**
+ * `primary` is the inverted (white on dark, black on light) main action: one per screen.
+ * `accent` is the orange fill, reserved for game moments (claim reward, join challenge).
+ */
+export type ButtonVariant =
+  'primary' | 'accent' | 'secondary' | 'outline' | 'ghost' | 'destructive';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
 export interface ButtonProps extends Omit<PressableProps, 'children' | 'style'> {
@@ -20,15 +26,19 @@ export interface ButtonProps extends Omit<PressableProps, 'children' | 'style'> 
 }
 
 const containerClass: Record<ButtonVariant, string> = {
-  primary: 'bg-primary',
-  secondary: 'bg-surface-raised border border-border',
+  primary: 'bg-text',
+  accent: 'bg-primary',
+  secondary: 'bg-surface-raised',
+  outline: 'border border-border bg-transparent',
   ghost: 'bg-transparent',
   destructive: 'bg-danger',
 };
 
 const contentTone: Record<ButtonVariant, { text: TextTone; token: ColorToken }> = {
-  primary: { text: 'onPrimary', token: 'onPrimary' },
+  primary: { text: 'inverse', token: 'background' },
+  accent: { text: 'onPrimary', token: 'onPrimary' },
   secondary: { text: 'default', token: 'text' },
+  outline: { text: 'default', token: 'text' },
   ghost: { text: 'primary', token: 'primary' },
   destructive: { text: 'onDanger', token: 'onDanger' },
 };
@@ -56,17 +66,17 @@ export function Button({
   const isDisabled = disabled || loading;
 
   return (
-    <Pressable
+    <PressableScale
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel ?? label}
       accessibilityState={{ disabled: !!isDisabled, busy: loading }}
       disabled={isDisabled}
       hitSlop={size === 'sm' ? 6 : 0}
+      containerStyle={fullWidth ? { alignSelf: 'stretch' } : undefined}
       className={cn(
-        'flex-row items-center justify-center rounded-md active:opacity-80',
+        'flex-row items-center justify-center rounded-md',
         containerClass[variant],
         sizeClass[size],
-        fullWidth && 'self-stretch',
         isDisabled && !loading && 'opacity-50',
         className,
       )}
@@ -77,11 +87,15 @@ export function Button({
       ) : (
         <View className="flex-row items-center gap-sm">
           {icon ? <Icon name={icon} size={size === 'sm' ? 16 : 20} tone={tone.token} /> : null}
-          <Text variant={size === 'sm' ? 'label' : 'subheading'} tone={tone.text}>
+          <Text
+            variant={size === 'sm' ? 'label' : 'subheading'}
+            tone={tone.text}
+            maxFontSizeMultiplier={1.4}
+          >
             {label}
           </Text>
         </View>
       )}
-    </Pressable>
+    </PressableScale>
   );
 }

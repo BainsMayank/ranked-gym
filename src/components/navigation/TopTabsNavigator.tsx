@@ -41,7 +41,7 @@ export function TopTabsNavigator({ title, screens, headerRight }: TopTabsNavigat
 
   return (
     <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
-      <View className="flex-row items-center justify-between px-lg pb-sm pt-sm">
+      <View className="min-h-12 flex-row items-center justify-between px-lg pb-md pt-sm">
         <Text variant="title">{title}</Text>
         {headerRight}
       </View>
@@ -52,6 +52,7 @@ export function TopTabsNavigator({ title, screens, headerRight }: TopTabsNavigat
           const active = state.routes[state.index];
           return (
             <TopTabs
+              className="mx-lg mb-sm"
               tabs={state.routes.map((r) => ({ key: r.key, label: titles[r.name] ?? r.name }))}
               activeKey={active?.key ?? ''}
               onChange={(key) => {

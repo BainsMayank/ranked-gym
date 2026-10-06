@@ -1,9 +1,14 @@
-import { useEffect, useRef, useState } from 'react';
-import { Pressable, ScrollView, View, type LayoutRectangle } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import { useEffect, useState } from 'react';
+import { Pressable, View } from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated';
 
 import { cn } from '@/lib/utils';
-import { spacing, useTheme } from '@/theme';
+import { radius, useTheme } from '@/theme';
 
 import { Text } from './Text';
 
@@ -19,73 +24,75 @@ export interface TopTabsProps {
   className?: string;
 }
 
-/** Underlined, horizontally scrollable tab strip. Used standalone or as the bar for TopTabsNavigator. */
+const PAD = 3;
+
+/**
+ * Segmented sub-tab bar: equal-width segments with a sliding inverted pill (white on dark).
+ * Used standalone or as the bar for TopTabsNavigator.
+ */
 export function TopTabs({ tabs, activeKey, onChange, className }: TopTabsProps) {
   const { colors } = useTheme();
-  const scrollRef = useRef<ScrollView>(null);
-  const [layouts, setLayouts] = useState<Record<string, LayoutRectangle>>({});
+  const reducedMotion = useReducedMotion();
+  const [width, setWidth] = useState(0);
+  const index = Math.max(
+    0,
+    tabs.findIndex((t) => t.key === activeKey),
+  );
+  const segment = tabs.length > 0 ? (width - PAD * 2) / tabs.length : 0;
   const x = useSharedValue(0);
-  const width = useSharedValue(0);
 
   useEffect(() => {
-    const l = layouts[activeKey];
-    if (!l) return;
-    x.set(withTiming(l.x, { duration: 220 }));
-    width.set(withTiming(l.width, { duration: 220 }));
-    scrollRef.current?.scrollTo({ x: Math.max(0, l.x - 48), animated: true });
-  }, [activeKey, layouts, x, width]);
+    const target = index * segment;
+    x.set(reducedMotion ? target : withSpring(target, { damping: 22, stiffness: 260 }));
+  }, [index, segment, reducedMotion, x]);
 
-  const indicatorStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: x.get() }],
-    width: width.get(),
-  }));
+  const pillStyle = useAnimatedStyle(() => ({ transform: [{ translateX: x.get() }] }));
 
   return (
-    <View className={cn('border-b border-border', className)}>
-      <ScrollView
-        ref={scrollRef}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        accessibilityRole="tablist"
-        contentContainerClassName="px-lg"
-      >
-        <View className="flex-row gap-lg">
-          {tabs.map((tab) => {
-            const selected = tab.key === activeKey;
-            return (
-              <Pressable
-                key={tab.key}
-                accessibilityRole="tab"
-                accessibilityLabel={tab.label}
-                accessibilityState={{ selected }}
-                onPress={() => onChange(tab.key)}
-                onLayout={(e) => {
-                  const layout = e.nativeEvent.layout;
-                  setLayouts((prev) => ({ ...prev, [tab.key]: layout }));
-                }}
-                className="min-h-11 justify-center active:opacity-70"
-              >
-                <Text variant="label" tone={selected ? 'default' : 'muted'}>
-                  {tab.label}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </View>
+    <View
+      accessibilityRole="tablist"
+      onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
+      className={cn('flex-row rounded-md bg-surface', className)}
+      style={{ padding: PAD }}
+    >
+      {segment > 0 ? (
         <Animated.View
           style={[
             {
               position: 'absolute',
-              bottom: 0,
-              left: spacing.lg,
-              height: 3,
-              borderRadius: 2,
-              backgroundColor: colors.primary,
+              top: PAD,
+              bottom: PAD,
+              left: PAD,
+              width: segment,
+              borderRadius: radius.md - PAD,
+              backgroundColor: colors.text,
             },
-            indicatorStyle,
+            pillStyle,
           ]}
         />
-      </ScrollView>
+      ) : null}
+      {tabs.map((tab) => {
+        const selected = tab.key === activeKey;
+        return (
+          <Pressable
+            key={tab.key}
+            accessibilityRole="tab"
+            accessibilityLabel={tab.label}
+            accessibilityState={{ selected }}
+            onPress={() => onChange(tab.key)}
+            className="min-h-10 flex-1 items-center justify-center px-xs"
+          >
+            <Text
+              variant="label"
+              tone={selected ? 'inverse' : 'muted'}
+              numberOfLines={1}
+              maxFontSizeMultiplier={1.3}
+            >
+              {tab.label}
+            </Text>
+          </Pressable>
+        );
+      })}
     </View>
   );
 }

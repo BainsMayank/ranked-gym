@@ -1,0 +1,640 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ranked Gym system</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root,
+      [data-mode='dark'] {
+        --bg: #0b0b0c;
+        --surface: #161618;
+        --raised: #202023;
+        --border: #2c2c30;
+        --edge: #34343a;
+        --text: #f4f4f5;
+        --muted: #9b9ba1;
+        --primary: #f2662f;
+        --on-primary: #0b0b0c;
+        --success: #5bc48a;
+        --warning: #ff9f43;
+        --danger: #e5484d;
+        --glass: rgba(22, 22, 24, 0.62);
+        --glass-edge: rgba(255, 255, 255, 0.09);
+        --page: #050506;
+        --cta-bg: #f4f4f5;
+        --cta-text: #0b0b0c;
+      }
+      [data-mode='light'] {
+        --bg: #f5f5f6;
+        --surface: #ffffff;
+        --raised: #ebebed;
+        --border: #dcdcdf;
+        --edge: #ffffff;
+        --text: #0f0f11;
+        --muted: #5f5f66;
+        --primary: #c2491a;
+        --on-primary: #ffffff;
+        --success: #1e8a55;
+        --warning: #b5650f;
+        --danger: #c9302c;
+        --glass: rgba(255, 255, 255, 0.7);
+        --glass-edge: rgba(0, 0, 0, 0.06);
+        --page: #e4e4e7;
+        --cta-bg: #0f0f11;
+        --cta-text: #f5f5f6;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        --font: 'Instrument Sans';
+        margin: 0;
+        background: var(--page);
+        color: var(--text);
+        font-family: var(--font), system-ui, sans-serif;
+      }
+      .wrap {
+        max-width: 1120px;
+        margin: 0 auto;
+        padding: 32px 16px 64px;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 390px;
+        gap: 40px;
+      }
+      @media (max-width: 900px) {
+        .wrap {
+          grid-template-columns: minmax(0, 1fr);
+        }
+      }
+      .display {
+        font-weight: 600 !important;
+        letter-spacing: -0.02em;
+      }
+      .eyebrow {
+        font-size: 11px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--muted);
+        font-weight: 500;
+      }
+      .num {
+        font-variant-numeric: tabular-nums;
+      }
+      h2 {
+        font-size: 13px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--muted);
+        font-weight: 600;
+        margin: 36px 0 14px;
+      }
+      button.toggle.on {
+        background: var(--cta-bg);
+        color: var(--cta-text);
+      }
+      button.toggle {
+        font: 500 13px var(--font);
+        background: var(--surface);
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 10px 16px;
+        cursor: pointer;
+      }
+      .swatches {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+        gap: 10px;
+      }
+      .sw b {
+        display: block;
+        height: 48px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+      }
+      .sw span {
+        display: block;
+        font-size: 12px;
+        margin-top: 6px;
+      }
+      .sw small {
+        color: var(--muted);
+        font-size: 11px;
+      }
+      .type-row {
+        display: flex;
+        align-items: baseline;
+        gap: 16px;
+        border-bottom: 1px solid var(--border);
+        padding: 12px 0;
+      }
+      .type-row .meta {
+        width: 120px;
+        flex: none;
+        font-size: 11px;
+        color: var(--muted);
+      }
+      /* phone */
+      .phone {
+        width: 390px;
+        max-width: 100%;
+        height: 800px;
+        border-radius: 48px;
+        background: var(--bg);
+        position: relative;
+        overflow: hidden;
+        border: 10px solid #000;
+        box-shadow: 0 40px 80px rgba(0, 0, 0, 0.45);
+      }
+      .scroll {
+        height: 100%;
+        overflow-y: auto;
+        padding: 56px 20px 120px;
+        scrollbar-width: none;
+      }
+      .scroll::-webkit-scrollbar {
+        display: none;
+      }
+      .hero {
+        position: relative;
+        padding: 20px 0 24px;
+      }
+      .hero::before {
+        content: '';
+        position: absolute;
+        inset: -40px -60px auto;
+        height: 260px;
+        background: radial-gradient(closest-side, rgba(228, 181, 63, 0.16), transparent);
+        pointer-events: none;
+      }
+      .tier {
+        font-size: 64px;
+        line-height: 1;
+        font-weight: 600;
+        color: var(--text);
+        position: relative;
+      }
+      .tier em {
+        font-style: normal;
+        color: #e4b53f;
+      }
+      .ladder {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 4px;
+        margin: 18px 0 8px;
+        position: relative;
+      }
+      .ladder i {
+        height: 6px;
+        background: var(--raised);
+        display: block;
+      }
+      .ladder i.on {
+        background: var(--primary);
+      }
+      .ladder i.part {
+        background: linear-gradient(90deg, var(--primary) 62%, var(--raised) 62%);
+      }
+      .ladder-labels {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        font-size: 11px;
+        color: var(--muted);
+        letter-spacing: 0.1em;
+      }
+      .statline {
+        display: flex;
+        border-top: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+        margin: 22px 0 8px;
+      }
+      .statline div {
+        flex: 1;
+        padding: 12px 0;
+      }
+      .statline div + div {
+        border-left: 1px solid var(--border);
+        padding-left: 14px;
+      }
+      .statline .v {
+        font-size: 28px;
+        font-weight: 600;
+        line-height: 1;
+      }
+      .seg {
+        display: flex;
+        background: var(--surface);
+        border-radius: 12px;
+        padding: 3px;
+        margin: 22px 0 6px;
+      }
+      .seg div {
+        flex: 1;
+        text-align: center;
+        font-size: 13px;
+        font-weight: 600;
+        padding: 9px 0;
+        border-radius: 10px;
+        color: var(--muted);
+      }
+      .seg div.on {
+        background: var(--cta-bg);
+        color: var(--cta-text);
+      }
+      .lift {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 14px 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .lift .name {
+        font-weight: 500;
+        font-size: 15px;
+      }
+      .lift .sub {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 2px;
+      }
+      .lift .right {
+        margin-left: auto;
+        text-align: right;
+      }
+      .lift .right .v {
+        font-size: 18px;
+        font-weight: 600;
+        line-height: 1;
+      }
+      .up {
+        color: var(--success);
+        font-size: 12px;
+        font-weight: 600;
+      }
+      .card {
+        background: var(--surface);
+        border-radius: 20px;
+        padding: 18px;
+        margin-top: 22px;
+        box-shadow:
+          inset 0 1px 0 var(--edge),
+          0 10px 24px rgba(0, 0, 0, 0.28);
+      }
+      .cta {
+        display: block;
+        width: 100%;
+        margin-top: 16px;
+        border: 0;
+        border-radius: 12px;
+        padding: 15px;
+        font: 600 15px var(--font);
+        background: var(--cta-bg);
+        color: var(--cta-text);
+      }
+      .tabbar {
+        position: absolute;
+        left: 12px;
+        right: 12px;
+        bottom: 14px;
+        height: 68px;
+        border-radius: 28px;
+        background: var(--glass);
+        backdrop-filter: blur(22px) saturate(160%);
+        -webkit-backdrop-filter: blur(22px) saturate(160%);
+        border: 1px solid var(--glass-edge);
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+      }
+      .tab {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        font-size: 10px;
+        font-weight: 600;
+        color: var(--muted);
+        letter-spacing: 0.04em;
+      }
+      .tab svg {
+        width: 22px;
+        height: 22px;
+        stroke: currentColor;
+        fill: none;
+        stroke-width: 1.8;
+      }
+      .tab.on {
+        color: var(--text);
+      }
+      .tab.on::after {
+        content: '';
+        width: 4px;
+        height: 4px;
+        border-radius: 2px;
+        background: var(--primary);
+      }
+      .tab:not(.on)::after {
+        content: '';
+        width: 4px;
+        height: 4px;
+      }
+    </style>
+  </head>
+  <body data-mode="dark">
+    <div class="wrap">
+      <div>
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+          "
+        >
+          <div>
+            <div class="eyebrow">Phase 0B proposal</div>
+            <div class="display" style="font-size: 40px; line-height: 1.1">Ranked Gym system</div>
+          </div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap">
+            <button class="toggle font on" data-font="Instrument Sans">Instrument Sans</button>
+            <button class="toggle font" data-font="Hanken Grotesk">Hanken Grotesk</button>
+            <button class="toggle font" data-font="Schibsted Grotesk">Schibsted Grotesk</button>
+            <button class="toggle" id="mode">Switch to light</button>
+          </div>
+        </div>
+
+        <h2>Type</h2>
+        <div class="type-row">
+          <div class="meta">Display · 600 · 40</div>
+          <div class="display num" style="font-size: 40px; line-height: 1.1">
+            Gold II · 142.5 kg
+          </div>
+        </div>
+        <div class="type-row">
+          <div class="meta">Title · 600 · 28</div>
+          <div class="display" style="font-size: 28px">Your ranks</div>
+        </div>
+        <div class="type-row">
+          <div class="meta">Heading · 500 · 20</div>
+          <div style="font-size: 20px; font-weight: 500">Bench press</div>
+        </div>
+        <div class="type-row">
+          <div class="meta">Body · 400 · 15</div>
+          <div style="font-size: 15px; line-height: 22px">
+            You're 240 points from Gold I. One more heavy single gets you there.
+          </div>
+        </div>
+        <div class="type-row">
+          <div class="meta">Label · 500 · 11 caps</div>
+          <div class="eyebrow" style="color: var(--text)">Tuesday, 6 October</div>
+        </div>
+        <div class="type-row">
+          <div class="meta">Caption · 400 · 12</div>
+          <div style="font-size: 12px; color: var(--muted)">Updated 2 min ago · synced</div>
+        </div>
+
+        <h2>Interface</h2>
+        <div class="swatches" id="ui"></div>
+        <h2>Status</h2>
+        <div class="swatches" id="status"></div>
+        <h2>Ranks (same in both modes)</h2>
+        <div class="swatches" id="ranks"></div>
+
+        <h2>Shape and depth</h2>
+        <div style="display: flex; gap: 14px; flex-wrap: wrap; align-items: flex-end">
+          <div style="text-align: center">
+            <div
+              style="width: 72px; height: 40px; background: var(--raised); border-radius: 6px"
+            ></div>
+            <small style="color: var(--muted); font-size: 11px">sm 6 · tags</small>
+          </div>
+          <div style="text-align: center">
+            <div
+              style="width: 72px; height: 48px; background: var(--raised); border-radius: 12px"
+            ></div>
+            <small style="color: var(--muted); font-size: 11px">md 12 · controls</small>
+          </div>
+          <div style="text-align: center">
+            <div
+              style="
+                width: 96px;
+                height: 72px;
+                background: var(--surface);
+                border-radius: 20px;
+                box-shadow:
+                  inset 0 1px 0 var(--edge),
+                  0 10px 24px rgba(0, 0, 0, 0.28);
+              "
+            ></div>
+            <small style="color: var(--muted); font-size: 11px">lg 20 · cards</small>
+          </div>
+          <div style="text-align: center">
+            <div
+              style="
+                width: 120px;
+                height: 72px;
+                background: var(--surface);
+                border-radius: 28px 28px 0 0;
+              "
+            ></div>
+            <small style="color: var(--muted); font-size: 11px">xl 28 · sheets, tab bar</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="phone">
+        <div class="scroll">
+          <div class="eyebrow">Tuesday, 6 October</div>
+          <div class="display" style="font-size: 28px; margin-top: 4px">Your ranks</div>
+
+          <div class="hero">
+            <div class="eyebrow">Overall</div>
+            <div class="display tier"><em>Gold</em> II</div>
+            <div
+              class="ladder"
+              role="img"
+              aria-label="Division progress: 62 percent through Gold II"
+            >
+              <i class="on"></i><i class="on"></i><i class="part"></i><i></i>
+            </div>
+            <div class="ladder-labels">
+              <span>IV</span><span>III</span><span>II</span><span>I</span>
+            </div>
+            <div style="font-size: 13px; color: var(--muted); margin-top: 10px">
+              <span class="num" style="color: var(--text); font-weight: 600">240</span> points to
+              Gold I
+            </div>
+          </div>
+
+          <div class="statline">
+            <div>
+              <div class="display num v">12</div>
+              <div class="eyebrow" style="margin-top: 6px; color: var(--warning)">Day streak</div>
+            </div>
+            <div>
+              <div class="display num v">2</div>
+              <div class="eyebrow" style="margin-top: 6px">PRs this week</div>
+            </div>
+            <div>
+              <div class="display num v">#4</div>
+              <div class="eyebrow" style="margin-top: 6px">In college</div>
+            </div>
+          </div>
+
+          <div class="seg">
+            <div>Lifts</div>
+            <div class="on">Muscles</div>
+            <div>History</div>
+          </div>
+
+          <div class="lift">
+            <div>
+              <div class="name">Bench press</div>
+              <div class="sub">Gold II · e1RM</div>
+            </div>
+            <div class="right">
+              <div class="display num v">96 kg</div>
+              <div class="up">+2.5 this week</div>
+            </div>
+          </div>
+          <div class="lift">
+            <div>
+              <div class="name">Back squat</div>
+              <div class="sub">Platinum IV · e1RM</div>
+            </div>
+            <div class="right">
+              <div class="display num v">142.5 kg</div>
+              <div class="up">PR</div>
+            </div>
+          </div>
+          <div class="lift">
+            <div>
+              <div class="name">Deadlift</div>
+              <div class="sub">Gold I · e1RM</div>
+            </div>
+            <div class="right">
+              <div class="display num v">170 kg</div>
+              <div class="sub">no change</div>
+            </div>
+          </div>
+          <div class="lift">
+            <div>
+              <div class="name">Overhead press</div>
+              <div class="sub">Silver I · e1RM</div>
+            </div>
+            <div class="right">
+              <div class="display num v">55 kg</div>
+              <div class="sub">no change</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="eyebrow" style="color: var(--primary)">Next session</div>
+            <div style="font-size: 19px; font-weight: 500; margin-top: 6px">Push · heavy day</div>
+            <div style="font-size: 13px; color: var(--muted); margin-top: 4px">
+              6 exercises · about 55 min
+            </div>
+            <button class="cta">Start workout</button>
+          </div>
+        </div>
+
+        <nav class="tabbar" aria-label="Tabs">
+          <div class="tab">
+            <svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z" /></svg>Home
+          </div>
+          <div class="tab">
+            <svg viewBox="0 0 24 24"><path d="M3 9v6M6 6v12M18 6v12M21 9v6M6 12h12" /></svg>Workout
+          </div>
+          <div class="tab on">
+            <svg viewBox="0 0 24 24"><path d="M12 3l7 4v6c0 4-3 7-7 8-4-1-7-4-7-8V7z" /></svg>Rank
+          </div>
+          <div class="tab">
+            <svg viewBox="0 0 24 24">
+              <circle cx="9" cy="8" r="3.5" />
+              <path
+                d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5M16 4.8a3.5 3.5 0 010 6.4M18 14.8c1.8.7 3 2.6 3.5 5.2"
+              /></svg
+            >Friends
+          </div>
+          <div class="tab">
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 21c1-4 4-6 8-6s7 2 8 6" /></svg
+            >Profile
+          </div>
+        </nav>
+      </div>
+    </div>
+    <script>
+      const ui = [
+        ['background', '--bg'],
+        ['surface', '--surface'],
+        ['surfaceRaised', '--raised'],
+        ['border', '--border'],
+        ['text', '--text'],
+        ['textMuted', '--muted'],
+        ['primary', '--primary'],
+      ];
+      const status = [
+        ['success · PRs', '--success'],
+        ['warning · streak', '--warning'],
+        ['danger', '--danger'],
+      ];
+      const ranks = [
+        ['Iron', '#7A7A82'],
+        ['Bronze', '#B9773F'],
+        ['Silver', '#B9C2CE'],
+        ['Gold', '#E4B53F'],
+        ['Platinum', '#4FC3D9'],
+        ['Diamond', '#5E9BFF'],
+        ['Master', '#A67CFF'],
+        ['Champion', '#F2662F'],
+      ];
+      function sw(el, list, isVar) {
+        el.innerHTML = list
+          .map(([n, v]) => {
+            const val = isVar ? getComputedStyle(document.body).getPropertyValue(v).trim() : v;
+            return `<div class="sw"><b style="background:${val}"></b><span>${n}</span><small>${val}</small></div>`;
+          })
+          .join('');
+      }
+      function paint() {
+        sw(document.getElementById('ui'), ui, true);
+        sw(document.getElementById('status'), status, true);
+        sw(document.getElementById('ranks'), ranks, false);
+      }
+      paint();
+      document.getElementById('mode').addEventListener('click', (e) => {
+        const next = document.body.dataset.mode === 'dark' ? 'light' : 'dark';
+        document.body.dataset.mode = next;
+        e.target.textContent = next === 'dark' ? 'Switch to light' : 'Switch to dark';
+        paint();
+      });
+      document.querySelectorAll('button.font').forEach((b) =>
+        b.addEventListener('click', () => {
+          document.body.style.setProperty('--font', `'${b.dataset.font}'`);
+          document
+            .querySelectorAll('button.font')
+            .forEach((x) => x.classList.toggle('on', x === b));
+        }),
+      );
+    </script>
+  </body>
+</html>

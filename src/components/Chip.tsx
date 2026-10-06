@@ -33,14 +33,14 @@ export function Chip({
       disabled={disabled || !onPress}
       hitSlop={4}
       className={cn(
-        'min-h-8 flex-row items-center gap-xs self-start rounded-full border px-md active:opacity-70',
-        selected ? 'border-primary bg-primary/15' : 'border-border bg-surface',
+        'min-h-8 flex-row items-center gap-xs self-start rounded-full px-md active:opacity-70',
+        selected ? 'bg-text' : 'bg-surface-raised',
         disabled && 'opacity-50',
         className,
       )}
     >
-      {icon ? <Icon name={icon} size={14} tone={selected ? 'primary' : 'textMuted'} /> : null}
-      <Text variant="label" tone={selected ? 'primary' : 'default'}>
+      {icon ? <Icon name={icon} size={14} tone={selected ? 'background' : 'textMuted'} /> : null}
+      <Text variant="label" tone={selected ? 'inverse' : 'default'}>
         {label}
       </Text>
     </Pressable>

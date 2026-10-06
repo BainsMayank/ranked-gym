@@ -2,7 +2,6 @@ import { useState, type ReactNode } from 'react';
 import { View } from 'react-native';
 
 import {
-  Avatar,
   Button,
   Card,
   Chip,
@@ -11,7 +10,6 @@ import {
   Input,
   NumberStepper,
   ProgressBar,
-  RankBadge,
   Screen,
   SegmentedControl,
   Sheet,
@@ -27,6 +25,8 @@ import {
   useThemeStore,
   type ThemeMode,
 } from '@/theme';
+
+import { GameSection } from '../components/GameSection';
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -101,7 +101,10 @@ export function ComponentGalleryScreen() {
       </Section>
 
       <Section title="Text">
-        <Text variant="display">Display</Text>
+        <Text variant="hero">Hero</Text>
+        <Text variant="display" numeric>
+          142.5 kg
+        </Text>
         <Text variant="title">Title</Text>
         <Text variant="heading">Heading</Text>
         <Text variant="subheading">Subheading</Text>
@@ -110,16 +113,21 @@ export function ComponentGalleryScreen() {
         <Text variant="caption" tone="muted">
           Caption, muted
         </Text>
+        <Text variant="overline" tone="muted">
+          Overline · Tuesday, 6 October
+        </Text>
         <View className="flex-row flex-wrap gap-md">
           <Text tone="primary">primary</Text>
           <Text tone="success">success</Text>
           <Text tone="warning">warning</Text>
+          <Text tone="streak">streak</Text>
           <Text tone="danger">danger</Text>
         </View>
       </Section>
 
       <Section title="Button">
         <Button label="Start workout" icon="play" onPress={() => undefined} />
+        <Button label="Join challenge" variant="accent" onPress={() => undefined} />
         <Button label="Secondary" variant="secondary" onPress={() => undefined} />
         <Button label="Ghost" variant="ghost" onPress={() => undefined} />
         <Button
@@ -161,7 +169,7 @@ export function ComponentGalleryScreen() {
       <Section title="Card">
         <Card>
           <Text variant="subheading">Card</Text>
-          <Text tone="muted">Surface with border.</Text>
+          <Text tone="muted">Surface with a lit top edge.</Text>
         </Card>
         <Card raised>
           <Text variant="subheading">Raised card</Text>
@@ -234,28 +242,7 @@ export function ComponentGalleryScreen() {
         </View>
       </Section>
 
-      <Section title="Avatar">
-        <View className="flex-row items-end gap-md">
-          <Avatar name="Aarav Sharma" size="sm" />
-          <Avatar name="Diya Patel" size="md" />
-          <Avatar name="Kabir" size="lg" />
-          <Avatar name="Broken Image" uri="https://invalid.example/x.png" size="xl" />
-        </View>
-      </Section>
-
-      <Section title="RankBadge">
-        <View className="flex-row flex-wrap gap-lg">
-          {rankTiers.map((tier, i) => (
-            <RankBadge
-              key={tier}
-              tier={tier}
-              division={((i % 4) + 1) as 1 | 2 | 3 | 4}
-              showLabel
-              size={56}
-            />
-          ))}
-        </View>
-      </Section>
+      <GameSection />
 
       <Section title="ProgressBar">
         <ProgressBar progress={0.65} accessibilityLabel="Weekly volume goal" />

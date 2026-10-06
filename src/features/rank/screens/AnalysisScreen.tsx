@@ -1,12 +1,24 @@
-import { PlaceholderScreen } from '@/components';
+import { View } from 'react-native';
 
+import { Screen } from '@/components';
+
+import { BalanceCard } from '../components/BalanceCard';
+import { DisciplineCards } from '../components/DisciplineCards';
+import { PredictionsCard } from '../components/PredictionsCard';
+import { RankUpsCard } from '../components/RankUpsCard';
+import { RegionDonutCard } from '../components/RegionDonutCard';
+
+/** Rank → Analysis: discipline scores, predictions, rank-up timing, point sources and balance. */
 export function AnalysisScreen() {
   return (
-    <PlaceholderScreen
-      title="Analysis"
-      icon="analytics-outline"
-      phase="Phase 7"
-      description="Weightlifting vs calisthenics rank, what you need for your next rank-up, rank-ups by weekday, and rank distribution by body region and muscle group."
-    />
+    <Screen edges={[]} scroll className="pt-sm">
+      <View className="gap-lg">
+        <DisciplineCards detailed />
+        <PredictionsCard />
+        <RankUpsCard />
+        <RegionDonutCard />
+        <BalanceCard />
+      </View>
+    </Screen>
   );
 }

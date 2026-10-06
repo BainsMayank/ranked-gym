@@ -9,12 +9,16 @@ export const colorTokenNames = [
   'surface',
   'surfaceRaised',
   'border',
+  /** Lighter top edge on raised surfaces: the "lit from above" line that gives cards depth. */
+  'edge',
   'text',
   'textMuted',
   'primary',
   'onPrimary',
   'success',
   'warning',
+  /** Streak flame. Same value as warning today (a streak at risk is a warning); kept separate so it can diverge. */
+  'streak',
   'danger',
   'onDanger',
   'scrim',
@@ -24,34 +28,42 @@ export type ColorToken = (typeof colorTokenNames)[number];
 export type ColorScheme = 'dark' | 'light';
 export type Palette = Record<ColorToken, string>;
 
+/**
+ * Calm chrome, loud rewards: the interface is near-black neutrals plus ONE orange signal colour.
+ * Saturated colour belongs to game objects (ranks, rarities), never to chrome.
+ */
 export const palette: Record<ColorScheme, Palette> = {
   dark: {
-    background: '#0B0D12',
-    surface: '#151922',
-    surfaceRaised: '#1E2430',
-    border: '#2A3140',
-    text: '#F4F6FA',
-    textMuted: '#9AA3B2',
-    primary: '#B8F536',
-    onPrimary: '#0B0D12',
-    success: '#22C55E',
-    warning: '#F59E0B',
-    danger: '#F43F5E',
-    onDanger: '#FFFFFF',
+    background: '#0B0B0C',
+    surface: '#161618',
+    surfaceRaised: '#202023',
+    border: '#2C2C30',
+    edge: '#34343A',
+    text: '#F4F4F5',
+    textMuted: '#9B9BA1',
+    primary: '#F2662F',
+    onPrimary: '#0B0B0C',
+    success: '#5BC48A',
+    warning: '#FF9F43',
+    streak: '#FF9F43',
+    danger: '#E5484D',
+    onDanger: '#0B0B0C',
     scrim: '#000000',
   },
   light: {
-    background: '#F6F7F9',
+    background: '#F5F5F6',
     surface: '#FFFFFF',
-    surfaceRaised: '#EEF0F4',
-    border: '#DDE1E8',
-    text: '#0F1218',
-    textMuted: '#5B6475',
-    primary: '#4D7C0F',
+    surfaceRaised: '#EBEBED',
+    border: '#DCDCDF',
+    edge: '#FFFFFF',
+    text: '#0F0F11',
+    textMuted: '#5F5F66',
+    primary: '#C2491A',
     onPrimary: '#FFFFFF',
-    success: '#15803D',
-    warning: '#B45309',
-    danger: '#BE123C',
+    success: '#1E8A55',
+    warning: '#A85D0C',
+    streak: '#A85D0C',
+    danger: '#C9302C',
     onDanger: '#FFFFFF',
     scrim: '#000000',
   },
@@ -70,16 +82,35 @@ export const rankTiers = [
 
 export type RankTier = (typeof rankTiers)[number];
 
-/** Rank colours are identical in both schemes so a tier is always recognisable. */
-export const rankColors: Record<RankTier, { base: string; highlight: string; on: string }> = {
-  iron: { base: '#6B7280', highlight: '#A3AAB6', on: '#FFFFFF' },
-  bronze: { base: '#B4693A', highlight: '#E3A274', on: '#FFFFFF' },
-  silver: { base: '#9AA6B6', highlight: '#E2E8F0', on: '#0F1218' },
-  gold: { base: '#E0A91B', highlight: '#FCE38A', on: '#0F1218' },
-  platinum: { base: '#22A99A', highlight: '#8CEBDD', on: '#0F1218' },
-  diamond: { base: '#4C8DFF', highlight: '#A9C8FF', on: '#FFFFFF' },
-  master: { base: '#9B5CFF', highlight: '#D2B6FF', on: '#FFFFFF' },
-  champion: { base: '#FF4D5E', highlight: '#FFB36B', on: '#FFFFFF' },
+/** A game-object colour: `base` fill, `highlight` for gradients and glows, `on` for text/marks drawn on `base`. */
+export interface GameColor {
+  base: string;
+  highlight: string;
+  on: string;
+}
+
+/** Rank colours are identical in both schemes so a tier is always recognisable. Metallic, tuned for near-black. */
+export const rankColors: Record<RankTier, GameColor> = {
+  iron: { base: '#7A7A82', highlight: '#B4B4BB', on: '#0B0B0C' },
+  bronze: { base: '#B9773F', highlight: '#E2AE7E', on: '#0B0B0C' },
+  silver: { base: '#B9C2CE', highlight: '#E8EDF3', on: '#0B0B0C' },
+  gold: { base: '#E4B53F', highlight: '#F8DE8C', on: '#0B0B0C' },
+  platinum: { base: '#4FC3D9', highlight: '#A6EAF5', on: '#0B0B0C' },
+  diamond: { base: '#5E9BFF', highlight: '#B3D0FF', on: '#0B0B0C' },
+  master: { base: '#A67CFF', highlight: '#D7C4FF', on: '#0B0B0C' },
+  champion: { base: '#F2662F', highlight: '#FFB547', on: '#0B0B0C' },
+};
+
+/** Rarity for badges, cosmetics, avatar frames and rewards. Reuses rank hues so the game has one colour language. */
+export const rarities = ['common', 'rare', 'epic', 'legendary'] as const;
+
+export type Rarity = (typeof rarities)[number];
+
+export const rarityColors: Record<Rarity, GameColor> = {
+  common: rankColors.iron,
+  rare: rankColors.diamond,
+  epic: rankColors.master,
+  legendary: { base: '#FFB547', highlight: '#FFE0A3', on: '#0B0B0C' },
 };
 
 /** 4pt spacing scale (px). Tailwind numeric spacing also works: p-4 = 16px. */
@@ -95,33 +126,60 @@ export const spacing = {
   xxxl: 48,
 } as const;
 
+/** Shape lock, applied by role: sm tags · md controls · lg cards · xl sheets and bars. */
 export const radius = {
   none: 0,
   sm: 6,
-  md: 10,
-  lg: 14,
-  xl: 20,
+  md: 12,
+  lg: 20,
+  xl: 28,
   full: 9999,
 } as const;
 
-export type TypeVariant =
-  'display' | 'title' | 'heading' | 'subheading' | 'body' | 'label' | 'caption';
+/** Instrument Sans, loaded in app/_layout.tsx before the splash hides. Each weight is its own family on Android. */
+export const fontFamilies = {
+  regular: 'InstrumentSans_400Regular',
+  medium: 'InstrumentSans_500Medium',
+  semibold: 'InstrumentSans_600SemiBold',
+} as const;
 
-export const typography: Record<
-  TypeVariant,
-  { fontSize: number; lineHeight: number; fontWeight: '400' | '500' | '600' | '700' | '800' }
-> = {
-  display: { fontSize: 34, lineHeight: 40, fontWeight: '800' },
-  title: { fontSize: 26, lineHeight: 32, fontWeight: '700' },
-  heading: { fontSize: 20, lineHeight: 26, fontWeight: '700' },
-  subheading: { fontSize: 17, lineHeight: 22, fontWeight: '600' },
-  body: { fontSize: 15, lineHeight: 22, fontWeight: '400' },
-  label: { fontSize: 13, lineHeight: 18, fontWeight: '600' },
-  caption: { fontSize: 12, lineHeight: 16, fontWeight: '400' },
+export type FontWeightName = keyof typeof fontFamilies;
+
+export type TypeVariant =
+  | 'hero'
+  | 'display'
+  | 'title'
+  | 'heading'
+  | 'subheading'
+  | 'body'
+  | 'label'
+  | 'caption'
+  | 'overline';
+
+export interface TypeStyle {
+  fontSize: number;
+  lineHeight: number;
+  weight: FontWeightName;
+  letterSpacing: number;
+  uppercase?: boolean;
+}
+
+/** Weight comes from size, not heaviness: nothing above semibold. */
+export const typography: Record<TypeVariant, TypeStyle> = {
+  hero: { fontSize: 64, lineHeight: 68, weight: 'semibold', letterSpacing: -1.6 },
+  display: { fontSize: 40, lineHeight: 46, weight: 'semibold', letterSpacing: -0.8 },
+  title: { fontSize: 28, lineHeight: 34, weight: 'semibold', letterSpacing: -0.4 },
+  heading: { fontSize: 20, lineHeight: 26, weight: 'medium', letterSpacing: -0.2 },
+  subheading: { fontSize: 17, lineHeight: 22, weight: 'medium', letterSpacing: 0 },
+  body: { fontSize: 15, lineHeight: 22, weight: 'regular', letterSpacing: 0 },
+  label: { fontSize: 13, lineHeight: 18, weight: 'medium', letterSpacing: 0 },
+  caption: { fontSize: 12, lineHeight: 16, weight: 'regular', letterSpacing: 0 },
+  overline: { fontSize: 11, lineHeight: 14, weight: 'medium', letterSpacing: 1.3, uppercase: true },
 };
 
 export type ShadowLevel = 'none' | 'sm' | 'md' | 'lg';
 
+/** Each level pairs iOS shadow props with Android elevation. Depth on dark comes mostly from surface steps + `edge`. */
 export const shadows: Record<
   ShadowLevel,
   {
@@ -141,28 +199,40 @@ export const shadows: Record<
   },
   sm: {
     shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.18,
-    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
     elevation: 2,
   },
   md: {
     shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.22,
-    shadowRadius: 8,
-    elevation: 6,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.28,
+    shadowRadius: 20,
+    elevation: 8,
   },
   lg: {
     shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.3,
-    shadowRadius: 20,
-    elevation: 12,
+    shadowOffset: { width: 0, height: 20 },
+    shadowOpacity: 0.4,
+    shadowRadius: 36,
+    elevation: 16,
   },
 };
 
-/** '#B8F536' → '184 245 54' (space-separated channels for `rgb(var(--x) / <alpha-value>)`). */
+/** Motion posture: springy press feedback, short state transitions. Decorative motion collapses under reduced motion. */
+export const motion = {
+  press: { scale: 0.97, damping: 18, stiffness: 320 },
+  duration: { fast: 150, base: 240, slow: 400 },
+} as const;
+
+/** Glass chrome (tab bar). iOS blurs; Android shows `surface` at `fallbackOpacity` (no BlurTargetView, for performance). */
+export const glass = {
+  intensity: 50,
+  fallbackOpacity: 0.94,
+} as const;
+
+/** '#F2662F' → '242 102 47' (space-separated channels for `rgb(var(--x) / <alpha-value>)`). */
 export function hexToRgbChannels(hex: string): string {
   const clean = hex.replace('#', '');
   const full =

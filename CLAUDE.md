@@ -26,7 +26,7 @@
 | Tests                | Jest (`jest-expo` preset) + React Native Testing Library 14                                                                                                 |
 | Package manager      | **pnpm** (v12). `nodeLinker: hoisted` in `pnpm-workspace.yaml` is required by Expo                                                                          |
 
-Approved additions to the stack: `react-native-tab-view` and `react-native-pager-view` (needed by swipeable top tabs), `expo-system-ui`, and `expo-font` (a peer dependency of `@expo/vector-icons`).
+Approved additions to the stack: `react-native-tab-view` and `react-native-pager-view` (needed by swipeable top tabs), `expo-system-ui`, `expo-font` (a peer dependency of `@expo/vector-icons`), `expo-blur` (glass tab bar) and `@expo-google-fonts/instrument-sans` (brand font).
 
 ### Expo changes fast: don't trust memory
 
@@ -46,20 +46,27 @@ app/                     Routes only (thin files that render a feature screen). 
   index.tsx              Redirects to /home
   (tabs)/_layout.tsx     Bottom tabs: Home, Workout, Rank, Friends, Profile (this order)
   (tabs)/home/           Top tabs: index (For You), feed, discover
-  (tabs)/workout/        Single scrolling screen: My Plan, New Workout, Routines
-  (tabs)/rank/           Top tabs: index (My Ranks), body-map, leagues, analysis, records
-  (tabs)/friends/        Top tabs: index (Friends), leaderboards, invite
+  (tabs)/workout/        Hub: My Plan, New Workout, Routines
+  (tabs)/rank/           Top tabs: index (Ranks), body-map (Body), leagues, analysis, records
+  (tabs)/friends/        Stack: index (hub with invite), leaderboards
   (tabs)/profile/        Stack: index, settings/index, settings/[section]
+  plan/new.tsx           Create plan (full screen, no tab bar)
+  routine/[id].tsx       Routine builder (full screen)
+  session.tsx            Live workout session (slides up, full screen)
+  welcome.tsx            Sign up / log in
   dev/components.tsx     Component gallery (redirects home when !__DEV__)
 src/
   components/            Shared, feature-agnostic UI (barrel: '@/components')
-    navigation/          TopTabsNavigator (swipeable route tabs using our TopTabs bar)
+    navigation/          TopTabsNavigator (swipeable route tabs using our TopTabs bar), GlassTabBarBackground
+    game/                Game layer UI: RankBadge, DivisionLadder, RankGlow, artRegistry (final art slots)
   features/<feature>/    Everything for one feature: screens/, components/, hooks/, api/, store.ts, types.ts
   lib/                   supabase.ts, queryClient.ts, db/ (Drizzle client + schema), utils/
-  theme/                 tokens.ts (single source of truth), ThemeProvider, themeStore
+    game/                Rank model shared by features (divisions, labels, ordering)
+  theme/                 tokens.ts (single source of truth), displayColor (Expo Go fix), ThemeProvider, themeStore
   types/                 Global/ambient types
 supabase/                migrations/, functions/ (Edge Functions), seed.sql
-docs/                    PRODUCT_SPEC.md, PROGRESS.md
+docs/                    PRODUCT_SPEC.md, PROGRESS.md, design/ (references, system-preview.html)
+MOBILE-DESIGN.md         Approved design system: rules, risks, game layer
 ```
 
 - Import with the `@/` alias (maps to `src/`).
@@ -81,12 +88,21 @@ docs/                    PRODUCT_SPEC.md, PROGRESS.md
 
 ## Theme and design system
 
-- `src/theme/tokens.ts` defines the colour tokens `background, surface, surfaceRaised, border, text, textMuted, primary, onPrimary, success, warning, danger, onDanger, scrim` for **dark** (default, dark-first) and **light**. It also defines `rankColors` (iron, bronze, silver, gold, platinum, diamond, master, champion; each has base, highlight and on), `spacing` (4pt: xxs 2 … xxxl 48), `typography` (display, title, heading, subheading, body, label, caption), `radius` and `shadows`.
-- Tailwind classes map to those tokens through CSS variables that `ThemeProvider` sets, so one class works in both schemes. Examples: `bg-background`, `bg-surface`, `bg-surface-raised`, `border-border`, `text-text`, `text-text-muted`, `bg-primary`, `text-on-primary`, `bg-rank-gold`, `text-rank-diamond-highlight`, `p-lg`, `gap-sm`, `rounded-md`, `text-heading`. Numeric spacing is also available (`p-4` = 16px, because `inlineRem` is 16).
+> **Read [MOBILE-DESIGN.md](MOBILE-DESIGN.md) before any UI work.** It holds the approved system (Phase 0B), its rules and the game layer. [src/theme/README.md](src/theme/README.md) explains how to change values. Change token _values_ freely; don't rename token _keys_ or bake visual values into components without updating both files.
+
+- **Calm chrome, loud rewards**: chrome is near-black neutrals plus one orange signal colour (`primary`). Saturated colour is only for game objects (`rankColors`, `rarityColors`).
+- `src/theme/tokens.ts` defines the colour tokens `background, surface, surfaceRaised, border, edge, text, textMuted, primary, onPrimary, success, warning, streak, danger, onDanger, scrim` for **dark** (default) and **light**. It also defines `rankColors` and `rarityColors` (base, highlight, on), `spacing` (4pt: xxs 2 … xxxl 48), `typography` (hero, display, title, heading, subheading, body, label, caption, overline), `fontFamilies` (Instrument Sans), `radius` (sm 6, md 12, lg 20, xl 28), `shadows`, `motion` and `glass`.
+- **Import colours from `@/theme`, never from `tokens.ts` directly.** `@/theme` corrects for Expo Go on iOS reading hex as Display P3 (`src/theme/displayColor.ts`).
+- Tailwind classes map to the tokens through CSS variables that `ThemeProvider` sets, so one class works in both schemes. Examples: `bg-background`, `bg-surface`, `border-edge`, `text-text`, `text-text-muted`, `bg-primary`, `p-lg`, `gap-sm`, `rounded-md`, `text-heading`. Numeric spacing also works (`p-4` = 16px). For rank colours use `rankColors` in `style` (the static `bg-rank-*` classes skip the Expo Go correction).
+- Use `<Text variant tone numeric>`. It applies the font family per weight, so never set `fontWeight` or `fontFamily` by hand. Use `numeric` for changing numbers (tabular figures).
 - Use `useTheme()` for raw values (icon colours, SVG, navigator options, Reanimated styles). NativeWind `className` doesn't style Reanimated `Animated.View`, so pass theme values through `style` there.
+- New touchables use `PressableScale` (spring press feedback, reduced-motion aware).
 - Use `useThemeStore` for the mode: `dark | light | system`, default `dark`. Persistence is planned for Phase 11.
 - Use Reanimated shared values via `.get()` and `.set()`, not `.value`. The React Compiler lint rules flag `.value` mutation.
-- Base components (`@/components`): Screen, Text, Button, Card, IconButton, Icon, Chip, Input, NumberStepper, Sheet, EmptyState, Skeleton, Avatar, RankBadge, ProgressBar, SegmentedControl, TopTabs and PlaceholderScreen. See them all at `/dev/components` (Profile → Component gallery in dev builds).
+- Screens inside the tabs must use `Screen` (or pad by `BottomTabBarHeightContext`), because the glass tab bar floats over content.
+- **Game layer**: rank model in `src/lib/game` (`rankLabel`, `compareRanks`, divisions). Final rank art and avatar frames are registered in `src/components/game/artRegistry.ts`, never hard-coded in screens.
+- Base components (`@/components`): Screen (title, `onBack`, pinned `footer`), Text, Button (primary, accent, secondary, outline, ghost, destructive), Card, IconButton, Icon, Chip, Tag, Input, SelectField, NumberStepper, Sheet, EmptyState, Skeleton, Avatar, ProgressBar, SegmentedControl, TopTabs (segmented), SectionHeader, Stat, ListGroup + ListItem, BarChart, PressableScale, PlaceholderScreen. Game components: RankBadge, RankTag, HexEmblem, DivisionLadder, RankGlow, LeaderboardRow, BadgeTile, StreakChip. See them at `/dev/components` (Profile → Component gallery in dev builds).
+- **Mock data**: until each backend phase lands, screens read typed placeholder data from `src/features/<feature>/mocks.ts`. Replace a mocks file with real queries (TanStack Query / Drizzle) without changing the screens.
 
 ## Commands
 

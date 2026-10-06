@@ -3,11 +3,11 @@ import { useColorScheme, View } from 'react-native';
 import { vars } from 'nativewind';
 
 import { useThemeStore } from './themeStore';
+import { palette } from './displayColor';
 import {
   colorTokenNames,
   cssVarName,
   hexToRgbChannels,
-  palette,
   type ColorScheme,
   type Palette,
 } from './tokens';

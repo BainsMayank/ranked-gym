@@ -6,6 +6,7 @@ import {
   rankColors,
   rankTiers,
 } from '../tokens';
+import { srgbToP3Hex } from '../displayColor';
 
 describe('theme tokens', () => {
   it.each(['dark', 'light'] as const)('%s palette defines every colour token as hex', (scheme) => {
@@ -38,5 +39,13 @@ describe('theme tokens', () => {
   it('builds kebab-case CSS variable names', () => {
     expect(cssVarName('surfaceRaised')).toBe('--color-surface-raised');
     expect(cssVarName('primary')).toBe('--color-primary');
+  });
+});
+
+describe('Expo Go colour correction', () => {
+  it('maps sRGB to the P3 value that displays the same colour', () => {
+    // Pure sRGB red sits inside P3 at about (0.918, 0.200, 0.139).
+    expect(srgbToP3Hex('#FF0000')).toBe('#EA3323');
+    expect(srgbToP3Hex('#9B9B9B')).toBe('#9B9B9B');
   });
 });

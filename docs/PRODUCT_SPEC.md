@@ -15,13 +15,17 @@ A social, ranked gym and self-improvement app for Android and iOS. Every set you
 
 Five bottom tabs, in this order:
 
-| Tab     | Structure                      | Sub-sections                                                                 |
-| ------- | ------------------------------ | ---------------------------------------------------------------------------- |
-| Home    | Top tabs                       | For You · Feed · Discover                                                    |
-| Workout | One scrolling screen           | My Plan · New Workout · Routines                                             |
-| Rank    | Top tabs                       | My Ranks · Body Map · Leagues · Analysis · Records                           |
-| Friends | Top tabs                       | Friends · Leaderboards · Invite                                              |
-| Profile | Single screen + settings stack | Profile, Settings (account, appearance, units, notifications, privacy, data) |
+| Tab     | Structure                      | Sub-sections                                                                                                        |
+| ------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
+| Home    | Top tabs                       | For You · Feed · Discover                                                                                           |
+| Workout | Hub + full-screen flows        | Hub (My Plan · New Workout · Routines); Create plan, Routine builder and Live session open full screen (no tab bar) |
+| Rank    | Top tabs                       | Ranks · Body · Leagues · Analysis · Records                                                                         |
+| Friends | Hub + pushed screen            | Hub (invite, add friends, standings, requests, friends) → Leaderboards                                              |
+| Profile | Single screen + settings stack | Profile (level, stats, badges, customise, settings list) → Settings sections                                        |
+
+Outside the tabs: **Welcome** (sign up / log in), shown before the tabs once auth lands in Phase 1.
+
+Layouts follow the Claude Design mockups in `docs/design/mockups/` (decided 2026-10-06), restyled to the design system in [MOBILE-DESIGN.md](../MOBILE-DESIGN.md). Records has no mockup and keeps the same list language.
 
 ## 3. Home tab
 
@@ -133,7 +137,7 @@ A full builder for routines such as "Leg Day":
 
 ### 6.3 Invite
 
-- Invite links, plus referral rewards (granted server-side).
+- Invite links, plus referral rewards (granted server-side). Lives as a card at the top of the Friends hub (per the mockups), not a separate sub-tab.
 
 ## 7. Profile tab
 
@@ -172,11 +176,22 @@ A full builder for routines such as "Leg Day":
 - **Server-trusted maths**: ranks, XP, leaderboards, leagues, streak stakes, rewards and anti-cheat run in Postgres or Edge Functions. Clients can only preview.
 - **Accessibility**: labels on all touchables, dynamic type (up to 1.6×), contrast-checked tokens, reduced-motion support.
 - **Privacy and security**: RLS on every table, private-by-default options, data export and account deletion (DPDP Act 2023).
-- **Theming**: dark-first, with a light variant. All colours come from theme tokens.
+- **Theming**: dark-first, with a light variant. All colours come from theme tokens. The design system is recorded in [MOBILE-DESIGN.md](../MOBILE-DESIGN.md).
 
 ## 10. Phases
 
-See [PROGRESS.md](PROGRESS.md) for the checklist (0 Foundation … 15 Launch).
+See [PROGRESS.md](PROGRESS.md) for the checklist (0 Foundation, 0B Design system, 1 Backend … 15 Launch). Phase 0 shipped a provisional theme, and Phase 0B set the final visual identity before any feature work.
+
+## 10A. Design decisions (Phase 0B, 2026-10-06)
+
+Full detail in [MOBILE-DESIGN.md](../MOBILE-DESIGN.md).
+
+- **Look**: layouts from the Claude Design mockups, styling from the references in `docs/design/references/`. "Calm chrome, loud rewards": near-black neutrals plus one calm burnt-orange signal colour (`#F2662F`); saturated colour only on game objects (rank tiers, rarities).
+- **Type**: Instrument Sans (400/500/600), nothing heavier than semibold, tabular figures for numbers. The provisional lime primary and a condensed display face were rejected as too loud.
+- **Depth**: borderless surfaces with a lit top edge and soft shadows; a glass bottom tab bar (iOS blur, Android near-opaque); one radial glow reserved for rank and celebration moments.
+- **Game layer**: rarity scale (common, rare, epic, legendary) on the rank hues; rank art and avatar frames plug into a registry; avatars carry rank/rarity rings and a level tag; rank progress uses the division ladder.
+- **Rank badge art**: the user will supply final art; placeholder shields render until it is registered.
+- **Light mode**: designed alongside dark with full token coverage; parity at launch stays open (#19).
 
 ## 11. Open decisions
 
@@ -202,5 +217,5 @@ Resolve these with the user before building the phase that needs them.
 | 16  | Plan generator     | Rules-based templates vs an algorithm; progression model (linear, double progression, RIR-based).                                                                              | Phase 5                    |
 | 17  | Content moderation | Reporting, blocking, moderation tooling for feed, discover and comments.                                                                                                       | Phase 13                   |
 | 18  | Monetisation       | Free vs premium features; ads (probably not).                                                                                                                                  | Before Phase 15            |
-| 19  | Light-mode parity  | Is light mode fully supported at launch or best-effort? (Phase 0 builds both.)                                                                                                 | Phase 14                   |
+| 19  | Light-mode parity  | Is light mode fully supported at launch or best-effort? (Phase 0 builds both; Phase 0B designs both.)                                                                          | Phase 14                   |
 | 20  | Charts in Expo Go  | Victory Native needs Skia, which is in Expo Go. Confirm performance on low-end Android when charts land.                                                                       | Phase 7                    |

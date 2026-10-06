@@ -1,12 +1,24 @@
-import { PlaceholderScreen } from '@/components';
+import { View } from 'react-native';
 
+import { Screen } from '@/components';
+
+import { GoalsCard } from '../components/GoalsCard';
+import { MuscleVolumeCard } from '../components/MuscleVolumeCard';
+import { OverviewCard } from '../components/OverviewCard';
+import { RecoveryCard } from '../components/RecoveryCard';
+import { TodayWorkoutCard } from '../components/TodayWorkoutCard';
+
+/** Home → For You: today's session, then muscle volume, recovery, goals and the 14-day overview. */
 export function ForYouScreen() {
   return (
-    <PlaceholderScreen
-      title="For You"
-      icon="pulse-outline"
-      phase="Phase 8"
-      description="Muscle analysis for a chosen period, estimated recovery % per muscle, your goals, and a 7/14/30-day overview: volume, duration, records, calories and bodyweight trend."
-    />
+    <Screen edges={[]} scroll className="pt-sm">
+      <View className="gap-lg">
+        <TodayWorkoutCard />
+        <MuscleVolumeCard />
+        <RecoveryCard />
+        <GoalsCard />
+        <OverviewCard />
+      </View>
+    </Screen>
   );
 }

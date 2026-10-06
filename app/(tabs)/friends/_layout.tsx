@@ -1,11 +1,18 @@
-import { TopTabsNavigator } from '@/components/navigation/TopTabsNavigator';
+import { Stack } from 'expo-router';
 
-const SCREENS = [
-  { name: 'index', title: 'Friends' },
-  { name: 'leaderboards', title: 'Leaderboards' },
-  { name: 'invite', title: 'Invite' },
-] as const;
+import { useTheme } from '@/theme';
 
+export const unstable_settings = { initialRouteName: 'index' };
+
+/** Friends hub with Leaderboards pushed on top (tab bar stays visible). */
 export default function FriendsLayout() {
-  return <TopTabsNavigator title="Friends" screens={SCREENS} />;
+  const { colors } = useTheme();
+  return (
+    <Stack
+      screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}
+    >
+      <Stack.Screen name="index" />
+      <Stack.Screen name="leaderboards" />
+    </Stack>
+  );
 }
