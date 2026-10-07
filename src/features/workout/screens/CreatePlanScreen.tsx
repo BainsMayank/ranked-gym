@@ -2,12 +2,18 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
 
-import { Button, Screen, SegmentedControl, SelectField, Text } from '@/components';
+import {
+  Button,
+  OptionCard,
+  Screen,
+  SegmentedControl,
+  SelectField,
+  StepProgress,
+  Text,
+} from '@/components';
+import { goalOptions, useProfile, type PrimaryGoal } from '@/lib/profile';
 
 import { DayPicker } from '../components/DayPicker';
-import { OptionCard } from '../components/OptionCard';
-import { StepProgress } from '../components/StepProgress';
-import { planGoals } from '../mocks';
 
 const SCHEDULE = [
   { value: 'count', label: 'Days per week' },
@@ -24,11 +30,13 @@ const LENGTHS = [
 /** Plan generator, step 1: goal, schedule, session length and profile. Generation lands in Phase 5. */
 export function CreatePlanScreen() {
   const router = useRouter();
-  const [goal, setGoal] = useState<string>(planGoals[0].id);
+  // Starts on the goal picked in onboarding.
+  const { data: profile } = useProfile();
+  const [goal, setGoal] = useState<PrimaryGoal>(profile?.primary_goal ?? goalOptions[0].id);
   const [schedule, setSchedule] = useState<(typeof SCHEDULE)[number]['value']>('days');
   const [days, setDays] = useState<number[]>([0, 2, 4, 5]);
   const [length, setLength] = useState<(typeof LENGTHS)[number]['value']>('60');
-  const goalTitle = planGoals.find((g) => g.id === goal)?.title ?? '';
+  const goalTitle = goalOptions.find((g) => g.id === goal)?.title ?? '';
 
   const toggleDay = (d: number) =>
     setDays((prev) => (prev.includes(d) ? prev.filter((x) => x !== d) : [...prev, d].sort()));
@@ -57,7 +65,7 @@ export function CreatePlanScreen() {
         <StepProgress step={1} total={3} />
         <Text variant="title">What do you want to achieve?</Text>
         <View className="flex-row flex-wrap gap-sm">
-          {planGoals.map((g) => (
+          {goalOptions.map((g) => (
             <OptionCard
               key={g.id}
               title={g.title}

@@ -1,7 +1,19 @@
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 
-import { Button, Chip, IconButton, Screen, SectionHeader, Text } from '@/components';
+import {
+  Button,
+  Chip,
+  Icon,
+  IconButton,
+  ListGroup,
+  ListItem,
+  Screen,
+  SectionHeader,
+  Text,
+} from '@/components';
+import { useExercises } from '@/lib/exercises';
 
 import { PlanCard } from '../components/PlanCard';
 import { RoutineCard } from '../components/RoutineCard';
@@ -13,7 +25,9 @@ type Folder = (typeof FOLDERS)[number];
 
 /** Workout tab: your plan, ways to start a session, and your routines. */
 export function WorkoutScreen() {
+  const router = useRouter();
   const [folder, setFolder] = useState<Folder>('All');
+  const { data: exercises } = useExercises();
   const shown = routines.filter((r: Routine) => folder === 'All' || r.folder === folder);
 
   return (
@@ -63,6 +77,19 @@ export function WorkoutScreen() {
         >
           <Text variant="label">Browse routine library · 120+ templates</Text>
         </Pressable>
+
+        <ListGroup>
+          <ListItem
+            title="Exercise library"
+            subtitle={
+              exercises?.length
+                ? `${exercises.length} exercises · search works offline`
+                : 'Search exercises or make your own'
+            }
+            leading={<Icon name="library-outline" size={22} tone="textMuted" />}
+            onPress={() => router.push('/exercises')}
+          />
+        </ListGroup>
       </View>
     </Screen>
   );

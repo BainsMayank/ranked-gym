@@ -185,14 +185,3 @@ export const session = {
   },
   exerciseRank: { tier: 'gold' as RankTier, division: 1 as const },
 };
-
-export const planGoals = [
-  { id: 'stronger', title: 'Get stronger', subtitle: 'Raise your lifts and ranks' },
-  { id: 'muscle', title: 'Build muscle', subtitle: 'Hypertrophy focus' },
-  { id: 'fat', title: 'Lose fat', subtitle: 'Keep strength, drop weight' },
-  { id: 'gain', title: 'Gain weight', subtitle: 'Lean bulk structure' },
-  { id: 'toned', title: 'Get toned', subtitle: 'Lighter, higher-rep work' },
-  { id: 'curvier', title: 'Get curvier', subtitle: 'Glute and lower-body focus' },
-  { id: 'calisthenics', title: 'Calisthenics', subtitle: 'Skills and bodyweight strength' },
-  { id: 'general', title: 'General fitness', subtitle: 'Balanced, all-round' },
-] as const;

@@ -4,72 +4,75 @@ import type { RankTier } from '@/theme';
 /**
  * Layout data until the rank engine (Phase 6) and Rank tab (Phase 7) land. Every rank, score and
  * prediction here will come from the server; the client only displays them.
+ *
+ * Numbers follow docs/RANK_SYSTEM.md for a 72 kg man (men's standards): each rank and Strength Score
+ * (SS) below is what src/lib/game/strength.ts gives for the logged sets.
  */
 
 export const season = { label: 'Season 4 · 23 days left' };
 
 export const overall = {
-  rank: { tier: 'gold', division: 2 } as Rank,
-  powerScore: 2184,
+  rank: { tier: 'platinum', division: 3 } as Rank,
+  strengthScore: 319,
   standing: 'top 18% in Delhi',
-  progress: 0.62,
-  pointsToNext: 116,
-  nextLabel: 'Gold I',
+  progress: 0.91,
+  pointsToNext: 1.3,
+  nextLabel: 'Platinum II',
 };
 
 export const disciplines = [
   {
     name: 'Weightlifting',
     rank: { tier: 'platinum', division: 3 } as Rank,
-    meta: '5 lifts ranked',
-    score: 'Score 2,410 · +140 this month',
-    progress: 0.2,
+    meta: '10 lifts ranked',
+    score: 'SS 319 · +9 this month',
+    progress: 0.91,
   },
   {
     name: 'Calisthenics',
     rank: { tier: 'silver', division: 1 } as Rank,
     meta: '3 skills ranked',
-    score: 'Score 1,560 · +60 this month',
+    score: 'SS 236 · +6 this month',
     progress: 0.8,
   },
 ];
 
 /** Rank ordinal per week for the last 12 weeks (see rankOrdinal in lib/game). */
 export const progression = {
-  weeks: [9, 9.4, 10, 10.2, 12, 12.4, 13, 13.5, 14, 14.4, 14.8, 14.9],
-  note: 'Promoted to Gold III in week 5 and Gold II in week 9',
+  weeks: [14.2, 14.5, 14.8, 15.3, 16.1, 16.3, 16.6, 16.8, 17.1, 17.4, 17.7, 17.9],
+  note: 'Promoted to Platinum IV in week 5 and Platinum III in week 9',
 };
 
 export const lifts: { name: string; rank: Rank; progress: number; meta: string }[] = [
   {
     name: 'Squat',
-    rank: { tier: 'platinum', division: 3 },
-    progress: 0.22,
-    meta: 'e1RM 151 kg · 2.11× bodyweight',
+    rank: { tier: 'platinum', division: 1 },
+    progress: 0.59,
+    meta: 'e1RM 163 kg · 2.27× bodyweight',
   },
   {
     name: 'Bench press',
-    rank: { tier: 'gold', division: 1 },
-    progress: 0.8,
-    meta: 'e1RM 101 kg · 1.41× bodyweight',
+    rank: { tier: 'platinum', division: 3 },
+    progress: 0.46,
+    meta: 'e1RM 108 kg · 1.50× bodyweight',
   },
   {
     name: 'Deadlift',
-    rank: { tier: 'gold', division: 2 },
-    progress: 0.54,
-    meta: 'e1RM 168 kg · 2.35× bodyweight',
+    rank: { tier: 'platinum', division: 2 },
+    progress: 0.43,
+    meta: 'e1RM 175 kg · 2.43× bodyweight',
   },
   {
     name: 'Pull-up',
     rank: { tier: 'gold', division: 3 },
-    progress: 0.3,
-    meta: '+15 kg × 5 · 12 bodyweight reps',
+    progress: 0.19,
+    meta: '+15 kg × 5 · 1.41× bodyweight',
   },
   {
     name: 'Overhead press',
-    rank: { tier: 'silver', division: 1 },
-    progress: 0.88,
-    meta: 'e1RM 58 kg · 0.81× bodyweight',
+    rank: { tier: 'gold', division: 1 },
+    progress: 0.72,
+    meta: 'e1RM 64 kg · 0.89× bodyweight',
   },
 ];
 
@@ -96,75 +99,75 @@ export const muscles: Record<
 > = {
   chest: {
     name: 'Chest',
-    rank: { tier: 'gold', division: 1 },
-    progress: 0.7,
-    detail: 'Bench 100 kg × 3 · 14 sets this week',
+    rank: { tier: 'platinum', division: 3 },
+    progress: 0.46,
+    detail: 'Bench 92.5 kg × 5 · 14 sets this week',
   },
   shoulders: {
     name: 'Shoulders',
-    rank: { tier: 'gold', division: 3 },
-    progress: 0.35,
+    rank: { tier: 'gold', division: 1 },
+    progress: 0.72,
     detail: 'OHP 55 kg × 5 · 12 sets this week',
   },
   biceps: {
     name: 'Biceps',
-    rank: { tier: 'silver', division: 1 },
-    progress: 0.6,
-    detail: 'Curl 20 kg × 10 · 8 sets this week',
+    rank: { tier: 'gold', division: 2 },
+    progress: 0.88,
+    detail: 'Row 80 kg × 8 · 8 sets this week',
   },
   triceps: {
     name: 'Triceps',
-    rank: { tier: 'silver', division: 1 },
-    progress: 0.5,
-    detail: 'Dips +10 kg × 8 · 9 sets this week',
+    rank: { tier: 'gold', division: 2 },
+    progress: 0.05,
+    detail: 'Bench 92.5 kg × 5 · 9 sets this week',
   },
   forearms: {
     name: 'Forearms',
-    rank: { tier: 'bronze', division: 1 },
-    progress: 0.4,
-    detail: 'Dead hang 0:45 · 4 sets this week',
+    rank: { tier: 'gold', division: 2 },
+    progress: 0.95,
+    detail: 'Deadlift 150 kg × 5 · 4 sets this week',
   },
   core: {
     name: 'Core',
-    rank: { tier: 'silver', division: 2 },
-    progress: 0.45,
-    detail: 'Plank 0:45 +10 kg · 6 sets this week',
+    rank: { tier: 'platinum', division: 4 },
+    progress: 0.15,
+    detail: 'Squat 140 kg × 5 · 6 sets this week',
   },
   traps: {
     name: 'Traps',
-    rank: { tier: 'gold', division: 2 },
-    progress: 0.5,
-    detail: 'Shrug 80 kg × 10 · 6 sets this week',
+    rank: { tier: 'platinum', division: 2 },
+    progress: 0.31,
+    detail: 'Row 80 kg × 8 · 6 sets this week',
   },
   lats: {
     name: 'Lats',
-    rank: { tier: 'gold', division: 2 },
-    progress: 0.55,
-    detail: 'Pull-up +15 kg × 5 · 12 sets this week',
+    rank: { tier: 'platinum', division: 2 },
+    progress: 0.31,
+    detail: 'Row 80 kg × 8 · 12 sets this week',
   },
   lowerBack: {
     name: 'Lower back',
-    rank: { tier: 'gold', division: 3 },
-    progress: 0.3,
+    rank: { tier: 'platinum', division: 2 },
+    progress: 0.43,
     detail: 'Deadlift 150 kg × 5 · 6 sets this week',
   },
   glutes: {
     name: 'Glutes',
-    rank: { tier: 'platinum', division: 3 },
-    progress: 0.25,
-    detail: 'Hip thrust 140 kg × 8 · 10 sets this week',
+    rank: { tier: 'platinum', division: 1 },
+    progress: 0.59,
+    detail: 'Squat 140 kg × 5 · 10 sets this week',
   },
   quads: {
     name: 'Quads',
-    rank: { tier: 'platinum', division: 3 },
-    progress: 0.22,
+    rank: { tier: 'platinum', division: 1 },
+    progress: 0.59,
     detail: 'Squat 140 kg × 5 · 15 sets this week',
   },
   hamstrings: {
     name: 'Hamstrings',
-    rank: { tier: 'silver', division: 1 },
-    progress: 0.65,
-    detail: 'RDL 110 kg × 8 · 6 sets this week',
+    rank: { tier: 'platinum', division: 2 },
+    progress: 0.43,
+    detail: 'Deadlift 150 kg × 5 · 6 sets this week',
   },
   calves: {
     name: 'Calves',
@@ -218,21 +221,21 @@ export const events = [
 export const predictions: { lift: string; target: Rank; need: string; weeks: number }[] = [
   {
     lift: 'Bench',
-    target: { tier: 'platinum', division: 3 },
-    need: 'Need 95 kg × 5 (e1RM 107) · you’re at 101',
+    target: { tier: 'platinum', division: 2 },
+    need: 'Need 95 kg × 5 (e1RM 111) · you’re at 108',
     weeks: 3,
   },
   {
     lift: 'Deadlift',
-    target: { tier: 'gold', division: 1 },
-    need: 'Need 160 kg × 5 · you’re at 150 × 5',
-    weeks: 5,
+    target: { tier: 'platinum', division: 1 },
+    need: 'Need 155 kg × 5 · you’re at 150 × 5',
+    weeks: 4,
   },
   {
     lift: 'Pull-up',
     target: { tier: 'gold', division: 2 },
-    need: 'Need +20 kg × 5 · you’re at +15 kg',
-    weeks: 4,
+    need: 'Need +17.5 kg × 5 · you’re at +15 kg',
+    weeks: 3,
   },
 ];
 
@@ -249,15 +252,14 @@ export const rankUpsByDay = [
 export const regions: { name: string; share: number; tier: RankTier }[] = [
   { name: 'Upper push', share: 0.32, tier: 'gold' },
   { name: 'Legs', share: 0.28, tier: 'platinum' },
-  { name: 'Upper pull', share: 0.26, tier: 'diamond' },
-  { name: 'Core', share: 0.14, tier: 'master' },
+  { name: 'Upper pull', share: 0.26, tier: 'platinum' },
+  { name: 'Core', share: 0.14, tier: 'platinum' },
 ];
 
 export const tierCounts: { tier: RankTier; count: number }[] = [
-  { tier: 'bronze', count: 2 },
-  { tier: 'silver', count: 4 },
-  { tier: 'gold', count: 5 },
-  { tier: 'platinum', count: 2 },
+  { tier: 'bronze', count: 1 },
+  { tier: 'gold', count: 4 },
+  { tier: 'platinum', count: 8 },
 ];
 
 export const balance = [
@@ -279,7 +281,7 @@ export const balance = [
 ];
 
 export const records = [
-  { lift: 'Back squat', best: '140 kg × 5', e1rm: '157 kg', date: '3 days ago', isNew: true },
+  { lift: 'Back squat', best: '140 kg × 5', e1rm: '163 kg', date: '3 days ago', isNew: true },
   {
     lift: 'Romanian deadlift',
     best: '110 kg × 8',
@@ -287,8 +289,8 @@ export const records = [
     date: '3 days ago',
     isNew: true,
   },
-  { lift: 'Bench press', best: '92.5 kg × 5', e1rm: '104 kg', date: '1 week ago', isNew: false },
-  { lift: 'Deadlift', best: '150 kg × 5', e1rm: '168 kg', date: '2 weeks ago', isNew: false },
+  { lift: 'Bench press', best: '92.5 kg × 5', e1rm: '108 kg', date: '1 week ago', isNew: false },
+  { lift: 'Deadlift', best: '150 kg × 5', e1rm: '175 kg', date: '2 weeks ago', isNew: false },
   { lift: 'Pull-up', best: '+15 kg × 5', e1rm: '—', date: '3 weeks ago', isNew: false },
-  { lift: 'Overhead press', best: '55 kg × 5', e1rm: '62 kg', date: '1 month ago', isNew: false },
+  { lift: 'Overhead press', best: '55 kg × 5', e1rm: '64 kg', date: '1 month ago', isNew: false },
 ];

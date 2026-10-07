@@ -1,11 +1,14 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 
 import { Button, Chip, Screen, Tag, Text } from '@/components';
+import { useExercisePicker } from '@/lib/exercises';
 
 import { ExerciseEditorCard } from '../components/ExerciseEditorCard';
 import { SetTypeLegend } from '../components/SetTypeLegend';
 import { SupersetGroup } from '../components/SupersetGroup';
+import { routineExerciseFromLibrary } from '../fromLibrary';
 import { findRoutine, type RoutineExercise } from '../mocks';
 
 /** Groups consecutive exercises that share a superset letter. */
@@ -24,6 +27,14 @@ export function RoutineBuilderScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const routine = findRoutine(id);
+  // Local until routines are stored (Phase 3).
+  const [exercises, setExercises] = useState(routine.exercises);
+  const pickExercises = useExercisePicker();
+
+  const addExercises = async () => {
+    const picked = await pickExercises({ multiple: true, exclude: exercises.map((e) => e.id) });
+    setExercises((prev) => [...prev, ...picked.map(routineExerciseFromLibrary)]);
+  };
 
   return (
     <Screen
@@ -43,7 +54,7 @@ export function RoutineBuilderScreen() {
           </View>
           <Tag label="5 exercises · 17 sets · ~62 min" tone="primary" className="self-start" />
         </View>
-        {groupExercises(routine.exercises).map((g) =>
+        {groupExercises(exercises).map((g) =>
           g.superset && g.items.length > 1 ? (
             <SupersetGroup key={g.key} label={g.superset} exercises={g.items} />
           ) : (
@@ -53,7 +64,7 @@ export function RoutineBuilderScreen() {
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Add exercise"
-          onPress={() => undefined}
+          onPress={() => void addExercises()}
           className="min-h-12 items-center justify-center rounded-lg border border-dashed border-border active:opacity-70"
         >
           <Text variant="subheading">+ Add exercise</Text>

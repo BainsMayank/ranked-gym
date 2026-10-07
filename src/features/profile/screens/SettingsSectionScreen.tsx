@@ -3,6 +3,9 @@ import { View } from 'react-native';
 import { EmptyState, Screen, SegmentedControl, Text } from '@/components';
 import { useThemeStore, type ThemeMode } from '@/theme';
 
+import { AccountSettings } from '../components/settings/AccountSettings';
+import { PrivacySettings } from '../components/settings/PrivacySettings';
+import { UnitsSettings } from '../components/settings/UnitsSettings';
 import { settingsSections, type SettingsSectionId } from '../settingsSections';
 
 const THEME_OPTIONS = [
@@ -35,6 +38,12 @@ export function SettingsSectionScreen({ section }: { section: SettingsSectionId 
     <Screen edges={[]} scroll className="pt-lg">
       {section === 'appearance' ? (
         <AppearanceSettings />
+      ) : section === 'units' ? (
+        <UnitsSettings />
+      ) : section === 'privacy' ? (
+        <PrivacySettings />
+      ) : section === 'account' ? (
+        <AccountSettings />
       ) : (
         <EmptyState icon={s.icon} title={s.title} description={s.description} />
       )}

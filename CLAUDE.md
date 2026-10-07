@@ -4,7 +4,7 @@
 
 ## Session protocol (mandatory)
 
-1. **Before planning anything**, read this file, [docs/PRODUCT_SPEC.md](docs/PRODUCT_SPEC.md) and [docs/PROGRESS.md](docs/PROGRESS.md).
+1. **Before planning anything**, read this file, [docs/PRODUCT_SPEC.md](docs/PRODUCT_SPEC.md) and [docs/PROGRESS.md](docs/PROGRESS.md). Before touching the database, read [docs/SCHEMA.md](docs/SCHEMA.md).
 2. Work on the phase marked in progress in PROGRESS.md unless the user says otherwise. If something in the spec is ambiguous, check **Open decisions** in PRODUCT_SPEC.md and ask before choosing.
 3. Run `pnpm check` before declaring work done. It must pass.
 4. **At the end of every session**, update docs/PROGRESS.md: tick finished items, add a session-log entry (what was built, decisions made, follow-ups) and mark the next phase in progress. Record new decisions in PRODUCT_SPEC.md, and move resolved open decisions out of that list.
@@ -26,7 +26,7 @@
 | Tests                | Jest (`jest-expo` preset) + React Native Testing Library 14                                                                                                 |
 | Package manager      | **pnpm** (v12). `nodeLinker: hoisted` in `pnpm-workspace.yaml` is required by Expo                                                                          |
 
-Approved additions to the stack: `react-native-tab-view` and `react-native-pager-view` (needed by swipeable top tabs), `expo-system-ui`, `expo-font` (a peer dependency of `@expo/vector-icons`), `expo-blur` (glass tab bar) and `@expo-google-fonts/instrument-sans` (brand font).
+Approved additions to the stack: `react-native-tab-view` and `react-native-pager-view` (needed by swipeable top tabs), `expo-system-ui`, `expo-font` (a peer dependency of `@expo/vector-icons`), `expo-blur` (glass tab bar), `@expo-google-fonts/instrument-sans` (brand font), `expo-auth-session` + `expo-web-browser` + `expo-crypto` (Google sign-in), `expo-secure-store` (sessions), `zod` (form validation), `supabase` (CLI, dev dependency), `babel-plugin-inline-import` (dev; lets Drizzle's local `.sql` migrations be imported) and `@types/node` (dev; types for the Node seed generator).
 
 ### Expo changes fast: don't trust memory
 
@@ -49,23 +49,32 @@ app/                     Routes only (thin files that render a feature screen). 
   (tabs)/workout/        Hub: My Plan, New Workout, Routines
   (tabs)/rank/           Top tabs: index (Ranks), body-map (Body), leagues, analysis, records
   (tabs)/friends/        Stack: index (hub with invite), leaderboards
-  (tabs)/profile/        Stack: index, settings/index, settings/[section]
+  (tabs)/profile/        Stack: index, edit, settings/index, settings/[section]
   plan/new.tsx           Create plan (full screen, no tab bar)
   routine/[id].tsx       Routine builder (full screen)
   session.tsx            Live workout session (slides up, full screen)
-  welcome.tsx            Sign up / log in
+  exercises/             Library (index), picker (pick, slides up), detail ([id]), create/edit custom (new, ?id= / ?name=)
+  (auth)/                Signed-out stack: welcome, sign-in/email, sign-in/code
+  onboarding/            8 onboarding steps (name … privacy); ready.tsx is the "You're in" screen after it
+  auth/callback.tsx      Google OAuth return deep link (redirects to the gate)
   dev/components.tsx     Component gallery (redirects home when !__DEV__)
 src/
   components/            Shared, feature-agnostic UI (barrel: '@/components')
     navigation/          TopTabsNavigator (swipeable route tabs using our TopTabs bar), GlassTabBarBackground
     game/                Game layer UI: RankBadge, DivisionLadder, RankGlow, artRegistry (final art slots)
   features/<feature>/    Everything for one feature: screens/, components/, hooks/, api/, store.ts, types.ts
-  lib/                   supabase.ts, queryClient.ts, db/ (Drizzle client + schema), utils/
-    game/                Rank model shared by features (divisions, labels, ordering)
+  lib/                   supabase.ts (typed client), queryClient.ts, units.ts, db/ (Drizzle client, schema, ensureDb migrations), utils/
+    exercises/           Exercise library: taxonomy (muscles, regions, enums), types, search, SQLite repository, sync, hooks, useExercisePicker
+    auth/                Session storage (SecureStore), auth store, bootstrap, gate (useAuthGate), signOut
+    profile/             Option lists, zod field schemas, useProfile / useUpdateProfile, bodyweight, username check
+    forms/               useZodForm (text forms validated by zod)
+    game/                Rank model shared by features (divisions, labels, ordering) and strength.ts (Strength Score maths, see docs/RANK_SYSTEM.md)
   theme/                 tokens.ts (single source of truth), displayColor (Expo Go fix), ThemeProvider, themeStore
-  types/                 Global/ambient types
-supabase/                migrations/, functions/ (Edge Functions), seed.sql
-docs/                    PRODUCT_SPEC.md, PROGRESS.md, design/ (references, system-preview.html)
+  types/                 Global/ambient types; database.ts is generated (pnpm db:types), never hand-edited
+supabase/                config.toml, migrations/, tests/database/ (pgTAP), templates/ (auth emails), functions/, seed.sql,
+                         seed/ (official exercise library source + validate + build → generated migration)
+drizzle/                 Generated local SQLite migrations (pnpm db:local:generate), never hand-edited
+docs/                    PRODUCT_SPEC.md, PROGRESS.md, SCHEMA.md, RANK_SYSTEM.md, CREDITS.md, design/ (references, system-preview.html)
 MOBILE-DESIGN.md         Approved design system: rules, risks, game layer
 ```
 
@@ -79,6 +88,7 @@ MOBILE-DESIGN.md         Approved design system: rules, risks, game layer
 - **Strict types, no `any`** (ESLint error). Prefer `unknown` plus narrowing, discriminated unions and `as const` arrays with derived union types.
 - **Small components**: one component per file, about 150 lines at most. Split when it grows.
 - **Feature folders**: no cross-feature deep imports. Share through `src/components` or `src/lib`.
+- **Database changes only through migrations** (`supabase migration new <name>`), never the dashboard. Every table gets RLS with explicit per-command policies and narrowed grants, plus pgTAP tests proving another user can't read or change it. After a migration: `pnpm db:reset`, `pnpm db:test`, `pnpm db:types`, and update docs/SCHEMA.md.
 - **Server-trusted calculations live in Postgres (SQL functions, RLS, triggers) or Supabase Edge Functions.** This covers ranks, XP, levels, leaderboards, league results, streak stakes, referral rewards and anti-cheat. The client may _preview_ a value, but the server is the source of truth and never accepts a client-computed rank or score.
 - **Local-first workout logging**: an active workout writes to SQLite (Drizzle) first and syncs to Supabase in the background through a queue. Logging must work fully offline.
 - **Accessibility**: every touchable has `accessibilityRole` and an `accessibilityLabel`. `IconButton` makes the label a required prop. Custom controls need `accessibilityState` and `accessibilityValue`. Touch targets should be at least 44pt (use `hitSlop` when visually smaller). Respect reduced motion (`useReducedMotion`).
@@ -100,8 +110,9 @@ MOBILE-DESIGN.md         Approved design system: rules, risks, game layer
 - Use `useThemeStore` for the mode: `dark | light | system`, default `dark`. Persistence is planned for Phase 11.
 - Use Reanimated shared values via `.get()` and `.set()`, not `.value`. The React Compiler lint rules flag `.value` mutation.
 - Screens inside the tabs must use `Screen` (or pad by `BottomTabBarHeightContext`), because the glass tab bar floats over content.
-- **Game layer**: rank model in `src/lib/game` (`rankLabel`, `compareRanks`, divisions). Final rank art and avatar frames are registered in `src/components/game/artRegistry.ts`, never hard-coded in screens.
-- Base components (`@/components`): Screen (title, `onBack`, pinned `footer`), Text, Button (primary, accent, secondary, outline, ghost, destructive), Card, IconButton, Icon, Chip, Tag, Input, SelectField, NumberStepper, Sheet, EmptyState, Skeleton, Avatar, ProgressBar, SegmentedControl, TopTabs (segmented), SectionHeader, Stat, ListGroup + ListItem, BarChart, PressableScale, PlaceholderScreen. Game components: RankBadge, RankTag, HexEmblem, DivisionLadder, RankGlow, LeaderboardRow, BadgeTile, StreakChip. See them at `/dev/components` (Profile → Component gallery in dev builds).
+- **Game layer**: rank model in `src/lib/game` (`rankLabel`, `compareRanks`, divisions). How ranks are earned is specified in [docs/RANK_SYSTEM.md](docs/RANK_SYSTEM.md); `strength.ts` is its reference implementation (client preview only, the Phase 6 engine mirrors it). Final rank art and avatar frames are registered in `src/components/game/artRegistry.ts`, never hard-coded in screens.
+- Base components (`@/components`): Screen (title, `onBack`, pinned `footer`), Text, Button (primary, accent, secondary, outline, ghost, destructive), Card, IconButton, Icon, Chip, Tag, Input, SelectField, NumberStepper, Sheet, EmptyState, Skeleton, Avatar, ProgressBar, SegmentedControl, TopTabs (segmented), SectionHeader, Stat, ListGroup + ListItem, BarChart, PressableScale, OptionCard (radio tile; `wide` for rows), StepProgress, PlaceholderScreen. `Screen` takes `avoidKeyboard` for forms. Game components: RankBadge, RankTag, HexEmblem, DivisionLadder, RankGlow, LeaderboardRow, BadgeTile, StreakChip. See them at `/dev/components` (Profile → Component gallery in dev builds).
+- **Exercises**: take muscle keys, equipment and log types from `@/lib/exercises` (never free-text muscle names). Pick exercises with `useExercisePicker()` (`await pick({ multiple: true })`), read the library with `useExercises()` / `useExercise(id)` (local SQLite, works offline). The official library changes only through `supabase/seed/` + `pnpm exercises:build`.
 - **Mock data**: until each backend phase lands, screens read typed placeholder data from `src/features/<feature>/mocks.ts`. Replace a mocks file with real queries (TanStack Query / Drizzle) without changing the screens.
 
 ## Commands
@@ -116,9 +127,18 @@ pnpm format           # prettier --write (format:check to verify)
 pnpm test             # jest
 pnpm check            # typecheck + lint + format:check + test (must pass before done)
 pnpm expo:doctor      # expo-doctor (plain `pnpm doctor` is pnpm's own command)
+pnpm db:start         # local Supabase in Docker (Colima: `colima start` first); db:stop to stop
+pnpm db:reset         # rebuild the local DB from migrations + seed
+pnpm db:test          # pgTAP tests in supabase/tests/database (RLS proofs); db:test:remote runs them on the linked project
+pnpm db:types         # regenerate src/types/database.ts from the local DB (db:types:remote for the linked project)
+pnpm db:push          # apply migrations to the linked hosted project
+pnpm exercises:build  # validate supabase/seed/exercises.ts and write the library migration
+pnpm db:local:generate # new local SQLite migration in drizzle/ after changing src/lib/db/schema.ts
 ```
 
-Environment: copy `.env.example` to `.env` and fill in `SUPABASE_URL` and `SUPABASE_ANON_KEY`. `app.config.ts` exposes them as `extra`, and `src/lib/supabase.ts` reads them through `expo-constants`. `getSupabase()` throws a clear error if they're missing. The rest of the app boots without them.
+Environment: copy `.env.example` to `.env` and fill in `SUPABASE_URL` and `SUPABASE_ANON_KEY`. `app.config.ts` exposes them as `extra`, and `src/lib/supabase.ts` reads them through `expo-constants`. `getSupabase()` throws a clear error if they're missing. Without them the Welcome screen says so and, in dev, offers "Preview the app on mock data". For the simulator you can point `.env` at the local stack (`http://127.0.0.1:54321` + the anon key from `supabase status`); emailed codes then land in Mailpit at http://127.0.0.1:54324. A real phone needs the hosted project.
+
+Auth: email one-time code + Google (browser flow, works in Expo Go). The root layout's `Stack.Protected` groups (auth / onboarding / app) follow `useAuthGate()`; don't navigate around them. New signed-in screens go inside the app group in `app/_layout.tsx`.
 
 ## Git
 

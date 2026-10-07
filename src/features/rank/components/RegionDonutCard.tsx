@@ -58,10 +58,10 @@ export function RegionDonutCard() {
           </Svg>
           <View className="absolute items-center">
             <Text variant="heading" numeric>
-              {overall.powerScore.toLocaleString('en-IN')}
+              {overall.strengthScore.toLocaleString('en-IN')}
             </Text>
             <Text variant="overline" tone="muted">
-              Power
+              SS
             </Text>
           </View>
         </View>

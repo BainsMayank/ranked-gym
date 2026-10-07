@@ -23,7 +23,7 @@ Five bottom tabs, in this order:
 | Friends | Hub + pushed screen            | Hub (invite, add friends, standings, requests, friends) → Leaderboards                                              |
 | Profile | Single screen + settings stack | Profile (level, stats, badges, customise, settings list) → Settings sections                                        |
 
-Outside the tabs: **Welcome** (sign up / log in), shown before the tabs once auth lands in Phase 1.
+Outside the tabs: **Welcome** (sign up / log in: Google or an emailed code) and **onboarding** (8 steps, then a "You're in" screen). An auth gate shows signed-out users only the auth screens, and signed-in users onboarding until it's finished.
 
 Layouts follow the Claude Design mockups in `docs/design/mockups/` (decided 2026-10-06), restyled to the design system in [MOBILE-DESIGN.md](../MOBILE-DESIGN.md). Records has no mockup and keeps the same list language.
 
@@ -120,9 +120,15 @@ A full builder for routines such as "Leg Day":
 
 ### 5.6 Rank model (summary)
 
-- **8 tiers**: Iron, Bronze, Silver, Gold, Platinum, Diamond, Master, Champion.
-- Tiers have divisions (placeholder: IV → I). Master and Champion have none.
-- Ranks are computed **server-side** from verified logs. The exact formula is an open decision.
+Full design in [RANK_SYSTEM.md](RANK_SYSTEM.md) (decided 2026-10-06; resolves the former open decisions on the rank formula, divisions and overall rank).
+
+- **8 tiers**: Iron, Bronze, Silver, Gold, Platinum, Diamond, Master, Champion. Iron to Diamond have 4 divisions (IV → I); Master and Champion have none.
+- **Strength Score (SS)**: every ranked set converts to one pound-for-pound scale based on DOTS: Epley e1RM (sets above 12 reps count as 12) × DOTS coefficient ÷ the lift's share of a total. Pull-ups, chin-ups and dips use bodyweight ratios instead. Men's and women's standards.
+- **Realistic calibration**: Gold is an intermediate lifter (about a year), Platinum 2–3 years, Diamond advanced, Master elite (national level), Champion international level. World-record lifts are always Champion.
+- **Lift, overall, muscle and discipline ranks**: overall is the mean of the best SS in 5 movement patterns (needs 3); muscles take the best primary lift or 85% of a secondary one; calisthenics is its own ladder.
+- **Keeping ranks**: sets are scored at bodyweight on the day (so bulking never costs a rank); records count fully for a year then fade 1% a month to a 75% floor; peak rank is kept as a badge.
+- Strength ranks never use effort; XP and weekly leagues reward effort, so experienced lifters keep getting rewards when strength gains slow.
+- Ranks are computed **server-side** from logged sets. `src/lib/game/strength.ts` is the reference the rank engine mirrors; the client only previews.
 
 ## 6. Friends tab
 
@@ -193,29 +199,52 @@ Full detail in [MOBILE-DESIGN.md](../MOBILE-DESIGN.md).
 - **Rank badge art**: the user will supply final art; placeholder shields render until it is registered.
 - **Light mode**: designed alongside dark with full token coverage; parity at launch stays open (#19).
 
+## 10B. Auth and onboarding decisions (Phase 1, 2026-10-06)
+
+Schema in [SCHEMA.md](SCHEMA.md).
+
+- **Sign-in**: email one-time code (6 digits, one flow for sign-up and log-in) and Google (Supabase OAuth with PKCE in a browser sheet, so it runs in Expo Go). Phone OTP is not offered (SMS cost). **Apple sign-in is hidden until launch**, but it's required by the App Store once Google is offered, so it must ship before Phase 15.
+- **Sessions** persist in SecureStore and refresh only while the app is in the foreground. Sign-out clears this device's session and cached data.
+- **Minimum age 13** (birth year; enforced in the app and in Postgres). DPDP handling for 13–17s is still open (#13).
+- **Strength standards**: onboarding asks men's / women's / rather not say, explained as "used only to compare you to fair strength standards". "Rather not say" ranks on men's (open) standards. Never shown to others.
+- **Onboarding** (8 steps, each saved on Continue so a restart resumes with answers filled in): name and username → units → standards and birth year → height and first weigh-in → experience → main goal (same list as the plan generator) → city and optional college → profile visibility. It ends on a "You're in" screen offering "Create my plan" or "Start a workout". Everything is editable later in Profile → Edit profile and Settings.
+- **Visibility**: default `friends`. Everyone signed in can see your name, username and avatar (so people can find and add you); bio, city and college follow your visibility; birth year, standards, height, goals and bodyweight are never shown to anyone.
+- **Units**: everything is stored in kg and cm; kg users see cm, lb users see feet and inches.
+
+## 10C. Exercise library decisions (Phase 2, 2026-10-06)
+
+Schema in [SCHEMA.md](SCHEMA.md); data credits in [CREDITS.md](CREDITS.md). Resolves open decision #15.
+
+- **Source**: our own library (268 exercises at v1) written in `supabase/seed/exercises/`, using [free-exercise-db](https://github.com/yuhonas/free-exercise-db) (Unlicense) as a reference. Names normalised ("Equipment + movement", sentence case), muscles re-mapped by hand, Indian gym names as aliases ("pec deck", "dand", "baithak").
+- **Media**: none yet. The dataset's images have no stated licence, so `media_url` stays empty. Decide on a media source (or our own clips) before launch.
+- **Muscle taxonomy**: 20 muscles in 6 regions (chest, shoulders, arms, back, core, legs) plus an optional neck, off by default. One list for the DB enum, the app and the body-map SVG path ids (`src/lib/exercises/taxonomy.ts`). Roles: primary (volume weight 1), secondary (0.5, or 0.25 when it barely helps), stabiliser (0.25).
+- **Ranked lifts**: 32 rank keys (`src/lib/game/rankKeys.ts`), free weights and calisthenics only; machines, cables and Smith never rank (RANK_SYSTEM.md §4.3). Custom exercises never rank.
+- **Shipping the library**: a generated, idempotent migration per library version, so `db:push` delivers it to production and apps re-download it when `exercise_library_meta.version` changes.
+- **Offline**: the official library and the user's custom exercises are mirrored into SQLite; search runs in memory on the device (fuzzy matching on names and aliases, no extra dependency).
+- **Custom exercises**: name, equipment, log type, primary and secondary muscles. Private to their creator. Creating or editing needs a connection until the Phase 4 sync queue.
+
 ## 11. Open decisions
 
 Resolve these with the user before building the phase that needs them.
 
-| #   | Topic              | Question                                                                                                                                                                       | Needed by                  |
-| --- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------- |
-| 1   | App name           | Final name, bundle IDs (`com.rankedgym.app` placeholder), store listing, logo.                                                                                                 | Phase 15 (ideally earlier) |
-| 2   | Rank formula       | Strength standards source (bodyweight-relative ratios? age/sex adjustments? public datasets?), e1RM formula (Epley/Brzycki), and how rep PRs, volume and calisthenics feed in. | Phase 6                    |
-| 3   | Divisions          | How many divisions per tier (placeholder IV→I), and whether Master/Champion are percentile-based (top X%).                                                                     | Phase 6                    |
-| 4   | Overall rank       | How per-lift and per-muscle ranks combine into an overall rank, and which lifts count.                                                                                         | Phase 6                    |
-| 5   | XP and levels      | XP sources (workouts, PRs, streaks, social), the level curve, and anti-farming caps.                                                                                           | Phase 11                   |
-| 6   | Leagues            | Weekly vs seasonal format, season length, group size, promotion/relegation, and the scoring metric (XP? rank gains?).                                                          | Phase 7                    |
-| 7   | Streak stakes      | What is at stake: points/XP, cosmetic penalties, or real money. Real money raises legal and payment issues in India, so the recommendation is no money at launch.              | Phase 12                   |
-| 8   | Anti-cheat         | Which ranks need verification, evidence type (video?), reviewers (mods/peers), outlier thresholds, and appeals.                                                                | Phase 13                   |
-| 9   | Calories           | Estimation method (MET-based by duration and intensity? a wearable later?).                                                                                                    | Phase 8                    |
-| 10  | Recovery model     | Formula for recovery % per muscle (time decay × volume × RPE?).                                                                                                                | Phase 8                    |
-| 11  | Regions            | Source for the college and city lists (curated seed? user-submitted plus moderation?), and verification of college membership (college email?).                                | Phase 10                   |
-| 12  | Auth methods       | Email OTP, Google, Apple (required on iOS if other social logins are offered), phone OTP (popular in India; SMS cost).                                                         | Phase 1                    |
-| 13  | Age and consent    | Minimum age, and DPDP Act handling for users under 18.                                                                                                                         | Phase 1                    |
-| 14  | Referral rewards   | What the inviter and invitee get, and abuse limits.                                                                                                                            | Phase 10                   |
-| 15  | Exercise library   | Source and licensing (own dataset vs open dataset), media (GIFs/videos), and muscle taxonomy for the body map.                                                                 | Phase 2                    |
-| 16  | Plan generator     | Rules-based templates vs an algorithm; progression model (linear, double progression, RIR-based).                                                                              | Phase 5                    |
-| 17  | Content moderation | Reporting, blocking, moderation tooling for feed, discover and comments.                                                                                                       | Phase 13                   |
-| 18  | Monetisation       | Free vs premium features; ads (probably not).                                                                                                                                  | Before Phase 15            |
-| 19  | Light-mode parity  | Is light mode fully supported at launch or best-effort? (Phase 0 builds both; Phase 0B designs both.)                                                                          | Phase 14                   |
-| 20  | Charts in Expo Go  | Victory Native needs Skia, which is in Expo Go. Confirm performance on low-end Android when charts land.                                                                       | Phase 7                    |
+| #   | Topic              | Question                                                                                                                                                                                              | Needed by                  |
+| --- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
+| 1   | App name           | Final name, bundle IDs (`com.rankedgym.app` placeholder), store listing, logo.                                                                                                                        | Phase 15 (ideally earlier) |
+| 5   | XP and levels      | XP sources (workouts, PRs, streaks, social), the level curve, and anti-farming caps.                                                                                                                  | Phase 11                   |
+| 6   | Leagues            | Weekly vs seasonal format, season length, group size, promotion/relegation, and the scoring metric (XP? rank gains?).                                                                                 | Phase 7                    |
+| 7   | Streak stakes      | What is at stake: points/XP, cosmetic penalties, or real money. Real money raises legal and payment issues in India, so the recommendation is no money at launch.                                     | Phase 12                   |
+| 8   | Anti-cheat         | Which ranks need verification, evidence type (video?), reviewers (mods/peers), outlier thresholds, and appeals.                                                                                       | Phase 13                   |
+| 9   | Calories           | Estimation method (MET-based by duration and intensity? a wearable later?).                                                                                                                           | Phase 8                    |
+| 10  | Recovery model     | Formula for recovery % per muscle (time decay × volume × RPE?).                                                                                                                                       | Phase 8                    |
+| 11  | Regions            | Source for the college and city lists (curated seed? user-submitted plus moderation?), and verification of college membership (college email?).                                                       | Phase 10                   |
+| 13  | Under-18 consent   | Minimum age is 13 (decided). Still open: DPDP Act handling for 13–17s (verifiable parental consent, no behavioural tracking): consent flow, forcing private visibility, or raising the minimum to 18. | Before Phase 15            |
+| 14  | Referral rewards   | What the inviter and invitee get, and abuse limits.                                                                                                                                                   | Phase 10                   |
+| 16  | Plan generator     | Rules-based templates vs an algorithm; progression model (linear, double progression, RIR-based).                                                                                                     | Phase 5                    |
+| 17  | Content moderation | Reporting, blocking, moderation tooling for feed, discover and comments.                                                                                                                              | Phase 13                   |
+| 18  | Monetisation       | Free vs premium features; ads (probably not).                                                                                                                                                         | Before Phase 15            |
+| 19  | Light-mode parity  | Is light mode fully supported at launch or best-effort? (Phase 0 builds both; Phase 0B designs both.)                                                                                                 | Phase 14                   |
+| 20  | Charts in Expo Go  | Victory Native needs Skia, which is in Expo Go. Confirm performance on low-end Android when charts land.                                                                                              | Phase 7                    |
+| 22  | Age brackets       | Onboarding says leaderboards group people by age bracket, but RANK_SYSTEM.md has no age adjustment. Decide the brackets (e.g. under 18, 18–23, 24–39, 40+) and whether they filter leaderboards only. | Phase 10                   |
+| 23  | Apple sign-in      | Required by the App Store when Google is offered. Needs a dev build (or Expo Go's bundle id) and an Apple Developer account.                                                                          | Before Phase 15            |
+| 25  | Exercise media     | Source for exercise images or clips with a clear licence (or record our own); `exercises.media_url` is ready.                                                                                         | Before Phase 15            |
+| 24  | Countries          | Country is stored (default `IN`) but not asked. Add a picker when launching outside India.                                                                                                            | After launch               |

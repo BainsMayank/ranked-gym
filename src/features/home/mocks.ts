@@ -100,7 +100,7 @@ export const feed: FeedItem[] = [
       { name: 'Romanian deadlift', detail: '3 × 8 · 110 kg' },
       { name: 'Leg press', detail: '3 × 12 · 220 kg' },
     ],
-    rankUp: { text: 'Quads reached Platinum III', tier: 'platinum' },
+    rankUp: { text: 'Quads reached Platinum I', tier: 'platinum' },
     likes: 24,
     comments: 6,
   },

@@ -11,6 +11,7 @@ export { ProgressBar, type ProgressBarProps } from './ProgressBar';
 export { PressableScale, type PressableScaleProps } from './PressableScale';
 export { PlaceholderScreen, type PlaceholderScreenProps } from './PlaceholderScreen';
 export { Screen, type ScreenProps } from './Screen';
+export { SearchField, type SearchFieldProps } from './SearchField';
 export {
   SegmentedControl,
   type SegmentedControlProps,
@@ -43,3 +44,5 @@ export { SectionHeader, type SectionHeaderProps } from './SectionHeader';
 export { SelectField, type SelectFieldProps } from './SelectField';
 export { Stat, type StatProps } from './Stat';
 export { Tag, type TagProps, type TagTone } from './Tag';
+export { OptionCard, type OptionCardProps } from './OptionCard';
+export { StepProgress } from './StepProgress';

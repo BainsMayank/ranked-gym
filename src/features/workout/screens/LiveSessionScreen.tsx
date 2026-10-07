@@ -1,10 +1,13 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 
 import { Button, IconButton, ListGroup, ListItem, Screen, Stat, Text } from '@/components';
+import { useExercisePicker } from '@/lib/exercises';
 
 import { ActiveExerciseCard } from '../components/ActiveExerciseCard';
 import { RestTimerCard } from '../components/RestTimerCard';
+import { routineExerciseFromLibrary } from '../fromLibrary';
 import { formatClock, useTicker } from '../hooks/useTicker';
 import { findRoutine, session } from '../mocks';
 
@@ -14,7 +17,15 @@ export function LiveSessionScreen() {
   const { routine: routineId } = useLocalSearchParams<{ routine?: string }>();
   const routine = findRoutine(routineId ?? session.routineId);
   const elapsed = useTicker() + session.startedSecondsAgo;
-  const [active, ...rest] = routine.exercises;
+  // Local until logging is stored (Phase 4).
+  const [exercises, setExercises] = useState(routine.exercises);
+  const [active, ...rest] = exercises;
+  const pickExercises = useExercisePicker();
+
+  const addExercises = async () => {
+    const picked = await pickExercises({ multiple: true, exclude: exercises.map((e) => e.id) });
+    setExercises((prev) => [...prev, ...picked.map(routineExerciseFromLibrary)]);
+  };
 
   return (
     <Screen edges={['top', 'bottom']} scroll className="pt-sm">
@@ -59,7 +70,7 @@ export function LiveSessionScreen() {
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Add exercise"
-          onPress={() => undefined}
+          onPress={() => void addExercises()}
           className="min-h-12 items-center justify-center rounded-lg border border-dashed border-border active:opacity-70"
         >
           <Text variant="subheading">+ Add exercise</Text>

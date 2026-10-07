@@ -20,7 +20,7 @@ import { board, metrics, scopes, you } from '../mocks';
 export function LeaderboardsScreen() {
   const router = useRouter();
   const [scope, setScope] = useState<(typeof scopes)[number]['value']>('regional');
-  const [metric, setMetric] = useState<(typeof metrics)[number]>('Power score');
+  const [metric, setMetric] = useState<(typeof metrics)[number]>('Strength score');
 
   return (
     <Screen

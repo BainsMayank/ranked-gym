@@ -20,9 +20,9 @@ export function RankHeroCard() {
         {rankLabel(tier, division)}
       </Text>
       <Text tone="muted">
-        Power score{' '}
+        Strength score{' '}
         <Text numeric className="text-text">
-          {overall.powerScore.toLocaleString('en-IN')}
+          {overall.strengthScore.toLocaleString('en-IN')}
         </Text>{' '}
         · {overall.standing}
       </Text>
@@ -35,7 +35,7 @@ export function RankHeroCard() {
         />
       ) : null}
       <Text variant="label" numeric className="self-start">
-        {overall.pointsToNext} pts to {overall.nextLabel}
+        {overall.pointsToNext} SS to {overall.nextLabel}
       </Text>
     </View>
   );

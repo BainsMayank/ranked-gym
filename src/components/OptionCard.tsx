@@ -1,16 +1,27 @@
-import { PressableScale, Text } from '@/components';
 import { cn } from '@/lib/utils';
 
-interface OptionCardProps {
+import { PressableScale } from './PressableScale';
+import { Text } from './Text';
+
+export interface OptionCardProps {
   title: string;
   subtitle?: string;
   selected: boolean;
   onPress: () => void;
+  /** Full-width row (for longer descriptions) instead of a half-width tile. */
+  wide?: boolean;
   className?: string;
 }
 
 /** Selectable choice tile. Selected = inverted, matching chips and segmented controls. */
-export function OptionCard({ title, subtitle, selected, onPress, className }: OptionCardProps) {
+export function OptionCard({
+  title,
+  subtitle,
+  selected,
+  onPress,
+  wide = false,
+  className,
+}: OptionCardProps) {
   return (
     <PressableScale
       accessibilityRole="radio"
@@ -18,9 +29,10 @@ export function OptionCard({ title, subtitle, selected, onPress, className }: Op
       accessibilityHint={subtitle}
       accessibilityState={{ selected, checked: selected }}
       onPress={onPress}
-      containerStyle={{ flexBasis: '47%', flexGrow: 1 }}
+      containerStyle={wide ? { width: '100%' } : { flexBasis: '47%', flexGrow: 1 }}
       className={cn(
-        'min-h-20 gap-xxs rounded-lg p-lg',
+        'gap-xxs rounded-lg p-lg',
+        wide ? 'min-h-16' : 'min-h-20',
         selected ? 'bg-text' : 'bg-surface',
         className,
       )}

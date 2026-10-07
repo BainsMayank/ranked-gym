@@ -1,17 +1,16 @@
 import { useState } from 'react';
-import { ScrollView, TextInput, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 
 import {
   Avatar,
   Button,
   Chip,
-  Icon,
   ListGroup,
   ListItem,
   Screen,
+  SearchField,
   SectionHeader,
 } from '@/components';
-import { useTheme } from '@/theme';
 
 import { ChallengeCard } from '../components/ChallengeCard';
 import { PartnerCard } from '../components/PartnerCard';
@@ -19,22 +18,17 @@ import { communities, discoverFilters, openChallenge, partners } from '../mocks'
 
 /** Home → Discover: search, training partners, communities and open challenges. */
 export function DiscoverScreen() {
-  const { colors } = useTheme();
+  const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<(typeof discoverFilters)[number]>('Same college');
 
   return (
     <Screen edges={[]} scroll className="pt-sm">
       <View className="gap-lg">
-        <View className="min-h-12 flex-row items-center gap-sm rounded-md bg-surface px-md">
-          <Icon name="search" size={18} tone="textMuted" />
-          <TextInput
-            accessibilityLabel="Search people, communities, routines"
-            placeholder="Search people, communities, routines"
-            placeholderTextColor={colors.textMuted}
-            selectionColor={colors.primary}
-            className="flex-1 py-sm text-body text-text"
-          />
-        </View>
+        <SearchField
+          value={query}
+          onChangeText={setQuery}
+          placeholder="Search people, communities, routines"
+        />
         <View className="flex-row flex-wrap gap-sm">
           {discoverFilters.map((f) => (
             <Chip key={f} label={f} selected={f === filter} onPress={() => setFilter(f)} />

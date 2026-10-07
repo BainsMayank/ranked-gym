@@ -1,6 +1,6 @@
 import { BottomTabBarHeightContext } from 'expo-router/js-tabs';
 import { useContext, type ReactNode } from 'react';
-import { ScrollView, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
 import { SafeAreaView, type Edge } from 'react-native-safe-area-context';
 
 import { cn } from '@/lib/utils';
@@ -22,6 +22,11 @@ export interface ScreenProps {
   footer?: ReactNode;
   scroll?: boolean;
   padded?: boolean;
+  /**
+   * Keeps focused inputs and the footer above the keyboard (forms). On Android the window already
+   * makes room, so only iOS pads.
+   */
+  avoidKeyboard?: boolean;
   /** Safe-area edges to inset. Defaults to top; inside tabs the content is padded past the glass tab bar. */
   edges?: Edge[];
   className?: string;
@@ -37,6 +42,7 @@ export function Screen({
   scroll = false,
   padded = true,
   edges = ['top'],
+  avoidKeyboard = false,
   className,
 }: ScreenProps) {
   // The tab bar floats over content (glass), so pad by its height. Undefined outside the tab navigator.
@@ -72,29 +78,36 @@ export function Screen({
       className="flex-1 bg-background"
       style={{ paddingBottom: footer ? tabBarHeight : 0 }}
     >
-      {scroll ? (
-        <ScrollView
-          className="flex-1"
-          contentContainerClassName={cn(padded && 'px-lg', className)}
-          contentContainerStyle={{ paddingBottom: bottomInset + 32 }}
-          scrollIndicatorInsets={{ bottom: bottomInset }}
-          keyboardShouldPersistTaps="handled"
-        >
-          {header}
-          {children}
-        </ScrollView>
-      ) : (
-        <View
-          className={cn('flex-1', padded && 'px-lg', className)}
-          style={{ paddingBottom: bottomInset }}
-        >
-          {header}
-          {children}
-        </View>
-      )}
-      {footer ? (
-        <View className="border-t border-border bg-background px-lg pb-md pt-md">{footer}</View>
-      ) : null}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        enabled={avoidKeyboard}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        {scroll ? (
+          <ScrollView
+            className="flex-1"
+            contentContainerClassName={cn(padded && 'px-lg', className)}
+            contentContainerStyle={{ paddingBottom: bottomInset + 32 }}
+            scrollIndicatorInsets={{ bottom: bottomInset }}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="interactive"
+          >
+            {header}
+            {children}
+          </ScrollView>
+        ) : (
+          <View
+            className={cn('flex-1', padded && 'px-lg', className)}
+            style={{ paddingBottom: bottomInset }}
+          >
+            {header}
+            {children}
+          </View>
+        )}
+        {footer ? (
+          <View className="border-t border-border bg-background px-lg pb-md pt-md">{footer}</View>
+        ) : null}
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

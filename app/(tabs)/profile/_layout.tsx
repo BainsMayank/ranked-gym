@@ -16,6 +16,7 @@ export default function ProfileLayout() {
       }}
     >
       <Stack.Screen name="index" options={{ headerShown: false, title: 'Profile' }} />
+      <Stack.Screen name="edit" options={{ headerShown: false }} />
       <Stack.Screen name="settings/index" options={{ title: 'Settings' }} />
       <Stack.Screen name="settings/[section]" options={{ title: '' }} />
     </Stack>

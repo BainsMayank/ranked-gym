@@ -23,7 +23,7 @@ export const settingsSections: Record<SettingsSectionId, SettingsSection> = {
     id: 'account',
     title: 'Account',
     icon: 'person-outline',
-    description: 'Sign in, sign up, email and password. Coming in Phase 1.',
+    description: 'Your email, how you sign in, and sign out.',
   },
   appearance: {
     id: 'appearance',
@@ -35,7 +35,7 @@ export const settingsSections: Record<SettingsSectionId, SettingsSection> = {
     id: 'units',
     title: 'Units',
     icon: 'barbell-outline',
-    description: 'Kilograms or pounds. Coming in Phase 11.',
+    description: 'Kilograms or pounds.',
   },
   notifications: {
     id: 'notifications',
@@ -47,7 +47,7 @@ export const settingsSections: Record<SettingsSectionId, SettingsSection> = {
     id: 'privacy',
     title: 'Privacy',
     icon: 'lock-closed-outline',
-    description: 'Who can see your workouts, ranks and profile. Coming in Phase 11.',
+    description: 'Who can see your profile.',
   },
   data: {
     id: 'data',

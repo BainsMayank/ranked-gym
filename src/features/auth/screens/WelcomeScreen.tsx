@@ -2,13 +2,19 @@ import { useRouter } from 'expo-router';
 import { Pressable, View } from 'react-native';
 
 import { Button, Screen, Text } from '@/components';
+import { useAuthStore } from '@/lib/auth';
+import { isSupabaseConfigured } from '@/lib/supabase';
 
 import { EmblemCluster } from '../components/EmblemCluster';
+import { useGoogleSignIn } from '../hooks/useGoogleSignIn';
 
-/** Sign-up entry. Auth providers are wired in Phase 1 (open decision #12); buttons preview the app for now. */
+/** Sign-up and log-in entry: Google, or a one-time code by email (one flow for both). */
 export function WelcomeScreen() {
   const router = useRouter();
-  const enter = () => router.replace('/home');
+  const google = useGoogleSignIn();
+  const setPreview = useAuthStore((s) => s.setPreview);
+  const configured = isSupabaseConfigured();
+  const toEmail = () => router.push('/sign-in/email');
 
   return (
     <Screen edges={['top', 'bottom']} scroll className="flex-grow justify-center">
@@ -31,44 +37,67 @@ export function WelcomeScreen() {
         </View>
         <View className="gap-sm">
           <Button
-            label="Continue with Apple"
-            icon="logo-apple"
-            fullWidth
-            size="lg"
-            onPress={enter}
-          />
-          <Button
             label="Continue with Google"
             icon="logo-google"
-            variant="secondary"
             fullWidth
             size="lg"
-            onPress={enter}
+            loading={google.pending}
+            disabled={!configured}
+            onPress={() => void google.start()}
           />
           <Button
-            label="Sign up with email"
+            label="Continue with email"
             icon="mail-outline"
             variant="outline"
             fullWidth
             size="lg"
-            onPress={enter}
+            disabled={!configured}
+            onPress={toEmail}
           />
-        </View>
-        <View className="items-center gap-sm">
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Log in"
-            onPress={enter}
-            hitSlop={8}
-          >
-            <Text tone="muted">
-              Already training with us? <Text tone="primary">Log in</Text>
+          {google.error ? (
+            <Text
+              variant="caption"
+              tone="danger"
+              className="text-center"
+              accessibilityLiveRegion="polite"
+            >
+              {google.error}
             </Text>
-          </Pressable>
-          <Text variant="caption" tone="muted" className="text-center">
-            By continuing you agree to the Terms and Privacy Policy.
-          </Text>
+          ) : null}
         </View>
+        {configured ? (
+          <View className="items-center gap-sm">
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Log in"
+              onPress={toEmail}
+              hitSlop={12}
+            >
+              <Text tone="muted">
+                Already training with us? <Text tone="primary">Log in</Text>
+              </Text>
+            </Pressable>
+            <Text variant="caption" tone="muted" className="text-center">
+              By continuing you agree to the Terms and Privacy Policy.
+            </Text>
+          </View>
+        ) : (
+          <View className="gap-sm rounded-md bg-surface p-lg">
+            <Text variant="label">Supabase isn&apos;t set up</Text>
+            <Text variant="caption" tone="muted">
+              Copy .env.example to .env, add SUPABASE_URL and SUPABASE_ANON_KEY, then restart the
+              dev server.
+            </Text>
+            {__DEV__ ? (
+              <Button
+                label="Preview the app on mock data"
+                variant="secondary"
+                size="sm"
+                onPress={() => setPreview(true)}
+              />
+            ) : null}
+          </View>
+        )}
       </View>
     </Screen>
   );

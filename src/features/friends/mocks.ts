@@ -66,7 +66,14 @@ export const scopes = [
   { value: 'global', label: 'Global' },
 ] as const;
 
-export const metrics = ['Power score', 'Bench', 'Squat', 'Deadlift', 'Volume', 'Streak'] as const;
+export const metrics = [
+  'Strength score',
+  'Bench',
+  'Squat',
+  'Deadlift',
+  'Volume',
+  'Streak',
+] as const;
 
 export const board: {
   position: number;
@@ -75,42 +82,42 @@ export const board: {
   score: string;
   movement: number;
 }[] = [
-  { position: 1, name: 'Harsh V.', rank: { tier: 'champion' }, score: '6,840', movement: 0 },
-  { position: 2, name: 'Simran B.', rank: { tier: 'master' }, score: '6,420', movement: 1 },
-  { position: 3, name: 'Arjun T.', rank: { tier: 'master' }, score: '6,210', movement: -1 },
+  { position: 1, name: 'Harsh V.', rank: { tier: 'champion' }, score: '541', movement: 0 },
+  { position: 2, name: 'Simran B.', rank: { tier: 'master' }, score: '478', movement: 1 },
+  { position: 3, name: 'Arjun T.', rank: { tier: 'master' }, score: '446', movement: -1 },
   {
     position: 4,
     name: 'Kunal N.',
     rank: { tier: 'diamond', division: 1 },
-    score: '5,980',
+    score: '421',
     movement: 2,
   },
   {
     position: 5,
     name: 'Meera R.',
     rank: { tier: 'diamond', division: 1 },
-    score: '5,870',
+    score: '414',
     movement: 0,
   },
   {
     position: 6,
     name: 'Vikram S.',
     rank: { tier: 'diamond', division: 2 },
-    score: '5,640',
+    score: '402',
     movement: 4,
   },
   {
     position: 7,
     name: 'Nikhil A.',
     rank: { tier: 'diamond', division: 2 },
-    score: '5,520',
+    score: '397',
     movement: -2,
   },
   {
     position: 8,
     name: 'Pooja S.',
     rank: { tier: 'diamond', division: 3 },
-    score: '5,310',
+    score: '381',
     movement: 1,
   },
 ];
@@ -118,7 +125,7 @@ export const board: {
 export const you = {
   position: '#1,204',
   name: 'Mayank Bains',
-  rank: { tier: 'gold', division: 2 } as Rank,
+  rank: { tier: 'platinum', division: 3 } as Rank,
   standing: 'top 18%',
-  score: '2,184',
+  score: '319',
 };

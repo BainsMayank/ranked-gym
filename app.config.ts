@@ -30,7 +30,13 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     },
     predictiveBackGestureEnabled: false,
   },
-  plugins: ['expo-router', 'expo-status-bar', 'expo-sqlite'],
+  plugins: [
+    'expo-router',
+    'expo-status-bar',
+    'expo-sqlite',
+    'expo-web-browser',
+    'expo-secure-store',
+  ],
   experiments: {
     typedRoutes: true,
   },

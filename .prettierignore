@@ -7,3 +7,7 @@ coverage
 pnpm-lock.yaml
 expo-env.d.ts
 nativewind-env.d.ts
+supabase/.temp
+supabase/.branches
+drizzle/meta
+drizzle/migrations.js

@@ -1,4 +1,8 @@
 import { useRouter, type Href } from 'expo-router';
+import { useAuthStore } from '@/lib/auth';
+import { optionTitle, useLatestBodyweight, useProfile, visibilityOptions } from '@/lib/profile';
+import { formatHeight, formatWeight } from '@/lib/units';
+import { useThemeStore } from '@/theme';
 import { ScrollView, View } from 'react-native';
 
 import {
@@ -16,19 +20,47 @@ import { LevelCard } from '../components/LevelCard';
 import { ProfileHeaderCard } from '../components/ProfileHeaderCard';
 import { badges, profileStats } from '../mocks';
 
-const SETTINGS: { title: string; value: string; href: Href }[] = [
-  { title: 'Account & sign-in', value: 'Apple ID', href: '/welcome' },
-  { title: 'Body stats', value: '71.4 kg · 176 cm', href: '/profile/settings/units' },
-  { title: 'Units', value: 'kg · cm', href: '/profile/settings/units' },
-  { title: 'Privacy', value: 'Friends only', href: '/profile/settings/privacy' },
-  { title: 'Notifications', value: 'On', href: '/profile/settings/notifications' },
-  { title: 'Appearance', value: 'Dark', href: '/profile/settings/appearance' },
-  { title: 'Your data', value: 'Export, delete', href: '/profile/settings/data' },
-];
+const THEME_LABEL = { dark: 'Dark', light: 'Light', system: 'System' } as const;
+
+/** The settings list, showing current values from the profile. */
+function useSettingsRows(): { title: string; value: string; href: Href }[] {
+  const { data: profile } = useProfile();
+  const { data: weight } = useLatestBodyweight();
+  const provider = useAuthStore((s) => s.session?.user.app_metadata.provider);
+  const theme = useThemeStore((s) => s.mode);
+  const unit = profile?.units ?? 'kg';
+  const body = [
+    weight ? formatWeight(weight.weight_kg, unit) : null,
+    profile?.height_cm ? formatHeight(profile.height_cm, unit) : null,
+  ].filter(Boolean);
+
+  return [
+    {
+      title: 'Account & sign-in',
+      value: provider === 'google' ? 'Google' : 'Email',
+      href: '/profile/settings/account',
+    },
+    { title: 'Body stats', value: body.join(' · ') || 'Add', href: '/profile/edit' },
+    {
+      title: 'Units',
+      value: unit === 'kg' ? 'kg · cm' : 'lb · ft/in',
+      href: '/profile/settings/units',
+    },
+    {
+      title: 'Privacy',
+      value: optionTitle(visibilityOptions, profile?.visibility) ?? '',
+      href: '/profile/settings/privacy',
+    },
+    { title: 'Notifications', value: 'On', href: '/profile/settings/notifications' },
+    { title: 'Appearance', value: THEME_LABEL[theme], href: '/profile/settings/appearance' },
+    { title: 'Your data', value: 'Export, delete', href: '/profile/settings/data' },
+  ];
+}
 
 /** Profile: identity, level, stats, badges, cosmetics and settings. */
 export function ProfileScreen() {
   const router = useRouter();
+  const settings = useSettingsRows();
   const earned = badges.filter((b) => !b.locked).length;
 
   return (
@@ -79,7 +111,7 @@ export function ProfileScreen() {
         <CustomiseCard />
 
         <ListGroup>
-          {SETTINGS.map((s) => (
+          {settings.map((s) => (
             <ListItem
               key={s.title}
               title={s.title}

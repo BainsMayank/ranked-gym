@@ -2,6 +2,7 @@ import { Tabs } from 'expo-router/js-tabs';
 
 import { Icon, type IconName } from '@/components';
 import { GlassTabBarBackground } from '@/components/navigation/GlassTabBarBackground';
+import { useExerciseLibrarySync } from '@/lib/exercises';
 import { fontFamilies, useTheme } from '@/theme';
 
 const TABS: readonly { name: string; title: string; icon: IconName; iconActive: IconName }[] = [
@@ -14,6 +15,8 @@ const TABS: readonly { name: string; title: string; icon: IconName; iconActive: 
 
 export default function TabsLayout() {
   const { colors } = useTheme();
+  // Mirrors the exercise library into SQLite once signed in, so search works offline.
+  useExerciseLibrarySync();
 
   return (
     <Tabs
