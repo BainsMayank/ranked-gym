@@ -19,6 +19,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { ToastHost } from '@/components';
 import { useAuthBootstrap, useAuthStore } from '@/lib/auth';
 import { useAuthGate, type GateScreen } from '@/lib/auth/useAuthGate';
 import { queryClient } from '@/lib/queryClient';
@@ -78,10 +79,31 @@ function RootNavigator({ screen }: { screen: GateScreen }) {
         <Stack.Protected guard={screen === 'app'}>
           <Stack.Screen name="(tabs)" options={{ headerShown: false, animation: 'fade' }} />
           <Stack.Screen name="plan/new" options={{ headerShown: false }} />
+          <Stack.Screen name="plan/preview" options={{ headerShown: false }} />
+          <Stack.Screen name="plan/index" options={{ headerShown: false }} />
+          <Stack.Screen name="plan/why" options={{ headerShown: false }} />
+          <Stack.Screen name="plan/day/[id]" options={{ headerShown: false }} />
           <Stack.Screen name="routine/[id]" options={{ headerShown: false }} />
+          <Stack.Screen name="routines/reorder" options={{ headerShown: false }} />
+          <Stack.Screen name="routines/templates" options={{ headerShown: false }} />
           {/* Slides up like a modal but stays a card screen, so safe-area insets work. */}
           <Stack.Screen
-            name="session"
+            name="session/index"
+            options={{ headerShown: false, animation: 'slide_from_bottom', gestureEnabled: false }}
+          />
+          <Stack.Screen name="session/finish" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="session/rewards"
+            options={{ headerShown: false, animation: 'fade', gestureEnabled: false }}
+          />
+          <Stack.Screen
+            name="workout/generate"
+            options={{ headerShown: false, animation: 'slide_from_bottom' }}
+          />
+          <Stack.Screen name="workouts/index" options={{ headerShown: false }} />
+          <Stack.Screen name="workouts/[id]/index" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="workouts/[id]/edit"
             options={{ headerShown: false, animation: 'slide_from_bottom', gestureEnabled: false }}
           />
           <Stack.Screen name="exercises/index" options={{ headerShown: false }} />
@@ -133,6 +155,7 @@ export default function RootLayout() {
         <QueryClientProvider client={queryClient}>
           <ThemeProvider>
             <AppGate fontsReady={fontsReady} />
+            <ToastHost />
           </ThemeProvider>
         </QueryClientProvider>
       </SafeAreaProvider>

@@ -1,76 +1,226 @@
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
+import { randomUUID } from 'expo-crypto';
+import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
+import { usePreventRemove } from 'expo-router/react-navigation';
+import { useMemo, useState } from 'react';
+import { Alert, Keyboard, ScrollView, View } from 'react-native';
 
-import { Button, Chip, Screen, Tag, Text } from '@/components';
+import { Button, EmptyState, IconButton, Screen, showToast, Skeleton } from '@/components';
 import { useExercisePicker } from '@/lib/exercises';
+import { summariseRoutine, supersetPositions, useDeleteRoutine } from '@/lib/routines';
 
-import { ExerciseEditorCard } from '../components/ExerciseEditorCard';
-import { SetTypeLegend } from '../components/SetTypeLegend';
-import { SupersetGroup } from '../components/SupersetGroup';
-import { routineExerciseFromLibrary } from '../fromLibrary';
-import { findRoutine, type RoutineExercise } from '../mocks';
+import { FolderPickerSheet } from '../components/FolderPickerSheet';
+import { addExercises, replaceExercise, updateMeta } from '../editor/actions';
+import { AddExerciseButton } from '../editor/components/AddExerciseButton';
+import { ExerciseCard } from '../editor/components/ExerciseCard';
+import { ExerciseMenuSheet } from '../editor/components/ExerciseMenuSheet';
+import { ReorderExercises } from '../editor/components/ReorderExercises';
+import { RestSheet } from '../editor/components/RestSheet';
+import { RoutineMenuSheet } from '../editor/components/RoutineMenuSheet';
+import { RoutineMetaHeader } from '../editor/components/RoutineMetaHeader';
+import { SelectionBar } from '../editor/components/SelectionBar';
+import { SetSheet } from '../editor/components/SetSheet';
+import { MuscleSheet, SummaryFooter } from '../editor/components/SummaryFooter';
+import { UnsavedSheet } from '../editor/components/UnsavedSheet';
+import { EditorEnvProvider } from '../editor/EditorEnv';
+import { editRoutine, selectCanUndo, selectDirty, useRoutineEditor } from '../editor/store';
+import { useEditorSession } from '../editor/useEditorSession';
 
-/** Groups consecutive exercises that share a superset letter. */
-function groupExercises(list: RoutineExercise[]) {
-  const groups: { key: string; superset?: string; items: RoutineExercise[] }[] = [];
-  for (const e of list) {
-    const prev = groups[groups.length - 1];
-    if (e.superset && prev?.superset === e.superset) prev.items.push(e);
-    else groups.push({ key: e.id, superset: e.superset, items: [e] });
-  }
-  return groups;
-}
+type LeaveAction = Parameters<Parameters<typeof usePreventRemove>[1]>[0]['data']['action'];
 
-/** Routine builder: settings, then each exercise (or superset) with its planned sets. Saving lands in Phase 3. */
+/** Lets a focused cell commit (on blur) before reading the document. */
+const settleInputs = () => {
+  Keyboard.dismiss();
+  return new Promise((resolve) => setTimeout(resolve, 60));
+};
+
+/** Routine editor: build a routine exercise by exercise, set by set. Saves locally, syncs later. */
 export function RoutineBuilderScreen() {
   const router = useRouter();
+  const navigation = useNavigation();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const routine = findRoutine(id);
-  // Local until routines are stored (Phase 3).
-  const [exercises, setExercises] = useState(routine.exercises);
-  const pickExercises = useExercisePicker();
+  const session = useEditorSession(id);
+  const { env } = session;
+  const doc = useRoutineEditor((s) => s.doc);
+  const mode = useRoutineEditor((s) => s.mode);
+  const selected = useRoutineEditor((s) => s.selected);
+  const sheet = useRoutineEditor((s) => s.sheet);
+  const dirty = useRoutineEditor(selectDirty);
+  const canUndo = useRoutineEditor(selectCanUndo);
+  const pick = useExercisePicker();
+  const deleteRoutine = useDeleteRoutine();
+  const [leaving, setLeaving] = useState<LeaveAction | null>(null);
 
-  const addExercises = async () => {
-    const picked = await pickExercises({ multiple: true, exclude: exercises.map((e) => e.id) });
-    setExercises((prev) => [...prev, ...picked.map(routineExerciseFromLibrary)]);
+  usePreventRemove(dirty, ({ data }) => setLeaving(data.action));
+
+  const summary = useMemo(
+    () => (doc ? summariseRoutine(doc.exercises, (x) => env.exercises.get(x)) : null),
+    [doc, env.exercises],
+  );
+  const positions = useMemo(() => (doc ? supersetPositions(doc.exercises) : []), [doc]);
+
+  const add = async () => {
+    const picked = await pick({ multiple: true });
+    if (picked.length)
+      editRoutine((d) => addExercises(d, picked, randomUUID, env.effort, env.defaultRestSec));
+  };
+  const replace = async (exerciseId: string) => {
+    const current = doc?.exercises.find((e) => e.id === exerciseId);
+    const from = current && env.exercises.get(current.exerciseId);
+    const [next] = await pick({ multiple: false });
+    if (next && from) {
+      editRoutine((d) => replaceExercise(d, exerciseId, next, from.logType, env.effort));
+    }
   };
 
-  return (
-    <Screen
-      title="Edit routine"
-      onBack={() => router.back()}
-      headerRight={<Button label="Save" size="sm" onPress={() => router.back()} />}
-      edges={['top', 'bottom']}
-      scroll
-    >
-      <View className="gap-lg">
-        <View className="gap-sm">
-          <Text variant="display">{routine.name}</Text>
-          <View className="flex-row flex-wrap gap-sm">
-            <Chip label={`Folder: ${routine.folder}`} onPress={() => undefined} />
-            <Chip label="Effort: RIR" onPress={() => undefined} />
-            <Chip label="Progression: double" onPress={() => undefined} />
-          </View>
-          <Tag label="5 exercises · 17 sets · ~62 min" tone="primary" className="self-start" />
-        </View>
-        {groupExercises(exercises).map((g) =>
-          g.superset && g.items.length > 1 ? (
-            <SupersetGroup key={g.key} label={g.superset} exercises={g.items} />
-          ) : (
-            <ExerciseEditorCard key={g.key} exercise={g.items[0]!} />
-          ),
-        )}
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Add exercise"
-          onPress={() => void addExercises()}
-          className="min-h-12 items-center justify-center rounded-lg border border-dashed border-border active:opacity-70"
-        >
-          <Text variant="subheading">+ Add exercise</Text>
-        </Pressable>
-        <SetTypeLegend />
+  const save = async (then: () => void) => {
+    await settleInputs();
+    const result = await session.save();
+    if (!result.ok) {
+      setLeaving(null);
+      showToast({ message: result.message, above: 'footer' });
+      return;
+    }
+    // Navigate once the screen has re-rendered without unsaved changes.
+    setTimeout(then, 0);
+  };
+  const leave = (action: LeaveAction | null) => () =>
+    action ? navigation.dispatch(action) : router.back();
+
+  const confirmDelete = () =>
+    Alert.alert('Delete this routine?', 'It’s removed from all your devices.', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () => {
+          const { baseline, markSaved } = useRoutineEditor.getState();
+          if (baseline) markSaved(baseline);
+          deleteRoutine.mutate(session.id);
+          setTimeout(() => router.back(), 0);
+        },
+      },
+    ]);
+
+  const headerRight =
+    mode === 'reorder' ? (
+      <Button label="Done" size="sm" onPress={() => useRoutineEditor.getState().setMode('edit')} />
+    ) : (
+      <View className="flex-row items-center gap-xs">
+        <IconButton
+          icon="arrow-undo"
+          accessibilityLabel="Undo"
+          size="sm"
+          disabled={!canUndo}
+          onPress={() => useRoutineEditor.getState().undo()}
+        />
+        <IconButton
+          icon="ellipsis-horizontal"
+          accessibilityLabel="Routine options"
+          size="sm"
+          onPress={() => useRoutineEditor.getState().openSheet({ kind: 'routineMenu' })}
+        />
+        <Button
+          label="Save"
+          size="sm"
+          loading={session.saving}
+          onPress={() => void save(leave(null))}
+        />
       </View>
-    </Screen>
+    );
+
+  const footer =
+    mode === 'select' ? (
+      <SelectionBar />
+    ) : mode === 'edit' && summary ? (
+      <SummaryFooter summary={summary} />
+    ) : undefined;
+
+  return (
+    <EditorEnvProvider value={env}>
+      <Screen
+        title={session.isNew ? 'New routine' : 'Edit routine'}
+        onBack={() => router.back()}
+        headerRight={doc && !session.notFound ? headerRight : undefined}
+        edges={['top', 'bottom']}
+        footer={session.notFound ? undefined : footer}
+        avoidKeyboard
+      >
+        {!doc ? (
+          <View className="gap-md">
+            <Skeleton height={56} />
+            <Skeleton height={220} />
+            <Skeleton height={220} />
+          </View>
+        ) : session.notFound ? (
+          <EmptyState
+            icon="trash-outline"
+            title="Routine not found"
+            description="It may have been deleted on another device."
+            action={{ label: 'Back to routines', onPress: () => router.back() }}
+          />
+        ) : mode === 'reorder' ? (
+          <ScrollView contentContainerClassName="pb-xxl">
+            <ReorderExercises doc={doc} />
+          </ScrollView>
+        ) : (
+          <FlashList
+            data={doc.exercises}
+            keyExtractor={(e) => e.id}
+            getItemType={(_, i) => (positions[i] ? 'superset' : 'single')}
+            extraData={selected}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="interactive"
+            showsVerticalScrollIndicator={false}
+            ListHeaderComponent={
+              <RoutineMetaHeader
+                doc={doc}
+                restored={session.restored}
+                onDiscard={() => void session.discard()}
+              />
+            }
+            ListEmptyComponent={
+              <EmptyState
+                icon="barbell-outline"
+                title="No exercises yet"
+                description="Add a few from the library. You can pick several at once."
+                action={{ label: 'Add exercises', onPress: () => void add() }}
+              />
+            }
+            ListFooterComponent={
+              doc.exercises.length ? <AddExerciseButton onPress={() => void add()} /> : null
+            }
+            renderItem={({ item, index }) => (
+              <ExerciseCard
+                exercise={item}
+                superset={positions[index] ?? null}
+                selecting={mode === 'select'}
+                selected={selected.includes(item.id)}
+              />
+            )}
+          />
+        )}
+      </Screen>
+
+      <SetSheet />
+      <RestSheet />
+      <ExerciseMenuSheet onReplace={(x) => void replace(x)} />
+      {summary ? <MuscleSheet summary={summary} /> : null}
+      <RoutineMenuSheet canDelete={!session.isNew} onDelete={confirmDelete} />
+      <FolderPickerSheet
+        visible={sheet?.kind === 'folder'}
+        current={doc?.folderId ?? null}
+        title="Folder"
+        onPick={(folderId) => editRoutine((d) => updateMeta(d, { folderId }))}
+        onClose={() => useRoutineEditor.getState().openSheet(null)}
+      />
+      <UnsavedSheet
+        visible={!!leaving}
+        saving={session.saving}
+        onSave={() => void save(leave(leaving))}
+        onDiscard={() => void session.discard().then(() => setTimeout(leave(leaving), 0))}
+        onKeepEditing={() => setLeaving(null)}
+      />
+    </EditorEnvProvider>
   );
 }

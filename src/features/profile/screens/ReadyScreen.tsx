@@ -10,10 +10,10 @@ export function ReadyScreen() {
   const { data: profile } = useProfile();
   const firstName = profile?.display_name?.split(' ')[0];
 
-  // Land on the Workout tab first so Back from the plan or session returns somewhere sensible.
-  const openFromWorkout = (href: '/plan/new' | '/session') => {
+  // Land on the Workout tab first so Back from the plan returns somewhere sensible.
+  const openPlan = () => {
     router.replace('/workout');
-    router.push(href);
+    router.push('/plan/new');
   };
 
   return (
@@ -21,18 +21,14 @@ export function ReadyScreen() {
       edges={['top', 'bottom']}
       footer={
         <View className="gap-sm">
-          <Button
-            label="Create my plan"
-            fullWidth
-            size="lg"
-            onPress={() => openFromWorkout('/plan/new')}
-          />
+          <Button label="Create my plan" fullWidth size="lg" onPress={openPlan} />
           <Button
             label="Start a workout"
             variant="outline"
             fullWidth
             size="lg"
-            onPress={() => openFromWorkout('/session')}
+            // The Workout tab offers empty, generated and routine sessions.
+            onPress={() => router.replace('/workout')}
           />
           <Button
             label="Look around first"
@@ -46,14 +42,14 @@ export function ReadyScreen() {
       <View className="flex-1 items-center justify-center gap-xl">
         <View className="relative -mx-lg h-64 items-center justify-center self-stretch">
           <RankGlow tier="iron" intensity={0.35} />
-          <RankBadge tier="iron" division={4} size={128} />
+          <RankBadge tier="iron" division={3} size={128} />
         </View>
         <View className="items-center gap-sm">
           <Text variant="display" className="text-center" accessibilityRole="header">
             {firstName ? `You're in, ${firstName}.` : "You're in."}
           </Text>
           <Text tone="muted" className="text-center">
-            Everyone starts at Iron. Log your first lifts and your real rank shows up straight away.
+            Everyone starts at Iron. Each lift you log gets its real rank straight away.
           </Text>
         </View>
       </View>

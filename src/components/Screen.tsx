@@ -5,6 +5,8 @@ import { SafeAreaView, type Edge } from 'react-native-safe-area-context';
 
 import { cn } from '@/lib/utils';
 
+import { useBottomAccessory } from './navigation/bottomAccessory';
+
 import { IconButton } from './IconButton';
 import { Text } from './Text';
 
@@ -27,9 +29,24 @@ export interface ScreenProps {
    * makes room, so only iOS pads.
    */
   avoidKeyboard?: boolean;
+  /**
+   * For screens whose child is its own list (FlashList): don't pad the bottom, so content scrolls
+   * under the glass tab bar; the list pads its content with `useTabBarInset()` instead.
+   */
+  bleedBottom?: boolean;
   /** Safe-area edges to inset. Defaults to top; inside tabs the content is padded past the glass tab bar. */
   edges?: Edge[];
   className?: string;
+}
+
+/**
+ * Height of the floating tab bar plus anything docked above it (the workout mini bar); 0 outside
+ * the tabs. Lists pad their content by it.
+ */
+export function useTabBarInset(): number {
+  const tabBar = useContext(BottomTabBarHeightContext);
+  const accessory = useBottomAccessory((s) => s.height);
+  return tabBar === undefined ? 0 : tabBar + accessory;
 }
 
 export function Screen({
@@ -43,10 +60,11 @@ export function Screen({
   padded = true,
   edges = ['top'],
   avoidKeyboard = false,
+  bleedBottom = false,
   className,
 }: ScreenProps) {
   // The tab bar floats over content (glass), so pad by its height. Undefined outside the tab navigator.
-  const tabBarHeight = useContext(BottomTabBarHeightContext) ?? 0;
+  const tabBarHeight = useTabBarInset();
   const bottomInset = footer ? 0 : tabBarHeight;
 
   const header =
@@ -98,7 +116,7 @@ export function Screen({
         ) : (
           <View
             className={cn('flex-1', padded && 'px-lg', className)}
-            style={{ paddingBottom: bottomInset }}
+            style={{ paddingBottom: bleedBottom ? 0 : bottomInset }}
           >
             {header}
             {children}

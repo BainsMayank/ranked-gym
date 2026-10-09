@@ -47,7 +47,11 @@ export const experienceOptions = [
 export const sexOptions = [
   { id: 'male', title: "Men's", subtitle: "Ranked on men's standards" },
   { id: 'female', title: "Women's", subtitle: "Ranked on women's standards" },
-  { id: 'unspecified', title: 'Rather not say', subtitle: "Ranked on men's (open) standards" },
+  {
+    id: 'unspecified',
+    title: 'Rather not say',
+    subtitle: "Ranked on the average of men's and women's standards",
+  },
 ] as const satisfies readonly Option<SexForStandards>[];
 
 export const visibilityOptions = [

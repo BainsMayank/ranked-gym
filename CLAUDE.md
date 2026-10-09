@@ -26,7 +26,7 @@
 | Tests                | Jest (`jest-expo` preset) + React Native Testing Library 14                                                                                                 |
 | Package manager      | **pnpm** (v12). `nodeLinker: hoisted` in `pnpm-workspace.yaml` is required by Expo                                                                          |
 
-Approved additions to the stack: `react-native-tab-view` and `react-native-pager-view` (needed by swipeable top tabs), `expo-system-ui`, `expo-font` (a peer dependency of `@expo/vector-icons`), `expo-blur` (glass tab bar), `@expo-google-fonts/instrument-sans` (brand font), `expo-auth-session` + `expo-web-browser` + `expo-crypto` (Google sign-in), `expo-secure-store` (sessions), `zod` (form validation), `supabase` (CLI, dev dependency), `babel-plugin-inline-import` (dev; lets Drizzle's local `.sql` migrations be imported) and `@types/node` (dev; types for the Node seed generator).
+Approved additions to the stack: `react-native-tab-view` and `react-native-pager-view` (needed by swipeable top tabs), `expo-system-ui`, `expo-font` (a peer dependency of `@expo/vector-icons`), `expo-blur` (glass tab bar), `@expo-google-fonts/instrument-sans` (brand font), `expo-auth-session` + `expo-web-browser` + `expo-crypto` (Google sign-in), `expo-secure-store` (sessions), `zod` (form validation), `supabase` (CLI, dev dependency), `babel-plugin-inline-import` (dev; lets Drizzle's local `.sql` migrations be imported), `@types/node` (dev; types for the Node seed generator), `@shopify/flash-list` (long lists), `expo-haptics` (haptics vocabulary in `src/lib/haptics.ts`), `expo-keep-awake` (logging screen), `expo-notifications` (local rest-timer notifications only), `expo-network` (sync on reconnect), `expo-image-picker` + `expo-file-system` (workout photo).
 
 ### Expo changes fast: don't trust memory
 
@@ -50,9 +50,12 @@ app/                     Routes only (thin files that render a feature screen). 
   (tabs)/rank/           Top tabs: index (Ranks), body-map (Body), leagues, analysis, records
   (tabs)/friends/        Stack: index (hub with invite), leaderboards
   (tabs)/profile/        Stack: index, edit, settings/index, settings/[section]
-  plan/new.tsx           Create plan (full screen, no tab bar)
-  routine/[id].tsx       Routine builder (full screen)
-  session.tsx            Live workout session (slides up, full screen)
+  plan/                  new (questionnaire), preview, index (overview: calendar, volume), why, day/[id] (session: start, swap, move, regenerate, skip)
+  routine/[id].tsx       Routine editor (full screen; id 'new' creates one)
+  routines/              reorder (drag routines across folders), templates (starter routines)
+  session/               Live workout: index (logging, slides up), finish (summary), rewards (PRs + rank changes after Save)
+  workout/generate.tsx   Random workout generator (live preview, reroll)
+  workouts/              History (index), [id]/index (detail, deep-linkable), [id]/edit (edit a finished workout)
   exercises/             Library (index), picker (pick, slides up), detail ([id]), create/edit custom (new, ?id= / ?name=)
   (auth)/                Signed-out stack: welcome, sign-in/email, sign-in/code
   onboarding/            8 onboarding steps (name … privacy); ready.tsx is the "You're in" screen after it
@@ -65,16 +68,21 @@ src/
   features/<feature>/    Everything for one feature: screens/, components/, hooks/, api/, store.ts, types.ts
   lib/                   supabase.ts (typed client), queryClient.ts, units.ts, db/ (Drizzle client, schema, ensureDb migrations), utils/
     exercises/           Exercise library: taxonomy (muscles, regions, enums), types, search, SQLite repository, sync, hooks, useExercisePicker
+    routines/            Routine model shared by Phases 3–5: taxonomy, types, set rules, duration, warm-ups, summary, parse, validate, templates, SQLite repository, Supabase api, sync, hooks
+    workouts/            Workout model: types, 1RM, plates, calories, summary, session building, set flow, deviation, generator/, SQLite repository + queries, Supabase api, sync, hooks, prefs, photo
+    plans/               Plan generator: engine/ (pure: splits, schedule, selection, fitter, progression, deload, calendar, explanation; see docs/PLAN_ENGINE.md), SQLite repository, Supabase api, sync, hooks, edits (swap/regenerate scope), start (planned session → logger)
+    sync/                Outbox (sync_queue), runner (backoff, retry timer, reconnect), status store; entities register push handlers
     auth/                Session storage (SecureStore), auth store, bootstrap, gate (useAuthGate), signOut
     profile/             Option lists, zod field schemas, useProfile / useUpdateProfile, bodyweight, username check
     forms/               useZodForm (text forms validated by zod)
-    game/                Rank model shared by features (divisions, labels, ordering) and strength.ts (Strength Score maths, see docs/RANK_SYSTEM.md)
+    game/                Rank model shared by features (divisions III–I, labels, ordering), rankKeys, engine/ (TypeScript mirror of the Postgres rank engine; see docs/RANK_SYSTEM.md)
+    ranks/               Server rank results: parsers, api, hooks (useWorkoutRewards, useRanks, useRankPredictions), display formatting
   theme/                 tokens.ts (single source of truth), displayColor (Expo Go fix), ThemeProvider, themeStore
   types/                 Global/ambient types; database.ts is generated (pnpm db:types), never hand-edited
 supabase/                config.toml, migrations/, tests/database/ (pgTAP), templates/ (auth emails), functions/, seed.sql,
-                         seed/ (official exercise library source + validate + build → generated migration)
+                         seed/ (official exercise library, strength standards and 50 fake lifters: source + validate + build → generated migrations/tests)
 drizzle/                 Generated local SQLite migrations (pnpm db:local:generate), never hand-edited
-docs/                    PRODUCT_SPEC.md, PROGRESS.md, SCHEMA.md, RANK_SYSTEM.md, CREDITS.md, design/ (references, system-preview.html)
+docs/                    PRODUCT_SPEC.md, PROGRESS.md, SCHEMA.md, RANK_SYSTEM.md, PLAN_ENGINE.md, CREDITS.md, design/ (references, system-preview.html)
 MOBILE-DESIGN.md         Approved design system: rules, risks, game layer
 ```
 
@@ -109,10 +117,14 @@ MOBILE-DESIGN.md         Approved design system: rules, risks, game layer
 - New touchables use `PressableScale` (spring press feedback, reduced-motion aware).
 - Use `useThemeStore` for the mode: `dark | light | system`, default `dark`. Persistence is planned for Phase 11.
 - Use Reanimated shared values via `.get()` and `.set()`, not `.value`. The React Compiler lint rules flag `.value` mutation.
-- Screens inside the tabs must use `Screen` (or pad by `BottomTabBarHeightContext`), because the glass tab bar floats over content.
-- **Game layer**: rank model in `src/lib/game` (`rankLabel`, `compareRanks`, divisions). How ranks are earned is specified in [docs/RANK_SYSTEM.md](docs/RANK_SYSTEM.md); `strength.ts` is its reference implementation (client preview only, the Phase 6 engine mirrors it). Final rank art and avatar frames are registered in `src/components/game/artRegistry.ts`, never hard-coded in screens.
-- Base components (`@/components`): Screen (title, `onBack`, pinned `footer`), Text, Button (primary, accent, secondary, outline, ghost, destructive), Card, IconButton, Icon, Chip, Tag, Input, SelectField, NumberStepper, Sheet, EmptyState, Skeleton, Avatar, ProgressBar, SegmentedControl, TopTabs (segmented), SectionHeader, Stat, ListGroup + ListItem, BarChart, PressableScale, OptionCard (radio tile; `wide` for rows), StepProgress, PlaceholderScreen. `Screen` takes `avoidKeyboard` for forms. Game components: RankBadge, RankTag, HexEmblem, DivisionLadder, RankGlow, LeaderboardRow, BadgeTile, StreakChip. See them at `/dev/components` (Profile → Component gallery in dev builds).
+- Screens inside the tabs must use `Screen` (or pad by `useTabBarInset()`), because the glass tab bar (and the workout mini bar above it) float over content.
+- **Game layer**: rank model in `src/lib/game` (`rankLabel`, `compareRanks`, `rankFromServer`, divisions III–I, Champion undivided). How ranks are earned is specified in [docs/RANK_SYSTEM.md](docs/RANK_SYSTEM.md). Final rank art and avatar frames are registered in `src/components/game/artRegistry.ts`, never hard-coded in screens.
+- **Ranks**: computed only in Postgres (`rank_recompute_user`, run by `save_workout` and pg_cron jobs); read them through `@/lib/ranks` (`useWorkoutRewards`, `useRanks`, `useRankPredictions`). `src/lib/game/engine` mirrors the SQL rules in TypeScript for tests, previews and the fake-user check: change both together, then `pnpm ranks:fake` (the generated `08_rank_distribution` test fails if they disagree). Rebalance standards in `supabase/seed/standards.ts` + `pnpm standards:build` (bump `STANDARDS_VERSION`); never edit the generated migration. Engine files must stay free of RN and `@/` imports (Node runs them) and import siblings with `.ts` extensions.
+- Base components (`@/components`): Screen (title, `onBack`, pinned `footer`), SyncStatus (sync cloud), Text, Button (primary, accent, secondary, outline, ghost, destructive), Card, IconButton, Icon, Chip, Tag, Input, SelectField, NumberStepper, Sheet, EmptyState, Skeleton, Avatar, ProgressBar, SegmentedControl, TopTabs (segmented), SectionHeader, Stat, ListGroup + ListItem, BarChart, PressableScale, OptionCard (radio tile; `wide` for rows), StepProgress, PlaceholderScreen. `Screen` takes `avoidKeyboard` for forms. Game components: RankBadge, RankTag, HexEmblem, DivisionLadder, RankGlow, LeaderboardRow, BadgeTile, StreakChip. See them at `/dev/components` (Profile → Component gallery in dev builds).
 - **Exercises**: take muscle keys, equipment and log types from `@/lib/exercises` (never free-text muscle names). Pick exercises with `useExercisePicker()` (`await pick({ multiple: true })`), read the library with `useExercises()` / `useExercise(id)` (local SQLite, works offline). The official library changes only through `supabase/seed/` + `pnpm exercises:build`.
+- **Routines**: read and write through `@/lib/routines` hooks (local SQLite first; every write queues a push). Set-type rules live in `setRules.ts` (warm-ups never count); never re-derive them in screens. The editor (`src/features/workout/editor`) keeps its working copy in a Zustand store: apply edits with `editRoutine(action)` so each is one undo step and supersets stay valid.
+- **Workouts**: the live session is a Zustand store per session (`src/features/workout/session/store.ts`; `activeSession` for the workout in progress, `createSessionStore('edit')` for editing history). Edit it with the pure actions in `session/actions.ts` via `store.getState().apply(...)`; tick through `tickSet` (controller) so rest, superset focus and haptics stay consistent. Persistence, rest timers and notifications live in `session/controller.ts`; never write workout rows from screens. Start sessions with `useStartWorkout()` (one in progress at a time). Server totals (duration, volume, calories) and `is_pr` come from Postgres; the client only previews.
+- **Plans**: generate with `generatePlan()` from `@/lib/plans` (pure; same answers + seed = same plan) and lay out dates with `schedulePlan()`; rules live in docs/PLAN_ENGINE.md, never in screens. Save through `useCreatePlan` / `useSavePlan` (one local transaction, queued); edit routines through `editRoutineForDay` (scope `day` forks a copy, `every` edits the shared routine and its deload copy). Start planned sessions with `useStartWorkout()({ kind: 'planDay', planDayId })`, which applies progression; finishing marks the day done. Plan routines (`source = 'plan'`) stay out of the Routines list. Engine changes show up in the 10 profile snapshots: review the diff.
 - **Mock data**: until each backend phase lands, screens read typed placeholder data from `src/features/<feature>/mocks.ts`. Replace a mocks file with real queries (TanStack Query / Drizzle) without changing the screens.
 
 ## Commands
@@ -127,12 +139,14 @@ pnpm format           # prettier --write (format:check to verify)
 pnpm test             # jest
 pnpm check            # typecheck + lint + format:check + test (must pass before done)
 pnpm expo:doctor      # expo-doctor (plain `pnpm doctor` is pnpm's own command)
-pnpm db:start         # local Supabase in Docker (Colima: `colima start` first); db:stop to stop
+pnpm db:start         # local Supabase in Docker incl. Storage (Colima: `colima start` first); db:stop to stop
 pnpm db:reset         # rebuild the local DB from migrations + seed
 pnpm db:test          # pgTAP tests in supabase/tests/database (RLS proofs); db:test:remote runs them on the linked project
 pnpm db:types         # regenerate src/types/database.ts from the local DB (db:types:remote for the linked project)
 pnpm db:push          # apply migrations to the linked hosted project
 pnpm exercises:build  # validate supabase/seed/exercises.ts and write the library migration
+pnpm standards:build  # validate supabase/seed/standards.ts and write the strength standards migration
+pnpm ranks:fake       # regenerate the 50-fake-lifter parity test (08_rank_distribution) after engine/standards changes
 pnpm db:local:generate # new local SQLite migration in drizzle/ after changing src/lib/db/schema.ts
 ```
 

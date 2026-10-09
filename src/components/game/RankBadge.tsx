@@ -10,7 +10,7 @@ import { PlaceholderRankArt } from './PlaceholderRankArt';
 
 export interface RankBadgeProps {
   tier: RankTier;
-  /** Ignored for tiers without divisions (Master, Champion). */
+  /** Ignored for Champion (no divisions). */
   division?: RankDivision;
   size?: number;
   showLabel?: boolean;

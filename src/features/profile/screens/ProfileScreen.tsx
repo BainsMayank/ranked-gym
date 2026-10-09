@@ -1,3 +1,4 @@
+import { useWorkoutHistory } from '@/lib/workouts';
 import { useRouter, type Href } from 'expo-router';
 import { useAuthStore } from '@/lib/auth';
 import { optionTitle, useLatestBodyweight, useProfile, visibilityOptions } from '@/lib/profile';
@@ -9,6 +10,7 @@ import {
   BadgeTile,
   IconButton,
   ListGroup,
+  SyncStatus,
   ListItem,
   Screen,
   SectionHeader,
@@ -62,6 +64,7 @@ export function ProfileScreen() {
   const router = useRouter();
   const settings = useSettingsRows();
   const earned = badges.filter((b) => !b.locked).length;
+  const { data: history } = useWorkoutHistory();
 
   return (
     <Screen
@@ -107,6 +110,19 @@ export function ProfileScreen() {
             <BadgeTile key={b.label} {...b} />
           ))}
         </ScrollView>
+
+        <ListGroup>
+          <ListItem
+            title="Workout history"
+            subtitle={
+              history?.length
+                ? `${history.length} ${history.length === 1 ? 'workout' : 'workouts'} logged`
+                : 'Your finished workouts'
+            }
+            trailing={<SyncStatus showLabel />}
+            onPress={() => router.push('/workouts')}
+          />
+        </ListGroup>
 
         <CustomiseCard />
 

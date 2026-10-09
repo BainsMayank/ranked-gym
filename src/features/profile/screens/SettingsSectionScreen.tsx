@@ -5,6 +5,7 @@ import { useThemeStore, type ThemeMode } from '@/theme';
 
 import { AccountSettings } from '../components/settings/AccountSettings';
 import { PrivacySettings } from '../components/settings/PrivacySettings';
+import { TrainingSettings } from '../components/settings/TrainingSettings';
 import { UnitsSettings } from '../components/settings/UnitsSettings';
 import { settingsSections, type SettingsSectionId } from '../settingsSections';
 
@@ -40,6 +41,8 @@ export function SettingsSectionScreen({ section }: { section: SettingsSectionId 
         <AppearanceSettings />
       ) : section === 'units' ? (
         <UnitsSettings />
+      ) : section === 'training' ? (
+        <TrainingSettings />
       ) : section === 'privacy' ? (
         <PrivacySettings />
       ) : section === 'account' ? (

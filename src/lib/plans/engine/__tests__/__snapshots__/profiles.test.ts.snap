@@ -1,0 +1,459 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`1. Beginner, build muscle, Mon/Wed/Fri, 60 min, full gym, 8 weeks explains itself 1`] = `
+"Your split: Build muscle, 3 days a week: Full body. Full body three times a week trains every muscle often with plenty of rest between.
+
+Your week: Mon Full body A · Wed Full body B · Fri Full body C. No muscle is a main target on two days in a row, so each one gets at least a day to recover.
+
+Reps, rest and effort: Hypertrophy rep ranges: 6–12 reps on compound lifts, 10–15 on isolation work, 60–120 s rest, finishing 0–2 reps short of failure.
+
+Weekly sets: As a beginner lifter you grow best on about 8–10 hard sets per muscle a week; priority muscles aim for the top of that. Sets count fully for the main muscle and half for helpers. Chest 9 · Back 10 · Shoulders 9 · Biceps 9 · Triceps 9 · Quads 10 · Hamstrings 9 · Glutes 10 · Calves 5 · Core 5. Some sessions finish well inside 60 minutes (about 30): once a muscle has its weekly sets, more would only add tiredness.
+
+Exercises: Big compound lifts come first while you're fresh, isolation work after, all with a full gym. Every week covers squats, hip hinges, lunges, horizontal and overhead pushing, rows, vertical pulling and core.
+
+Progression: Linear progression: when you get all your reps, the next session adds weight (2.5 kg on upper-body lifts, 5 kg on squats and deadlifts). Miss reps and the weight stays until you get them. Bodyweight moves add reps, then move to a harder version.
+
+Deload week: Week 8 is a deload: about 40% fewer sets, around 90% of your weights and more reps in reserve. It lets tiredness fade so you start the next plan stronger.
+
+Week 1: Weights start blank. Use the first week to find a load that leaves about 2 reps in reserve; after that the app suggests your next weights from what you logged."
+`;
+
+exports[`1. Beginner, build muscle, Mon/Wed/Fri, 60 min, full gym, 8 weeks generates the expected plan 1`] = `
+"Build muscle · 3 days — Full body
+Week: Mon Full body A · Wed Full body B · Fri Full body C
+Full body A (~50 min)
+  - Barbell back squat: 2W + 3×6-10 RIR 2, rest 120s (linear)
+  - Barbell bench press: 4×6-10 RIR 2, rest 120s (linear)
+  - Lat pulldown: 3×8-12 RIR 2, rest 90s (linear)
+  - Barbell Romanian deadlift: 5×8-12 RIR 2, rest 90s (linear)
+  - Cable rope pushdown: 2×10-15 RIR 2, rest 75s (linear)
+  - Cable crunch: 3×10-15 RIR 2, rest 75s (linear)
+Full body B (~53 min)
+  - Barbell deadlift: 2W + 3×6-10 RIR 2, rest 120s (linear)
+  - Barbell overhead press: 5×6-10 RIR 2, rest 120s (linear)
+  - Barbell bent-over row: 3×8-12 RIR 2, rest 90s (linear)
+  - Dumbbell Bulgarian split squat: 2×8-12 RIR 2, rest 90s (linear)
+  - Dumbbell curl: 4×10-15 RIR 2, rest 75s (linear)
+  - Standing calf raise: 5×10-15 RIR 2, rest 75s (linear)
+Full body C (~31 min)
+  - Leg press: 2W + 3×6-10 RIR 2, rest 120s (linear)
+  - Incline dumbbell press: 4×6-10 RIR 2, rest 120s (linear)
+  - Chest-supported dumbbell row: 3×8-12 RIR 2, rest 90s (linear)
+  - Plank: 2×30s, rest 60s (hold)
+Weekly sets: Chest 9.25, Back 9.75, Shoulders 8.75, Biceps 8.5, Triceps 8.5, Quads 9.5, Hamstrings 8.5, Glutes 9.5, Calves 5, Core 5"
+`;
+
+exports[`2. Intermediate, get stronger, 4 days, 75 min, full gym, 6 weeks explains itself 1`] = `
+"Your split: Get stronger, 4 days a week: Upper / lower. Upper and lower twice each: every muscle twice a week.
+
+Your week: Mon Upper A · Tue Lower A · Thu Upper B · Fri Lower B. No muscle is a main target on two days in a row, so each one gets at least a day to recover.
+
+Reps, rest and effort: Heavy, low-rep main lifts (3–6 reps) with long rests (2–4 min) so every set is good quality, stopping 1–3 reps short of failure.
+
+Weekly sets: As an intermediate lifter you grow best on about 10–16 hard sets per muscle a week; priority muscles aim for the top of that. Sets count fully for the main muscle and half for helpers. Chest 13 · Back 14 · Shoulders 13 · Biceps 7 · Triceps 8 · Quads 15 · Hamstrings 14 · Glutes 13 · Calves 6 · Core 6. Some sessions finish well inside 75 minutes (about 40): once a muscle has its weekly sets, more would only add tiredness.
+
+Exercises: Big compound lifts come first while you're fresh, isolation work after, all with a full gym. Every week covers squats, hip hinges, lunges, horizontal and overhead pushing, rows, vertical pulling and core.
+
+Progression: Double progression: stay at a weight and add reps until every set reaches the top of the range, then add weight and start again at the bottom. Bodyweight moves add reps, then move to a harder version; holds add 5 seconds.
+
+Deload week: Week 6 is a deload: about 40% fewer sets, around 90% of your weights and more reps in reserve. It lets tiredness fade so you start the next plan stronger.
+
+Week 1: Weights start blank. Use the first week to find a load that leaves about 2 reps in reserve; after that the app suggests your next weights from what you logged."
+`;
+
+exports[`2. Intermediate, get stronger, 4 days, 75 min, full gym, 6 weeks generates the expected plan 1`] = `
+"Get stronger · 4 days — Upper / lower
+Week: Mon Upper A · Tue Lower A · Thu Upper B · Fri Lower B
+Upper A (~57 min)
+  - Barbell bench press: 2W + 1×top 3-5 + 3×backoff 4-6 @90% RIR 1, rest 180s (double)
+  - Barbell bent-over row: 4×4-6 RIR 2, rest 150s (double)
+  - Dumbbell shoulder press: 4×4-6 RIR 2, rest 150s (double)
+  - Lat pulldown: 3×4-6 RIR 2, rest 150s (double)
+  - Cable crossover: 4×8-12 RIR 2, rest 90s (double)
+Lower A (~47 min)
+  - Barbell back squat: 2W + 1×top 3-5 + 2×backoff 4-6 @90% RIR 1, rest 180s (double)
+  - Barbell Romanian deadlift: 4×4-6 RIR 2, rest 150s (double)
+  - Dumbbell Bulgarian split squat: 3×4-6 RIR 2, rest 150s (double)
+  - Standing calf raise: 3×8-12 RIR 2, rest 90s (double)
+  - Cable crunch: 3×8-12 RIR 2, rest 90s (double)
+Upper B (~42 min)
+  - Barbell overhead press: 2W + 1×top 3-5 + 3×backoff 4-6 @90% RIR 1, rest 180s (double)
+  - Pull-up: 3×4-6 RIR 2, rest 150s (reps)
+  - Incline dumbbell press: 3×4-6 RIR 2, rest 150s (double)
+  - Chest-supported dumbbell row: 3×4-6 RIR 2, rest 150s (double)
+Lower B (~57 min)
+  - Barbell deadlift: 2W + 1×top 3-5 + 4×backoff 4-6 @90% RIR 1, rest 180s (double)
+  - Leg press: 3×4-6 RIR 2, rest 150s (double)
+  - Dumbbell walking lunge: 3×4-6 RIR 2, rest 150s (double)
+  - Seated calf raise: 2×8-12 RIR 2, rest 90s (double)
+  - Plank: 3×40s, rest 60s (hold)
+  - Lying leg curl: 4×8-12 RIR 2, rest 90s (double)
+Weekly sets: Chest 13, Back 14.25, Shoulders 13, Biceps 6.5, Triceps 7.5, Quads 14.5, Hamstrings 13.5, Glutes 13, Calves 6, Core 6"
+`;
+
+exports[`3. Advanced, build muscle, 6 days, 90 min, chest and shoulders priority, 8 weeks explains itself 1`] = `
+"Your split: Build muscle, 6 days a week: Push / pull / legs ×2. Push, pull, legs twice: every muscle twice a week.
+
+Your week: Mon Push A · Tue Pull A · Wed Legs A · Thu Push B · Fri Pull B · Sat Legs B. No muscle is a main target on two days in a row, so each one gets at least a day to recover.
+
+Reps, rest and effort: Hypertrophy rep ranges: 6–12 reps on compound lifts, 10–15 on isolation work, 60–120 s rest, finishing 0–2 reps short of failure.
+
+Weekly sets: As an advanced lifter you grow best on about 12–20 hard sets per muscle a week; priority muscles aim for the top of that. Sets count fully for the main muscle and half for helpers. Chest (priority) 20 · Back 17 · Shoulders (priority) 20 · Biceps 12 · Triceps 12 · Quads 18 · Hamstrings 18 · Glutes 16 · Calves 8 · Core 8. Some sessions finish well inside 90 minutes (about 20): once a muscle has its weekly sets, more would only add tiredness.
+
+Exercises: Big compound lifts come first while you're fresh, isolation work after, all with a full gym. Every week covers squats, hip hinges, lunges, horizontal and overhead pushing, rows, vertical pulling and core.
+
+Progression: Double progression: stay at a weight and add reps until every set reaches the top of the range, then add weight and start again at the bottom. Bodyweight moves add reps, then move to a harder version; holds add 5 seconds.
+
+Deload week: Week 8 is a deload: about 40% fewer sets, around 90% of your weights and more reps in reserve. It lets tiredness fade so you start the next plan stronger.
+
+Week 1: Weights start blank. Use the first week to find a load that leaves about 2 reps in reserve; after that the app suggests your next weights from what you logged."
+`;
+
+exports[`3. Advanced, build muscle, 6 days, 90 min, chest and shoulders priority, 8 weeks generates the expected plan 1`] = `
+"Build muscle · 6 days — Push / pull / legs ×2
+Week: Mon Push A · Tue Pull A · Wed Legs A · Thu Push B · Fri Pull B · Sat Legs B
+Push A (~39 min)
+  - Barbell bench press: 2W + 4×6-10 RIR 1, rest 120s (double)
+  - Dumbbell shoulder press: 4×8-12 RIR 1, rest 90s (double)
+  - Incline dumbbell press: 4×8-12 RIR 1, rest 90s (double)
+  - Dumbbell lateral raise: 1×10-15 + 1×failure 10-15 RIR 0, rest 75s (double)
+  - Cable crossover: 1×10-15 + 1×failure 10-15 RIR 0, rest 75s (double)
+Pull A (~37 min)
+  - Pull-up: 4×6-10 RIR 1, rest 120s (reps)
+  - Barbell bent-over row: 2W + 4×6-10 RIR 1, rest 120s (double)
+  - Cable face pull: 2×10-15 RIR 0, rest 75s (double)
+  - Dumbbell curl: 1×10-15 + 1×failure 10-15 RIR 0, rest 75s (double)
+  - Hammer curl: 1×10-15 + 1×failure 10-15 RIR 0, rest 75s (double)
+Legs A (~56 min)
+  - Barbell back squat: 2W + 5×6-10 RIR 1, rest 120s (double)
+  - Barbell Romanian deadlift: 4×8-12 RIR 1, rest 90s (double)
+  - Dumbbell Bulgarian split squat: 4×8-12 RIR 1, rest 90s (double)
+  - Seated leg curl: 2×10-15 + 1×failure 10-15 RIR 0, rest 75s (double)
+  - Standing calf raise: 3×10-15 + 1×failure 10-15 RIR 0, rest 75s (double)
+  - Cable crunch: 3×10-15 + 1×failure 10-15 RIR 0, rest 75s (double)
+Push B (~35 min)
+  - Barbell overhead press: 2W + 4×6-10 RIR 1, rest 120s (double)
+  - Dumbbell bench press: 4×8-12 RIR 1, rest 90s (double)
+  - Barbell incline bench press: 4×8-12 RIR 1, rest 90s (double)
+  - Cable lateral raise: 1×10-15 + 1×failure 10-15 RIR 0, rest 75s (double)
+Pull B (~21 min)
+  - Chest-supported dumbbell row: 2W + 4×6-10 RIR 1, rest 120s (double)
+  - Lat pulldown: 4×8-12 RIR 1, rest 90s (double)
+Legs B (~56 min)
+  - Barbell hip thrust: 2W + 5×6-10 RIR 1, rest 120s (double)
+  - Leg press: 4×8-12 RIR 1, rest 90s (double)
+  - Dumbbell walking lunge: 4×8-12 RIR 1, rest 90s (double)
+  - Lying leg curl: 3×10-15 + 1×failure 10-15 RIR 0, rest 75s (double)
+  - Seated calf raise: 2×10-15 + 1×failure 10-15 RIR 0, rest 75s (double)
+  - Plank: 4×45s, rest 60s (hold)
+Weekly sets: Chest 20*, Back 17, Shoulders 20*, Biceps 12, Triceps 12, Quads 18.25, Hamstrings 17.75, Glutes 15.5, Calves 8, Core 8"
+`;
+
+exports[`4. Beginner, lose fat, Mon/Tue/Wed, 45 min, home dumbbells, cardio, 4 weeks explains itself 1`] = `
+"Your split: Lose fat, 3 days a week: Push / pull / legs. Push, pull and legs keep back-to-back days on different muscles. Some of your days are back to back (Mon–Tue, Tue–Wed), so we didn't use full-body sessions there.
+
+Your week: Mon Push A · Tue Pull A · Wed Legs A. No muscle is a main target on two days in a row, so each one gets at least a day to recover.
+
+Reps, rest and effort: Keep lifting heavy enough to hold on to muscle (8–15 reps), with accessories in supersets and shorter rests so sessions move quickly. Fat loss itself comes from eating a little less. Accessories are paired as supersets: do one, then the other, then rest. Each session ends with 10 min of walking at an easy pace.
+
+Weekly sets: As a beginner lifter you grow best on about 8–10 hard sets per muscle a week; priority muscles aim for the top of that. Sets count fully for the main muscle and half for helpers. Chest 9 · Back 9 · Shoulders 10 · Biceps 6 · Triceps 6 · Quads 8 · Hamstrings 6 · Glutes 6 · Core 2. Hamstrings and Glutes: 45-minute sessions can't fit 8 sets alongside everything else. Add a day or 15 minutes to reach it.
+
+Exercises: Big compound lifts come first while you're fresh, isolation work after, all with dumbbells at home. The week covers most movement patterns; vertical pulling didn't fit your kit or time. Without a pull-up bar or dip bars, pull-ups, dips and hanging work are left out; a doorway bar would open up much better back training.
+
+Progression: Linear progression: when you get all your reps, the next session adds weight (2.5 kg on upper-body lifts, 5 kg on squats and deadlifts). Miss reps and the weight stays until you get them. Bodyweight moves add reps, then move to a harder version.
+
+Week 1: Weights start blank. Use the first week to find a load that leaves about 2 reps in reserve; after that the app suggests your next weights from what you logged."
+`;
+
+exports[`4. Beginner, lose fat, Mon/Tue/Wed, 45 min, home dumbbells, cardio, 4 weeks generates the expected plan 1`] = `
+"Lose fat · 3 days — Push / pull / legs
+Week: Mon Push A · Tue Pull A · Wed Legs A
+Push A (~39 min)
+  - Dumbbell bench press: 2W + 4×8-12 RIR 3, rest 90s (linear)
+  - Dumbbell shoulder press: 4×10-12 RIR 3, rest 75s (linear)
+  - Incline dumbbell press: 4×10-12 RIR 3, rest 75s (linear)
+  - Walking: 1×600s, rest 0s (none)
+Pull A (~39 min)
+  - One-arm dumbbell row: 2W + 4×8-12 RIR 3, rest 90s (linear)
+  - Chest-supported dumbbell row: 4×8-12 RIR 3, rest 90s (linear)
+  - Dumbbell rear delt fly: 2×12-15 RIR 3, rest 75s [superset 1] (linear)
+  - Dumbbell curl: 2×12-15 RIR 3, rest 75s [superset 1] (linear)
+  - Walking: 1×600s, rest 0s (none)
+Legs A (~45 min)
+  - Goblet squat: 2W + 3×8-12 RIR 3, rest 90s (linear)
+  - Dumbbell Romanian deadlift: 3×10-12 RIR 3, rest 75s (linear)
+  - Dumbbell Bulgarian split squat: 3×10-12 RIR 3, rest 75s (linear)
+  - Dumbbell reverse lunge: 2×12-15 RIR 3, rest 75s [superset 1] (linear)
+  - Nordic hamstring curl: 2×12-15 RIR 3, rest 75s [superset 1] (reps)
+  - Reverse crunch: 2×12-15 RIR 3, rest 45s (reps)
+  - Walking: 1×600s, rest 0s (none)
+Weekly sets: Chest 9, Back 9, Shoulders 10, Biceps 6, Triceps 6, Quads 8, Hamstrings 5.75, Glutes 6, Calves 0, Core 2
+Short: Hamstrings — 45-minute sessions can't fit 8 sets alongside everything else. Add a day or 15 minutes to reach it. | Glutes — 45-minute sessions can't fit 8 sets alongside everything else. Add a day or 15 minutes to reach it."
+`;
+
+exports[`5. Intermediate, curvier, Mon/Tue/Thu/Fri, 60 min, glutes and hamstrings priority, 8 weeks explains itself 1`] = `
+"Your split: Get curvier, 4 days a week: Lower (glutes) / upper. Two glute-focused lower sessions, two upper sessions.
+
+Your week: Mon Glutes and hamstrings · Tue Upper A · Thu Glutes and quads · Fri Upper B. No muscle is a main target on two days in a row, so each one gets at least a day to recover.
+
+Reps, rest and effort: Glute-first sessions: hip thrusts, Romanian deadlifts, split squats and abduction work in 8–15 reps, finishing 1–2 reps short of failure.
+
+Weekly sets: As an intermediate lifter you grow best on about 10–16 hard sets per muscle a week; priority muscles aim for the top of that. Sets count fully for the main muscle and half for helpers. Chest 10 · Back 12 · Shoulders 11 · Biceps 6 · Triceps 7 · Quads 13 · Hamstrings (priority) 16 · Glutes (priority) 16 · Calves 4 · Core 4. Some sessions finish well inside 60 minutes (about 30): once a muscle has its weekly sets, more would only add tiredness.
+
+Exercises: Big compound lifts come first while you're fresh, isolation work after, all with a full gym. Every week covers squats, hip hinges, lunges, horizontal and overhead pushing, rows, vertical pulling and core.
+
+Progression: Double progression: stay at a weight and add reps until every set reaches the top of the range, then add weight and start again at the bottom. Bodyweight moves add reps, then move to a harder version; holds add 5 seconds.
+
+Deload week: Week 8 is a deload: about 40% fewer sets, around 90% of your weights and more reps in reserve. It lets tiredness fade so you start the next plan stronger.
+
+Week 1: Weights start blank. Use the first week to find a load that leaves about 2 reps in reserve; after that the app suggests your next weights from what you logged."
+`;
+
+exports[`5. Intermediate, curvier, Mon/Tue/Thu/Fri, 60 min, glutes and hamstrings priority, 8 weeks generates the expected plan 1`] = `
+"Get curvier · 4 days — Lower (glutes) / upper
+Week: Mon Glutes and hamstrings · Tue Upper A · Thu Glutes and quads · Fri Upper B
+Glutes and hamstrings (~46 min)
+  - Barbell hip thrust: 2W + 5×8-12 RIR 1, rest 120s (double)
+  - Barbell back squat: 4×10-12 RIR 1, rest 90s (double)
+  - Barbell Romanian deadlift: 4×10-12 RIR 1, rest 90s (double)
+  - Seated leg curl: 2×12-15 RIR 1, rest 60s (double)
+  - Cable crunch: 4×12-15 RIR 1, rest 60s (double)
+Upper A (~39 min)
+  - Barbell bench press: 2W + 3×8-12 RIR 1, rest 120s (double)
+  - Barbell bent-over row: 3×8-12 RIR 1, rest 120s (double)
+  - Dumbbell shoulder press: 4×10-12 RIR 1, rest 90s (double)
+  - Lat pulldown: 3×10-12 RIR 1, rest 90s (double)
+  - Dumbbell lateral raise: 2×12-15 RIR 1, rest 60s (double)
+Glutes and quads (~44 min)
+  - Barbell Romanian deadlift: 2W + 4×8-12 RIR 1, rest 120s (double)
+  - Dumbbell Bulgarian split squat: 4×10-12 RIR 1, rest 90s (double)
+  - Machine hip thrust: 3×10-12 RIR 1, rest 90s (double)
+  - Leg extension: 4×12-15 RIR 1, rest 60s (double)
+  - Standing calf raise: 4×12-15 RIR 1, rest 60s (double)
+Upper B (~32 min)
+  - Incline dumbbell press: 2W + 3×8-12 RIR 1, rest 120s (double)
+  - Pull-up: 3×8-12 RIR 1, rest 120s (reps)
+  - Dumbbell bench press: 3×10-12 RIR 1, rest 90s (double)
+  - Chest-supported dumbbell row: 3×10-12 RIR 1, rest 90s (double)
+Weekly sets: Chest 10, Back 12, Shoulders 10.5, Biceps 6, Triceps 6.5, Quads 13.25, Hamstrings 16*, Glutes 16*, Calves 4, Core 4"
+`;
+
+exports[`6. Beginner, calisthenics, 3 days, 45 min, bodyweight with bars, 6 weeks explains itself 1`] = `
+"Your split: Calisthenics, 3 days a week: Full body. Skills improve with frequent practice, so every session trains the whole body.
+
+Your week: Mon Full body A · Wed Full body B · Fri Full body C. No muscle is a main target on two days in a row, so each one gets at least a day to recover.
+
+Reps, rest and effort: Skill practice first while you are fresh (holds by time), then bodyweight strength progressions: 5–8 reps on the hardest moves, 8–12 on the rest.
+
+Weekly sets: As a beginner lifter you grow best on about 8–10 hard sets per muscle a week; priority muscles aim for the top of that. Sets count fully for the main muscle and half for helpers. Chest 9 · Back 10 · Shoulders 9 · Biceps 3 · Triceps 10 · Quads 9 · Hamstrings 1 · Glutes 10 · Core 9. Hamstrings: kept near the minimum so your main goal gets the time.
+
+Exercises: Big compound lifts come first while you're fresh, isolation work after, all with just your bodyweight. Every week covers squats, hip hinges, lunges, horizontal and overhead pushing, rows, vertical pulling and core.
+
+Progression: Add reps until every set reaches the top of the range, then move to a harder version of the move. Holds add 5 seconds at a time.
+
+Deload week: Week 6 is a deload: about 40% fewer sets, around 90% of your weights and more reps in reserve. It lets tiredness fade so you start the next plan stronger.
+
+Week 1: Weights start blank. Use the first week to find a load that leaves about 2 reps in reserve; after that the app suggests your next weights from what you logged."
+`;
+
+exports[`6. Beginner, calisthenics, 3 days, 45 min, bodyweight with bars, 6 weeks generates the expected plan 1`] = `
+"Calisthenics · 3 days — Full body
+Week: Mon Full body A · Wed Full body B · Fri Full body C
+Full body A (~36 min)
+  - Wall handstand: 3×15s, rest 90s (hold)
+  - Tuck L-sit: 3×15s, rest 90s (hold)
+  - Push-up: 4×5-8 RIR 2, rest 150s (reps)
+  - Bodyweight squat: 3×6-10 RIR 2, rest 120s (reps)
+  - Hollow body hold: 2×30s, rest 60s (hold)
+Full body B (~44 min)
+  - Planche lean: 3×15s, rest 90s (hold)
+  - Bench dip: 3×5-8 RIR 2, rest 150s (reps)
+  - Inverted row: 3×5-8 RIR 2, rest 150s (reps)
+  - Bodyweight lunge: 3×6-10 RIR 2, rest 120s (reps)
+  - Glute bridge: 5×6-10 RIR 2, rest 120s (reps)
+Full body C (~37 min)
+  - Tuck front lever: 3×15s, rest 90s (hold)
+  - Push-up: 3×5-8 RIR 2, rest 150s (reps)
+  - Negative pull-up: 3×5-8 RIR 2, rest 150s (reps)
+  - Box pistol squat: 3×6-10 RIR 2, rest 120s (reps)
+  - Toes-to-bar: 2×8-12 RIR 2, rest 75s (reps)
+Weekly sets: Chest 9.25, Back 10, Shoulders 9, Biceps 3, Triceps 9.5, Quads 9, Hamstrings 1.25, Glutes 9.5, Calves 0, Core 8.5
+Short: Hamstrings — kept near the minimum so your main goal gets the time."
+`;
+
+exports[`7. Intermediate, gain weight, Mon–Fri, 60 min, full gym, 8 weeks explains itself 1`] = `
+"Your split: Gain weight, 5 days a week: Upper / lower + push / pull / legs. Upper/lower plus push/pull/legs: every muscle about twice a week.
+
+Your week: Mon Upper A · Tue Lower A · Wed Push B · Thu Pull B · Fri Legs B. No muscle is a main target on two days in a row, so each one gets at least a day to recover.
+
+Reps, rest and effort: Muscle-building rep ranges with extra weight on the big compound lifts: 5–10 reps on compounds, 10–15 on isolation work, 1–2 min rest. Eat in a small surplus to gain.
+
+Weekly sets: As an intermediate lifter you grow best on about 10–16 hard sets per muscle a week; priority muscles aim for the top of that. Sets count fully for the main muscle and half for helpers. Chest 13 · Back 14 · Shoulders 13 · Biceps 11 · Triceps 10 · Quads 16 · Hamstrings 15 · Glutes 14 · Calves 7 · Core 6. Some sessions finish well inside 60 minutes (about 25): once a muscle has its weekly sets, more would only add tiredness.
+
+Exercises: Big compound lifts come first while you're fresh, isolation work after, all with a full gym. Every week covers squats, hip hinges, lunges, horizontal and overhead pushing, rows, vertical pulling and core.
+
+Progression: Double progression: stay at a weight and add reps until every set reaches the top of the range, then add weight and start again at the bottom. Bodyweight moves add reps, then move to a harder version; holds add 5 seconds.
+
+Deload week: Week 8 is a deload: about 40% fewer sets, around 90% of your weights and more reps in reserve. It lets tiredness fade so you start the next plan stronger.
+
+Week 1: Weights start blank. Use the first week to find a load that leaves about 2 reps in reserve; after that the app suggests your next weights from what you logged."
+`;
+
+exports[`7. Intermediate, gain weight, Mon–Fri, 60 min, full gym, 8 weeks generates the expected plan 1`] = `
+"Gain weight · 5 days — Upper / lower + push / pull / legs
+Week: Mon Upper A · Tue Lower A · Wed Push B · Thu Pull B · Fri Legs B
+Upper A (~50 min)
+  - Barbell bench press: 2W + 4×5-8 RIR 1, rest 150s (double)
+  - Barbell bent-over row: 4×5-8 RIR 1, rest 150s (double)
+  - Dumbbell shoulder press: 4×6-10 RIR 1, rest 120s (double)
+  - Lat pulldown: 3×6-10 RIR 1, rest 120s (double)
+  - Dumbbell curl: 2×10-15 RIR 1, rest 75s (double)
+Lower A (~50 min)
+  - Barbell back squat: 2W + 4×5-8 RIR 1, rest 150s (double)
+  - Barbell Romanian deadlift: 4×6-10 RIR 1, rest 120s (double)
+  - Dumbbell Bulgarian split squat: 3×6-10 RIR 1, rest 120s (double)
+  - Seated leg curl: 2×10-15 RIR 1, rest 75s (double)
+  - Standing calf raise: 3×10-15 RIR 1, rest 75s (double)
+  - Cable crunch: 3×10-15 RIR 1, rest 75s (double)
+Push B (~35 min)
+  - Barbell overhead press: 2W + 5×5-8 RIR 1, rest 150s (double)
+  - Dumbbell bench press: 4×6-10 RIR 1, rest 120s (double)
+  - Incline dumbbell press: 3×6-10 RIR 1, rest 120s (double)
+Pull B (~24 min)
+  - Chest-supported dumbbell row: 2W + 3×5-8 RIR 1, rest 150s (double)
+  - Neutral-grip pull-up: 3×6-10 RIR 1, rest 120s (reps)
+  - Hammer curl: 2×10-15 RIR 1, rest 75s (double)
+Legs B (~52 min)
+  - Barbell deadlift: 2W + 5×5-8 RIR 1, rest 150s (double)
+  - Leg press: 3×6-10 RIR 1, rest 120s (double)
+  - Dumbbell walking lunge: 3×6-10 RIR 1, rest 120s (double)
+  - Lying leg curl: 3×10-15 RIR 1, rest 75s (double)
+  - Seated calf raise: 3×10-15 RIR 1, rest 75s (double)
+  - Plank: 3×40s, rest 60s (hold)
+Weekly sets: Chest 13.25, Back 14.25, Shoulders 13.25, Biceps 10.5, Triceps 10, Quads 15.5, Hamstrings 14.75, Glutes 13.5, Calves 6.75, Core 6"
+`;
+
+exports[`8. Advanced, get stronger, Sat/Sun, 90 min, avoids back squat and deadlift, 6 weeks explains itself 1`] = `
+"Your split: Get stronger, 2 days a week: Upper / lower. Your days are back to back, so upper and lower sessions alternate and no muscle trains two days running. Some of your days are back to back (Sat–Sun), so we didn't use full-body sessions there.
+
+Your week: Sat Upper A · Sun Lower A. No muscle is a main target on two days in a row, so each one gets at least a day to recover.
+
+Reps, rest and effort: Heavy, low-rep main lifts (3–6 reps) with long rests (2–4 min) so every set is good quality, stopping 1–3 reps short of failure.
+
+Weekly sets: As an advanced lifter you grow best on about 12–20 hard sets per muscle a week; priority muscles aim for the top of that. Sets count fully for the main muscle and half for helpers. Chest 11 · Back 13 · Shoulders 14 · Biceps 5 · Triceps 5 · Quads 15 · Hamstrings 11 · Glutes 8 · Calves 4 · Core 3. Chest, Hamstrings and Glutes: 90-minute sessions can't fit 12 sets alongside everything else. Add a day or 15 minutes to reach it.
+
+Exercises: Big compound lifts come first while you're fresh, isolation work after, all with a full gym. Every week covers squats, hip hinges, lunges, horizontal and overhead pushing, rows, vertical pulling and core. Left out as you asked: Barbell back squat and Barbell deadlift.
+
+Progression: Double progression: stay at a weight and add reps until every set reaches the top of the range, then add weight and start again at the bottom. Bodyweight moves add reps, then move to a harder version; holds add 5 seconds.
+
+Deload week: Week 6 is a deload: about 40% fewer sets, around 90% of your weights and more reps in reserve. It lets tiredness fade so you start the next plan stronger.
+
+Week 1: Weights start blank. Use the first week to find a load that leaves about 2 reps in reserve; after that the app suggests your next weights from what you logged."
+`;
+
+exports[`8. Advanced, get stronger, Sat/Sun, 90 min, avoids back squat and deadlift, 6 weeks generates the expected plan 1`] = `
+"Get stronger · 2 days — Upper / lower
+Week: Sat Upper A · Sun Lower A
+Upper A (~87 min)
+  - Barbell bench press: 2W + 1×top 3-5 + 4×backoff 4-6 @90% RIR 1, rest 210s (double)
+  - Barbell bent-over row: 5×4-6 RIR 2, rest 150s (double)
+  - Dumbbell shoulder press: 5×4-6 RIR 2, rest 150s (double)
+  - Lat pulldown: 5×4-6 RIR 2, rest 150s (double)
+  - Dumbbell lateral raise: 5×8-12 RIR 2, rest 90s (double)
+  - Cable crossover: 5×8-12 RIR 2, rest 90s (double)
+Lower A (~88 min)
+  - Barbell front squat: 2W + 1×top 3-5 + 4×backoff 4-6 @90% RIR 1, rest 210s (double)
+  - Barbell Romanian deadlift: 5×4-6 RIR 2, rest 150s (double)
+  - Dumbbell Bulgarian split squat: 5×4-6 RIR 2, rest 150s (double)
+  - Seated leg curl: 5×8-12 RIR 2, rest 90s (double)
+  - Standing calf raise: 4×8-12 RIR 2, rest 90s (double)
+  - Cable crunch: 3×8-12 RIR 2, rest 90s (double)
+  - Leg extension: 5×8-12 RIR 2, rest 90s (double)
+Weekly sets: Chest 11.25, Back 12.5, Shoulders 13.75, Biceps 5, Triceps 5, Quads 15, Hamstrings 11.25, Glutes 7.5, Calves 4, Core 3
+Short: Chest — 90-minute sessions can't fit 12 sets alongside everything else. Add a day or 15 minutes to reach it. | Hamstrings — 90-minute sessions can't fit 12 sets alongside everything else. Add a day or 15 minutes to reach it. | Glutes — 90-minute sessions can't fit 12 sets alongside everything else. Add a day or 15 minutes to reach it."
+`;
+
+exports[`9. Beginner, get toned, 2 days, 30 min, bodyweight without bars, 4 weeks explains itself 1`] = `
+"Your split: Get toned, 2 days a week: Full body A / B. Two full-body sessions train every muscle twice a week.
+
+Your week: Mon Full body A · Thu Full body B. No muscle is a main target on two days in a row, so each one gets at least a day to recover.
+
+Reps, rest and effort: Moderate weights for 10–15 reps, accessories in supersets and short rests: firm, defined muscle without long sessions. Each session ends with 10 min of walking at an easy pace.
+
+Weekly sets: As a beginner lifter you grow best on about 8–10 hard sets per muscle a week; priority muscles aim for the top of that. Sets count fully for the main muscle and half for helpers. Chest 4 · Back 0 · Shoulders 3 · Triceps 3 · Quads 6 · Hamstrings 2 · Glutes 9. Chest, Shoulders and Quads: 30-minute sessions can't fit 8 sets alongside everything else. Add a day or 15 minutes to reach it. Back: nothing in your equipment trains it directly; a pull-up bar would help. Hamstrings: 2 days a week leaves limited room for more direct work without overloading single sessions; adding a day would raise it.
+
+Exercises: Big compound lifts come first while you're fresh, isolation work after, all with just your bodyweight. The week covers most movement patterns; rows, vertical pulling and core didn't fit your kit or time. Without a pull-up bar or dip bars, pull-ups, dips and hanging work are left out; a doorway bar would open up much better back training.
+
+Progression: Add reps until every set reaches the top of the range, then move to a harder version of the move. Holds add 5 seconds at a time.
+
+Week 1: Weights start blank. Use the first week to find a load that leaves about 2 reps in reserve; after that the app suggests your next weights from what you logged."
+`;
+
+exports[`9. Beginner, get toned, 2 days, 30 min, bodyweight without bars, 4 weeks generates the expected plan 1`] = `
+"Get toned · 2 days — Full body A / B
+Week: Mon Full body A · Thu Full body B
+Full body A (~30 min)
+  - Bodyweight squat: 3×10-12 RIR 3, rest 75s (reps)
+  - Push-up: 3×10-12 RIR 3, rest 75s (reps)
+  - Glute bridge: 3×12-15 RIR 3, rest 60s (reps)
+  - Walking: 1×600s, rest 0s (none)
+Full body B (~30 min)
+  - Pike push-up: 3×10-12 RIR 3, rest 75s (reps)
+  - Bodyweight lunge: 3×12-15 RIR 3, rest 60s (reps)
+  - Glute bridge: 3×10-12 RIR 3, rest 75s (reps)
+  - Walking: 1×600s, rest 0s (none)
+Weekly sets: Chest 3.75, Back 0, Shoulders 3, Biceps 0, Triceps 3, Quads 6, Hamstrings 1.5, Glutes 9, Calves 0, Core 0
+Short: Chest — 30-minute sessions can't fit 8 sets alongside everything else. Add a day or 15 minutes to reach it. | Back — nothing in your equipment trains it directly; a pull-up bar would help. | Shoulders — 30-minute sessions can't fit 8 sets alongside everything else. Add a day or 15 minutes to reach it. | Quads — 30-minute sessions can't fit 8 sets alongside everything else. Add a day or 15 minutes to reach it. | Hamstrings — 2 days a week leaves limited room for more direct work without overloading single sessions; adding a day would raise it."
+`;
+
+exports[`10. Intermediate, general fitness, Thu–Mon (incl. Sun and Mon), 45 min, dumbbells + cables + machines, 6 weeks explains itself 1`] = `
+"Your split: General fitness, 5 days a week: Upper / lower + push / pull / legs. Upper/lower plus push/pull/legs: every muscle about twice a week.
+
+Your week: Mon Upper A · Thu Lower A · Fri Push B · Sat Pull B · Sun Legs B. No muscle is a main target on two days in a row, so each one gets at least a day to recover.
+
+Reps, rest and effort: All-round training: 8–12 reps on compound lifts, 12–15 on accessories, about 1–2 min rest, finishing 2–3 reps short of failure.
+
+Weekly sets: As an intermediate lifter you grow best on about 10–16 hard sets per muscle a week; priority muscles aim for the top of that. Sets count fully for the main muscle and half for helpers. Chest 13 · Back 13 · Shoulders 14 · Biceps 6 · Triceps 9 · Quads 13 · Hamstrings 13 · Glutes 14 · Calves 6 · Core 6. Some sessions finish well inside 45 minutes (about 20): once a muscle has its weekly sets, more would only add tiredness.
+
+Exercises: Big compound lifts come first while you're fresh, isolation work after, all with the equipment you picked. Every week covers squats, hip hinges, lunges, horizontal and overhead pushing, rows, vertical pulling and core. Without a pull-up bar or dip bars, pull-ups, dips and hanging work are left out; a doorway bar would open up much better back training.
+
+Progression: Double progression: stay at a weight and add reps until every set reaches the top of the range, then add weight and start again at the bottom. Bodyweight moves add reps, then move to a harder version; holds add 5 seconds.
+
+Deload week: Week 6 is a deload: about 40% fewer sets, around 90% of your weights and more reps in reserve. It lets tiredness fade so you start the next plan stronger.
+
+Week 1: Weights start blank. Use the first week to find a load that leaves about 2 reps in reserve; after that the app suggests your next weights from what you logged."
+`;
+
+exports[`10. Intermediate, general fitness, Thu–Mon (incl. Sun and Mon), 45 min, dumbbells + cables + machines, 6 weeks generates the expected plan 1`] = `
+"General fitness · 5 days — Upper / lower + push / pull / legs
+Week: Mon Upper A · Thu Lower A · Fri Push B · Sat Pull B · Sun Legs B
+Upper A (~39 min)
+  - Dumbbell bench press: 2W + 3×8-10 RIR 2, rest 120s (double)
+  - One-arm dumbbell row: 3×8-10 RIR 2, rest 120s (double)
+  - Dumbbell shoulder press: 4×10-12 RIR 2, rest 90s (double)
+  - Lat pulldown: 3×10-12 RIR 2, rest 90s (double)
+  - Cable crossover: 2×12-15 RIR 2, rest 60s (double)
+Lower A (~45 min)
+  - Goblet squat: 2W + 3×8-10 RIR 2, rest 120s (double)
+  - Machine hip thrust: 4×10-12 RIR 2, rest 90s (double)
+  - Dumbbell Bulgarian split squat: 4×10-12 RIR 2, rest 90s (double)
+  - Seated leg curl: 3×12-15 RIR 2, rest 60s (double)
+  - Standing calf raise: 3×12-15 RIR 2, rest 60s (double)
+  - Cable crunch: 2×12-15 RIR 2, rest 60s (double)
+Push B (~26 min)
+  - Dumbbell shoulder press: 2W + 4×8-10 RIR 2, rest 120s (double)
+  - Machine chest press: 3×10-12 RIR 2, rest 90s (double)
+  - Incline dumbbell press: 3×10-12 RIR 2, rest 90s (double)
+Pull B (~21 min)
+  - Chest-supported dumbbell row: 2W + 3×8-10 RIR 2, rest 120s (double)
+  - Close-grip lat pulldown: 3×10-12 RIR 2, rest 90s (double)
+  - Cable face pull: 2×12-15 RIR 2, rest 60s (double)
+Legs B (~44 min)
+  - Machine hip thrust: 2W + 3×8-10 RIR 2, rest 120s (double)
+  - Leg press: 3×10-12 RIR 2, rest 90s (double)
+  - Dumbbell walking lunge: 3×10-12 RIR 2, rest 90s (double)
+  - Lying leg curl: 4×12-15 RIR 2, rest 60s (double)
+  - Seated calf raise: 2×12-15 RIR 2, rest 60s (double)
+  - Plank: 4×40s, rest 60s (hold)
+Weekly sets: Chest 13, Back 13, Shoulders 13.75, Biceps 6, Triceps 8.5, Quads 13, Hamstrings 13, Glutes 13.5, Calves 6, Core 6"
+`;

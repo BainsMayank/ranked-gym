@@ -4,6 +4,7 @@ export const settingsSectionIds = [
   'account',
   'appearance',
   'units',
+  'training',
   'notifications',
   'privacy',
   'data',
@@ -34,8 +35,14 @@ export const settingsSections: Record<SettingsSectionId, SettingsSection> = {
   units: {
     id: 'units',
     title: 'Units',
-    icon: 'barbell-outline',
+    icon: 'scale-outline',
     description: 'Kilograms or pounds.',
+  },
+  training: {
+    id: 'training',
+    title: 'Training',
+    icon: 'barbell-outline',
+    description: 'RIR or RPE, and your default rest.',
   },
   notifications: {
     id: 'notifications',

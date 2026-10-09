@@ -129,7 +129,7 @@ export const muscles: Record<
   },
   core: {
     name: 'Core',
-    rank: { tier: 'platinum', division: 4 },
+    rank: { tier: 'platinum', division: 3 },
     progress: 0.15,
     detail: 'Squat 140 kg × 5 · 6 sets this week',
   },

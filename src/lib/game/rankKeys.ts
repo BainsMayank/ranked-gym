@@ -3,8 +3,9 @@
  * lift's history ranks the same whichever library row logged it.
  *
  * Free weights and bodyweight only: machines and cables differ from gym to gym, so they earn XP,
- * volume and records but no rank (docs/RANK_SYSTEM.md §4.3). Keys with a standard today live in
- * `rankedLifts` (strength.ts); the rest get standards in Phase 6.
+ * volume and records but no rank (docs/RANK_SYSTEM.md §6). Every key has a standard in
+ * `supabase/seed/standards/` (the `strength_standards` table); skill progressions rank into their
+ * parent key through `rank_variants`.
  *
  * Imported by the Node seed generator, so this file must stay free of React Native and `@/` imports.
  */
@@ -31,11 +32,11 @@ export const rankKeys = [
   'dumbbellRow',
   'barbellCurl',
   'dumbbellCurl',
-  // Bodyweight (weightlifting patterns, judged on bodyweight ratios)
+  // Bodyweight lifts (calisthenics discipline: clean reps, or e1RM of bodyweight + added load)
   'pullUp',
   'chinUp',
   'dip',
-  // Calisthenics discipline (rep and skill standards, Phase 6)
+  // Calisthenics discipline (rep and hold standards)
   'pushUp',
   'muscleUp',
   'pistolSquat',
@@ -44,6 +45,7 @@ export const rankKeys = [
   'backLever',
   'planche',
   'lSit',
+  'handstand',
 ] as const;
 export type RankKey = (typeof rankKeys)[number];
 

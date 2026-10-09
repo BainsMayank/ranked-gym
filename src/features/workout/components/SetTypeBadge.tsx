@@ -1,46 +1,48 @@
 import { Pressable } from 'react-native';
 
 import { Text, type TextTone } from '@/components';
+import { setTypeInfo, type SetType } from '@/lib/routines';
 
-import type { PlannedSet, SetType } from '../mocks';
-
-export const setTypeInfo: Record<SetType, { mark: string; name: string; tone: TextTone }> = {
-  warmup: { mark: 'W', name: 'Warm-up', tone: 'warning' },
-  working: { mark: '1', name: 'Working / back-off', tone: 'default' },
-  top: { mark: 'T', name: 'Top set', tone: 'primary' },
-  drop: { mark: 'D', name: 'Drop set', tone: 'muted' },
-  failure: { mark: 'F', name: 'To failure', tone: 'danger' },
-  myo: { mark: 'M', name: 'Myo-reps', tone: 'muted' },
+/** Colour marks exceptions only: warm-ups, the top set and failure sets. */
+const tones: Record<SetType, TextTone> = {
+  warmup: 'warning',
+  working: 'default',
+  top: 'primary',
+  backoff: 'default',
+  drop: 'muted',
+  failure: 'danger',
+  amrap: 'default',
 };
 
 interface SetTypeBadgeProps {
   type: SetType;
-  /** Working sets show their number instead of a letter. */
-  number?: number;
+  /** From setMarks(): '1', '2' for working sets, otherwise the type's letter. */
+  mark: string;
+  /** Opens the set's options (type, load, tempo). */
   onPress?: () => void;
+  /** Position for screen readers, e.g. "Set 3". */
+  position?: string;
 }
 
-/** Square set marker (W, T, 1, 2, D, F, M). Tap to change the set type. */
-export function SetTypeBadge({ type, number, onPress }: SetTypeBadgeProps) {
-  const info = setTypeInfo[type];
-  const mark = type === 'working' && number ? `${number}` : info.mark;
+/** Square set marker (W, 1, 2, T, B, D, F, A). Tap to change the set type. */
+export function SetTypeBadge({ type, mark, onPress, position }: SetTypeBadgeProps) {
+  const name = setTypeInfo[type].name;
+  const label = [position, type === 'working' ? `${name} ${mark}` : name]
+    .filter(Boolean)
+    .join(', ');
   return (
     <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={`${info.name}${number ? ` ${number}` : ''}. Change set type`}
+      accessibilityRole={onPress ? 'button' : 'text'}
+      accessibilityLabel={label}
+      accessibilityHint={onPress ? 'Change set type and options' : undefined}
       onPress={onPress}
+      disabled={!onPress}
       hitSlop={6}
-      className="h-9 w-9 items-center justify-center rounded-sm bg-surface-raised"
+      className="h-11 w-10 items-center justify-center rounded-sm bg-surface-raised active:opacity-70"
     >
-      <Text variant="label" tone={info.tone} numeric>
+      <Text variant="label" tone={tones[type]} numeric>
         {mark}
       </Text>
     </Pressable>
   );
-}
-
-/** Working sets are numbered 1, 2, 3…; other set types get no number. */
-export function workingNumbers(sets: readonly PlannedSet[]): (number | undefined)[] {
-  let n = 0;
-  return sets.map((s) => (s.type === 'working' ? ++n : undefined));
 }

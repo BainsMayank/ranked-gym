@@ -1,11 +1,14 @@
-import { isRankKey, rankKeys, rankedLifts } from '@/lib/game';
+import { isRankKey, rankKeys } from '@/lib/game';
+
+import { rankConfig } from '../../../../supabase/seed/standards.ts';
 
 describe('rankKeys', () => {
   it('has no duplicates', () => {
     expect(new Set(rankKeys).size).toBe(rankKeys.length);
   });
 
-  it('covers every lift that has a standard', () => {
-    for (const lift of Object.keys(rankedLifts)) expect(isRankKey(lift)).toBe(true);
+  it('has a standard for every key, and only for keys', () => {
+    for (const lift of rankConfig.lifts) expect(isRankKey(lift.rankKey)).toBe(true);
+    expect(rankConfig.lifts).toHaveLength(rankKeys.length);
   });
 });

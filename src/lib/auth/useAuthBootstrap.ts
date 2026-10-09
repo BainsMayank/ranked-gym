@@ -2,6 +2,10 @@ import { useEffect } from 'react';
 import { AppState } from 'react-native';
 
 import { clearUserExerciseData } from '@/lib/exercises/repository';
+import { clearPlanData } from '@/lib/plans/repository';
+import { clearRoutineData } from '@/lib/routines/repository';
+import { clearQueue } from '@/lib/sync/queue';
+import { clearWorkoutData } from '@/lib/workouts/repository';
 import { queryClient } from '@/lib/queryClient';
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase';
 
@@ -35,6 +39,10 @@ export function useAuthBootstrap(): void {
       if (event === 'SIGNED_OUT') {
         queryClient.clear();
         void clearUserExerciseData().catch(() => undefined);
+        void clearRoutineData().catch(() => undefined);
+        void clearWorkoutData().catch(() => undefined);
+        void clearPlanData().catch(() => undefined);
+        void clearQueue().catch(() => undefined);
       }
     });
 

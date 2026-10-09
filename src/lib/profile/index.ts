@@ -7,7 +7,15 @@ export {
   useBodyweightLogs,
   useLatestBodyweight,
   useLogBodyweight,
+  readCachedBodyweight,
   type BodyweightLog,
 } from './useBodyweight';
 export { useUsernameAvailability, type UsernameStatus } from './useUsernameAvailability';
 export { suggestUsername } from './suggestUsername';
+export {
+  DEFAULT_TRAINING_SETTINGS,
+  parsePlateInventory,
+  useTrainingSettings,
+  useUpdateTrainingSettings,
+  type TrainingSettings,
+} from './useUserSettings';

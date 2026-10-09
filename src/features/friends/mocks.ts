@@ -83,8 +83,20 @@ export const board: {
   movement: number;
 }[] = [
   { position: 1, name: 'Harsh V.', rank: { tier: 'champion' }, score: '541', movement: 0 },
-  { position: 2, name: 'Simran B.', rank: { tier: 'master' }, score: '478', movement: 1 },
-  { position: 3, name: 'Arjun T.', rank: { tier: 'master' }, score: '446', movement: -1 },
+  {
+    position: 2,
+    name: 'Simran B.',
+    rank: { tier: 'master', division: 2 },
+    score: '478',
+    movement: 1,
+  },
+  {
+    position: 3,
+    name: 'Arjun T.',
+    rank: { tier: 'master', division: 3 },
+    score: '446',
+    movement: -1,
+  },
   {
     position: 4,
     name: 'Kunal N.',

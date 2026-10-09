@@ -1,0 +1,68 @@
+/** save_workout's `rewards`, as Postgres sends it (snake_case, numerics as numbers). */
+export function serverRewards(patch: Record<string, unknown> = {}): Record<string, unknown> {
+  return {
+    workout_id: 'aaaaaaaa-0000-0000-0000-000000000002',
+    standards_version: 1,
+    prs: [
+      {
+        exercise_id: 'bench',
+        exercise_name: 'Barbell bench press',
+        kind: 'e1rm',
+        weight_kg: null,
+        value: 80.21,
+        previous_value: 68.75,
+        workout_set_id: 's1',
+      },
+      {
+        exercise_id: 'bench',
+        exercise_name: 'Barbell bench press',
+        kind: 'reps_at_weight',
+        weight_kg: 60,
+        value: 8,
+        previous_value: 5,
+        workout_set_id: 's2',
+      },
+    ],
+    baselines: 1,
+    rank_changes: [
+      {
+        scope: 'muscle',
+        key: 'triceps',
+        name: 'triceps',
+        kind: 'rank_up',
+        from_tier: 'silver',
+        from_division: 1,
+        to_tier: 'gold',
+        to_division: 3,
+        score: 405,
+      },
+      {
+        scope: 'lift',
+        key: 'benchPress',
+        name: 'Bench press',
+        kind: 'rank_up',
+        from_tier: 'silver',
+        from_division: 1,
+        to_tier: 'gold',
+        to_division: 2,
+        score: 466.29,
+      },
+      {
+        scope: 'lift',
+        key: 'pullUp',
+        name: 'Pull-up',
+        kind: 'rank_down',
+        from_tier: 'gold',
+        from_division: 3,
+        to_tier: 'silver',
+        to_division: 1,
+        score: 390,
+      },
+    ],
+    placement: { lifts: 2, regions: 2, need_lifts: 5, need_regions: 4, placed: false },
+    needs_bodyweight: false,
+    flagged: 0,
+    xp_placeholder: null,
+    ...patch,
+  };
+}

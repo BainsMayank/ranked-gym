@@ -10,7 +10,7 @@ export { NumberStepper, type NumberStepperProps } from './NumberStepper';
 export { ProgressBar, type ProgressBarProps } from './ProgressBar';
 export { PressableScale, type PressableScaleProps } from './PressableScale';
 export { PlaceholderScreen, type PlaceholderScreenProps } from './PlaceholderScreen';
-export { Screen, type ScreenProps } from './Screen';
+export { Screen, useTabBarInset, type ScreenProps } from './Screen';
 export { SearchField, type SearchFieldProps } from './SearchField';
 export {
   SegmentedControl,
@@ -46,3 +46,6 @@ export { Stat, type StatProps } from './Stat';
 export { Tag, type TagProps, type TagTone } from './Tag';
 export { OptionCard, type OptionCardProps } from './OptionCard';
 export { StepProgress } from './StepProgress';
+export { ReorderList, type ReorderListProps } from './ReorderList';
+export { showToast, ToastHost, type ToastOptions } from './Toast';
+export { SyncStatus, type SyncStatusProps } from './SyncStatus';

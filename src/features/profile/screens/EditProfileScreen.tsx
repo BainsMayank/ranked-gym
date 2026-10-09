@@ -106,6 +106,10 @@ function EditProfileForm({ profile }: { profile: Profile }) {
             value={sex}
             onChange={setSex}
           />
+          <Text variant="caption" tone="muted">
+            {sexOptions.find((o) => o.id === sex)?.subtitle}. Used only to compare you with fair
+            strength standards; nobody else sees it. Changing it re-ranks your lifts.
+          </Text>
           <Input
             label="Birth year"
             keyboardType="number-pad"

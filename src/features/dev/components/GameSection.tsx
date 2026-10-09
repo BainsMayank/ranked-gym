@@ -33,7 +33,7 @@ export function GameSection() {
             points to Gold I
           </Text>
         </View>
-        <DivisionLadder tier="diamond" division={4} progress={0.3} tierColored />
+        <DivisionLadder tier="diamond" division={3} progress={0.3} tierColored />
       </Block>
 
       <Block title="RankBadge">

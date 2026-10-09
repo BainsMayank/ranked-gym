@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Storage } from 'expo-sqlite/kv-store';
 
 import { useUserId } from '@/lib/auth';
 import { getSupabase } from '@/lib/supabase';
@@ -7,6 +8,29 @@ import type { Database } from '@/types/database';
 import { profileKeys } from './keys';
 
 export type BodyweightLog = Database['public']['Tables']['bodyweight_logs']['Row'];
+
+const cacheKey = (userId: string) => `latest-bodyweight.${userId}`;
+
+/**
+ * The latest weigh-in seen on this device (kg), so a workout started offline still snapshots the
+ * bodyweight for its calorie estimate.
+ */
+export function readCachedBodyweight(userId: string): number | null {
+  try {
+    const raw = Storage.getItemSync(cacheKey(userId));
+    return raw ? Number(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeCachedBodyweight(userId: string, kg: number): void {
+  try {
+    Storage.setItemSync(cacheKey(userId), String(kg));
+  } catch {
+    // Only an optimisation.
+  }
+}
 
 /** Recent weigh-ins, newest first (kg). */
 export function useBodyweightLogs(limit = 30) {
@@ -20,6 +44,7 @@ export function useBodyweightLogs(limit = 30) {
         .order('logged_at', { ascending: false })
         .limit(limit);
       if (error) throw error;
+      if (userId && data[0]) writeCachedBodyweight(userId, Number(data[0].weight_kg));
       return data;
     },
     enabled: !!userId,
@@ -45,6 +70,7 @@ export function useLogBodyweight() {
         ? await table.update({ weight_kg: weightKg }).eq('id', replaceId).select('*').single()
         : await table.insert({ weight_kg: weightKg }).select('*').single();
       if (error) throw error;
+      if (userId && !replaceId) writeCachedBodyweight(userId, Number(data.weight_kg));
       return data;
     },
     networkMode: 'online',

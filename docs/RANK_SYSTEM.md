@@ -1,204 +1,282 @@
 # Rank system
 
-> How Ranked Gym turns lifts into ranks. Decided 2026-10-06 (resolves Open decisions #2, #3 and #4 in [PRODUCT_SPEC.md](PRODUCT_SPEC.md)).
-> Reference implementation: [`src/lib/game/strength.ts`](../src/lib/game/strength.ts), pinned by its tests. The Phase 6 rank engine (Postgres) mirrors it and is the source of truth.
+> How Ranked Gym turns logged sets into ranks, records and rank history. Rebuilt in Phase 6
+> (2026-10-08/09); it replaces the 2026-10-06 DOTS "Strength Score" model (see §16).
+>
+> **Source of truth**: the Postgres engine (`supabase/migrations/*_rank_engine.sql`,
+> `rank_recompute_user`) with the standards in tables (`supabase/seed/standards.ts` →
+> `pnpm standards:build`). **Mirror**: `src/lib/game/engine` follows the same rules in TypeScript for
+> tests, the fake-user check and previews. A generated test checks the two agree on 50 lifters.
+> The app never computes a rank; it only shows what the server sends.
 
 ## 1. Principles
 
-1. **Real numbers.** A rank means the same thing as it would on a gym floor. Gold is a solid intermediate lifter, not a world-class one. World-record lifts are Champion, every time.
-2. **Pound for pound.** A 60 kg lifter and a 100 kg lifter are judged on one fair scale (DOTS), and men and women on their own standards. Heavier lifters need more kg, but not proportionally more.
-3. **Fast at the start, steady after.** New lifters rank up every few weeks because real beginner gains are fast. Later, ranks slow down the way real progress does, and other systems (below) keep the rewards coming.
-4. **Every PR counts.** Even +2.5 kg moves your Strength Score and the progress bar. You never train for months with nothing changing.
-5. **Hard to lose.** Bulking, a bad day or a short break never drops your rank. Only records more than a year old fade, and only gently.
-6. **Trusted.** The server calculates ranks from logged sets. High ranks need verification before they show on public boards.
+1. **Real numbers.** A rank means the same in the app as on a gym floor. World-record lifts are always Champion.
+2. **Fair comparisons.** You're judged against lifters of your sex, bodyweight and age bracket.
+3. **Current strength.** Ranks come from your best lifting in the last 180 days of training, so they show where you are now.
+4. **Hard to lose by accident.** A break never costs points (ranks just show Inactive), and bulking never hurts, because each set is scored at the bodyweight you had that day.
+5. **Server-trusted.** Ranks, records and history are computed in Postgres from logged sets. Clients can't write them.
 
-## 2. Three ways to progress
+Strength ranks measure strength only. Effort is rewarded separately by XP (Phase 11) and weekly leagues (Phase 7), which never use absolute strength, so an Iron lifter can still win their league.
 
-Strength ranks alone would stall for experienced lifters, so progress is split into three layers that reward different things:
+## 2. The ladder
 
-| Layer             | Measures                 | Moves                             | Who wins                                          |
-| ----------------- | ------------------------ | --------------------------------- | ------------------------------------------------- |
-| **Strength rank** | How strong you are       | With PRs (fast early, slow later) | The strongest, pound for pound                    |
-| **Level (XP)**    | How much work you put in | Every workout, streak and PR      | The most consistent                               |
-| **League**        | How your week went       | Weekly, resets each week          | Anyone who trains hard this week, at any strength |
+Every rank sits on a **Rank Score from 0 to 1000**. Tiers and divisions are thresholds on that score, stored in `rank_thresholds` (so they can be rebalanced without an app update).
 
-Leagues and XP never use absolute strength, so an Iron lifter can win their league. Ranks never use effort, so a rank always means real strength. Leagues (#6) and the XP curve (#5) are specified separately.
+| Tier     | Starts at | Divisions (III → II → I) |
+| -------- | --------: | ------------------------ |
+| Iron     |         0 | 0 · 33.33 · 66.67        |
+| Bronze   |       100 | 100 · 150 · 200          |
+| Silver   |       250 | 250 · 300 · 350          |
+| Gold     |       400 | 400 · 450 · 500          |
+| Platinum |       550 | 550 · 600 · 650          |
+| Diamond  |       700 | 700 · 750 · 800          |
+| Master   |       850 | 850 · 883.33 · 916.67    |
+| Champion |       950 | none                     |
 
-## 3. The ladder
+Every tier but Champion has three divisions, III (lowest) to I (highest), each a third of the tier. The score is capped at 1000. On the ladder, Iron III is position 0 and Champion is position 21 (`rank_ordinal`). A move up that ladder is a rank-up.
 
-8 tiers. Iron to Diamond have 4 divisions each (IV → I). Master and Champion have none. Within Master and Champion, your Strength Score and board position show where you stand.
+## 3. From a lift to a Rank Score
 
-| Tier     | Strength Score | Who gets here                           | Typical time (consistent training) |
-| -------- | -------------- | --------------------------------------- | ---------------------------------- |
-| Iron     | 0 – 140        | Just started                            | Day one                            |
-| Bronze   | 140 – 190      | Novice: first few months                | 1 – 3 months                       |
-| Silver   | 190 – 240      | Novice to early intermediate            | 4 – 9 months                       |
-| Gold     | 240 – 290      | Intermediate                            | About 1 year                       |
-| Platinum | 290 – 350      | Strong intermediate                     | 2 – 3 years                        |
-| Diamond  | 350 – 430      | Advanced. Strongest person in most gyms | 3 – 6 years                        |
-| Master   | 430 – 520      | Elite. State or national level          | Years of dedicated training        |
-| Champion | 520 +          | International level, world records      | The very top                       |
+Each lift has a **standard**: the measured value you need at each score anchor. Anchors sit on the tier floors (Bronze 100, Silver 250, Gold 400, Platinum 550, Diamond 700, Master 850, Champion 950), so "Gold" means the Gold anchor of every table.
 
-Iron IV (0–80) catches the very first sessions, then Iron III, II and I start at 80, 100 and 120. Above Iron, divisions split each tier evenly: 12.5 SS each for Bronze to Gold, 15 for Platinum and 20 for Diamond. For a 75 kg man, 12.5 SS is about 4.5 kg on the bench or 6 kg on the squat.
+- **What's measured** depends on the lift (§5): e1RM ÷ bodyweight, clean reps, or hold seconds.
+- **Between anchors**, the score is interpolated in a straight line. Below the first anchor, the line runs from zero (an empty-bar bench is still Iron II). Above the last anchor, it continues at the last slope until it reaches 1000. Straight lines keep every division the same step in kg, reps or seconds within a tier, and they can be inverted exactly, which predictions rely on (§12).
+- **A progression can be capped.** For example, a tuck front lever tops out at 450 (Gold III) however long you hold it (§5.3).
 
-## 4. Strength Score (SS)
+## 4. Estimated 1RM (e1RM)
 
-Every ranked set converts to a **Strength Score** on one scale, so squats, bench, pull-ups, light and heavy lifters all share the same ladder. The scale is DOTS (the formula powerlifting federations use for "best lifter"), so a lifter's overall SS from squat, bench and deadlift is close to their real DOTS score.
+| Reps in the set | e1RM                                                                |
+| --------------- | ------------------------------------------------------------------- |
+| 1               | the weight lifted                                                   |
+| 2–10            | the average of Epley (w × (1 + r/30)) and Brzycki (w × 36/(37 − r)) |
+| above 10        | no e1RM: the set doesn't rank a weight lift                         |
 
-### 4.1 Barbell and dumbbell lifts
+Epley runs high and Brzycki low as reps rise; their average stays close to tested maxes up to about 10 reps. Above that, estimates drift too far to be fair. Those sets still count for reps-based standards and for records. The logger's live e1RM uses the same formula, so what you see while lifting is what ranks.
 
-```
-e1RM = load                          (1 rep)
-e1RM = load × (1 + reps ÷ 30)        (2–12 reps, Epley; sets above 12 reps count as 12)
-SS   = e1RM × DOTS(bodyweight, sex) ÷ share(lift, sex)
-```
+## 5. What each lift measures
 
-- **DOTS(bodyweight, sex)** is the standard DOTS coefficient. Bodyweight is clamped to 40–210 kg (men) and 40–150 kg (women).
-- **share** is the share of a powerlifting total that lift typically represents. It sets how heavy each lift needs to be relative to the others.
-- Capping at 12 reps keeps the estimate honest (high-rep estimates run high), yet still lets a beginner who trains in the 8–12 range rank from day one.
-- Warm-up sets never count. Working, top, back-off, drop and failure sets do.
+### 5.1 Weightlifting (barbell and dumbbell)
 
-### 4.2 Bodyweight lifts (pull-ups, chin-ups, dips)
+The value is **e1RM × age factor ÷ bodyweight**. Dumbbell lifts are logged per dumbbell, and their standards are per hand.
 
-These are judged on **system load ÷ bodyweight**, where system load = bodyweight + added weight (assistance counts as negative). 1.0 means one clean bodyweight rep. Bodyweight lifts don't scale like barbell lifts (a heavy lifter carries their own weight), so a ratio is fairer here than DOTS. Each tier starts at a set ratio, and the SS in between is interpolated.
+| Discipline    | Lifts                                                                                                                                                                                                                                                                                                                                     |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Weightlifting | Back squat, front squat, Bulgarian split squat, deadlift, sumo deadlift, trap bar deadlift, Romanian deadlift, hip thrust, power clean, bench press, incline bench, close-grip bench, dumbbell bench, incline dumbbell press, overhead press, push press, dumbbell shoulder press, barbell row, dumbbell row, barbell curl, dumbbell curl |
 
-| Pull-up ratio | Bronze | Silver | Gold | Platinum | Diamond | Master | Champion |
-| ------------- | -----: | -----: | ---: | -------: | ------: | -----: | -------: |
-| Men           |   1.00 |   1.15 | 1.35 |     1.55 |    1.75 |   2.00 |     2.30 |
-| Women         |   0.85 |   1.00 | 1.15 |     1.30 |    1.50 |   1.70 |     1.95 |
+Machines, cables and Smith machines never rank because they differ between gyms. They still earn records, volume and (later) XP. Custom exercises never rank.
 
-So a man's first strict pull-up is Bronze, 12 bodyweight reps are Gold, and +75 kg at 75 kg bodyweight is Master. A woman's first unassisted pull-up is Silver. Chin-ups need 5% more; dips have their own table in the code.
+**How the standards are made.** Each lift has a _share_: the part of a powerlifting-style total its 1RM typically represents (back squat ≈ 35% for men, bench 25.5%). Each anchor sits at a fixed DOTS score (Bronze 120, Silver 165, Gold 205, Platinum 250, Diamond 310, Master 390, Champion 500). For each bodyweight band, that score is turned back into the e1RM a lifter of that weight needs, then divided by bodyweight. DOTS is the coefficient powerlifting federations use for "best lifter". It bends the curve so heavier lifters need more kg but a smaller multiple of bodyweight. The reasoning for every lift's share is a comment block in `supabase/seed/standards/weightlifting.ts`.
 
-### 4.3 Which lifts rank
+### 5.2 Calisthenics (bodyweight)
 
-Only free-weight and bodyweight lifts with stable standards rank. Machines and cables differ from gym to gym, so they still earn XP, volume and records but no rank.
+| Lift              | Measured as                                                     |
+| ----------------- | --------------------------------------------------------------- |
+| Pull-up, chin-up  | clean reps, or weighted: (bodyweight + added) e1RM ÷ bodyweight |
+| Dip               | clean reps, or weighted (same)                                  |
+| Push-up           | clean reps, or weighted (plate or vest)                         |
+| Pistol squat      | clean reps per leg, or weighted                                 |
+| Muscle-up         | clean reps                                                      |
+| Handstand push-up | clean reps (wall, full range)                                   |
 
-| Pattern (overall) | Lifts                                                             |
-| ----------------- | ----------------------------------------------------------------- |
-| Squat             | Back squat, front squat                                           |
-| Hinge             | Deadlift, sumo deadlift, trap bar deadlift, Romanian deadlift     |
-| Horizontal push   | Bench press, incline bench, close-grip bench, dumbbell bench, dip |
-| Vertical push     | Overhead press                                                    |
-| Pull              | Pull-up, chin-up, barbell row                                     |
-| Muscle ranks only | Hip thrust, barbell curl                                          |
+A set scores the **better of the reps and weighted tables**. Up to 10 reps the two agree (10 bodyweight pull-ups score about the same either way), so adding a belt never costs you. Reps tables don't need a weigh-in. Some anchors are below one rep (0.5) only so that a first rep lands on the right tier (a woman's first pull-up is Silver).
 
-The share for each lift (men / women) is in `rankedLifts` in the code. More lifts can be added later by setting a share, with no schema change.
+| Pull-up, men   | Bronze | Silver | Gold | Platinum | Diamond | Master | Champion |
+| -------------- | -----: | -----: | ---: | -------: | ------: | -----: | -------: |
+| Clean reps     |      1 |      5 |   11 |       16 |      22 |     30 |       40 |
+| Weighted ratio |   1.00 |   1.15 | 1.35 |     1.55 |    1.75 |   2.00 |     2.30 |
 
-**Rank keys** (Phase 2, `src/lib/game/rankKeys.ts`). Each ranked lift has one key, and exactly one official exercise carries it (`exercises.rank_key`, unique). Custom exercises never carry one.
+| Pull-up, women | Bronze | Silver | Gold | Platinum | Diamond | Master | Champion |
+| -------------- | -----: | -----: | ---: | -------: | ------: | -----: | -------: |
+| Clean reps     |    0.5 |      1 |    4 |        8 |      12 |     17 |       24 |
+| Weighted ratio |   0.85 |   1.00 | 1.15 |     1.30 |    1.50 |   1.70 |     1.95 |
 
-| Status                                     | Keys                                                                                                                                                                                                                                                |
-| ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Standard defined (above)                   | `backSquat`, `frontSquat`, `deadlift`, `sumoDeadlift`, `trapBarDeadlift`, `romanianDeadlift`, `hipThrust`, `benchPress`, `inclineBench`, `closeGripBench`, `dumbbellBench`, `dip`, `overheadPress`, `pullUp`, `chinUp`, `barbellRow`, `barbellCurl` |
-| Free weight, standard in Phase 6           | `bulgarianSplitSquat`, `powerClean`, `inclineDumbbellBench`, `pushPress`, `dumbbellShoulderPress`, `dumbbellRow`, `dumbbellCurl`                                                                                                                    |
-| Calisthenics discipline, tables in Phase 6 | `pushUp`, `muscleUp`, `pistolSquat`, `handstandPushUp`, `frontLever`, `backLever`, `planche`, `lSit`                                                                                                                                                |
+A weighted ratio of 2.0 means a single with your own bodyweight added (a 75 kg man with +75 kg is Master). The other lifts' tables, with their reasoning, are in `supabase/seed/standards/calisthenics.ts`.
 
-Skill progressions (tuck and straddle levers, planche leans) are separate exercises without keys; the Phase 6 calisthenics tables may grade them through the skill's key.
+### 5.3 Skills (holds)
 
-## 5. What it takes (1RM or e1RM)
+Static skills score the **longest hold**. Progressions rank into the full skill (through `rank_variants`), each capped below the next step, so a long tuck lever never outranks a short full one.
 
-Generated from the model. Each cell is where the tier starts; divisions sit evenly in between. Pull-up shows added kg (BW = bodyweight, − = assisted).
+| Skill       | Progressions (cap)                                                                     | Full skill                               |
+| ----------- | -------------------------------------------------------------------------------------- | ---------------------------------------- |
+| Front lever | Tuck (Gold III), advanced tuck (Platinum II), straddle (Diamond II)                    | 1 s Diamond, 3 s Master, 15 s Champion   |
+| Back lever  | Tuck (Gold III)                                                                        | 3 s Platinum, 10 s Diamond, 20 s Master  |
+| Planche     | Lean (Silver II), tuck (Platinum II), advanced tuck (Diamond II), straddle (Master II) | 0.5 s Diamond, 2 s Master, 10 s Champion |
+| L-sit       | Tuck (Gold III)                                                                        | 10 s Gold, 30 s Diamond, 60 s Champion   |
+| Handstand   | Against a wall (Gold III)                                                              | 10 s Gold, 30 s Platinum, 60 s Diamond   |
 
-**Men, 60 kg**
+Holds and skill reps are the same for men and women, because they depend on leverage and bodyweight ratio more than absolute strength.
 
-| Lift               | Bronze | Silver |  Gold | Platinum | Diamond | Master | Champion |
-| ------------------ | -----: | -----: | ----: | -------: | ------: | -----: | -------: |
-| Squat              |   57.5 |     80 |   100 |      120 |     145 |  177.5 |      215 |
-| Bench              |   42.5 |   57.5 |  72.5 |     87.5 |     105 |    130 |    157.5 |
-| Deadlift           |     65 |     90 | 112.5 |      135 |     165 |    200 |    242.5 |
-| Overhead press     |   27.5 |   37.5 |  47.5 |     57.5 |    67.5 |     85 |    102.5 |
-| Pull-up (added kg) |     BW |    +10 |   +20 |    +32.5 |     +45 |    +60 |    +77.5 |
+## 6. Who you're compared with
 
-**Men, 75 kg**
+- **Bodyweight.** Each set is scored at the weigh-in closest to that set, up to 30 days either side (on a tie, the later weigh-in wins). A weighted set with no weigh-in in range doesn't rank. The summary then shows "Add a weigh-in to rank these lifts", and the set ranks as soon as you add one. Because each set uses that day's bodyweight, a bulk never lowers an old score.
+- **Bodyweight bands.** Standards are stored per band (men 45–140 kg, women 40–120 kg). Values are blended in a straight line between band centres, so crossing a band edge never makes a score jump. Below the lightest centre or above the heaviest, the edge band applies.
+- **Sex.** Onboarding asks "Men's", "Women's" or "Rather not say". **Rather not say ranks on the average of the men's and women's values** at your bodyweight; the Edit profile screen explains this. Changing it re-ranks every lift.
+- **Age.** Your measured value (e1RM, reps or seconds) is multiplied by an age factor, roughly the McCulloch (masters) and Foster (teen) coefficients. Age is the current year minus your birth year. The factors are in `strength_age_brackets`.
 
-| Lift               | Bronze | Silver |  Gold | Platinum | Diamond | Master | Champion |
-| ------------------ | -----: | -----: | ----: | -------: | ------: | -----: | -------: |
-| Squat              |   67.5 |   92.5 | 117.5 |    142.5 |     170 |    210 |    252.5 |
-| Bench              |     50 |   67.5 |    85 |    102.5 |     125 |  152.5 |      185 |
-| Deadlift           |   77.5 |    105 | 132.5 |      160 |   192.5 |  237.5 |    287.5 |
-| Overhead press     |   32.5 |   42.5 |    55 |     67.5 |      80 |    100 |      120 |
-| Pull-up (added kg) |     BW |  +12.5 | +27.5 |    +42.5 |   +57.5 |    +75 |    +97.5 |
+  | Age    | under 16 | 16–17 | 18–34 | 35–39 | 40–49 | 50–59 |  60+ |
+  | ------ | -------: | ----: | ----: | ----: | ----: | ----: | ---: |
+  | Factor |     1.15 |  1.06 |  1.00 |  1.02 |  1.08 |  1.18 | 1.32 |
 
-**Men, 90 kg**
+## 7. Which sets count
 
-| Lift               | Bronze | Silver |  Gold | Platinum | Diamond | Master | Champion |
-| ------------------ | -----: | -----: | ----: | -------: | ------: | -----: | -------: |
-| Squat              |     75 |  102.5 |   130 |    157.5 |     190 |  232.5 |    282.5 |
-| Bench              |     55 |     75 |    95 |      115 |   137.5 |    170 |      205 |
-| Deadlift           |     85 |    115 | 147.5 |    177.5 |     215 |  262.5 |    317.5 |
-| Overhead press     |     35 |   47.5 |    60 |       75 |      90 |    110 |    132.5 |
-| Pull-up (added kg) |     BW |  +12.5 | +32.5 |      +50 |   +67.5 |    +90 |   +117.5 |
+A set can rank when **all** of these hold:
 
-**Women, 55 kg**
+- it's completed, in a finished workout
+- it's not a warm-up (working, top, back-off, drop, failure and AMRAP sets all count)
+- it's not marked failed
+- it's not assisted (assistance mode, or an assisted exercise like the assisted pull-up machine)
+- the exercise carries a rank key (or is a skill progression), so machines and custom exercises don't rank
+- it isn't held back by a guardrail (§11)
 
-| Lift               | Bronze | Silver | Gold | Platinum | Diamond | Master | Champion |
-| ------------------ | -----: | -----: | ---: | -------: | ------: | -----: | -------: |
-| Squat              |     45 |     60 |   75 |     92.5 |     110 |    135 |      165 |
-| Bench              |     25 |     35 |   45 |     52.5 |      65 |     80 |       95 |
-| Deadlift           |     50 |   67.5 |   85 |    102.5 |     125 |  152.5 |      185 |
-| Overhead press     |     15 |   22.5 | 27.5 |     32.5 |      40 |     50 |       60 |
-| Pull-up (added kg) |   −7.5 |     BW | +7.5 |    +17.5 |   +27.5 |  +37.5 |    +52.5 |
+## 8. Your score for each lift: the 180-day window
 
-**Women, 70 kg**
+Your score for a lift is the **best set within the 180 days before your latest set of that lift**. The window is anchored to your own training, not to today:
 
-| Lift               | Bronze | Silver | Gold | Platinum | Diamond | Master | Champion |
-| ------------------ | -----: | -----: | ---: | -------: | ------: | -----: | -------: |
-| Squat              |     50 |     70 | 87.5 |      105 |   127.5 |  157.5 |      190 |
-| Bench              |     30 |     40 |   50 |     62.5 |      75 |   92.5 |      110 |
-| Deadlift           |   57.5 |   77.5 | 97.5 |      120 |   142.5 |  177.5 |    212.5 |
-| Overhead press     |   17.5 |     25 | 32.5 |     37.5 |    47.5 |   57.5 |       70 |
-| Pull-up (added kg) |    −10 |     BW |  +10 |      +20 |     +35 |    +50 |    +67.5 |
+- **While you're away** the score stays frozen. After 60 days with no rankable sets at all, your ranks show as **Inactive** (greyed), with no points lost.
+- **When you come back**, your next session of that lift moves the window forward. Records older than 180 days before it drop out, so the score reflects your strength now. This is the only way a lift ranks down, apart from editing or deleting workouts.
 
-**Sanity checks (in the tests):** for a 75 kg man, common published standards land where intended (beginner bench 47 kg → Iron, novice 68 → Silver, intermediate 94 → Gold, advanced 125 → Diamond, elite 160 → Master). World-record-level lifts (light and heavy, men and women) are all Champion.
+## 9. Muscle, region, overall and discipline ranks
 
-## 6. Overall, muscle and discipline ranks
+- **Muscle**: a weighted average of the lift scores that train it, using the library's muscle weights (primary 1, secondary 0.5 or 0.25; stabilisers don't count). Muscles nothing trains stay unranked.
+- **Region** (chest, shoulders, arms, back, core, legs): the average of its ranked muscles.
+- **Overall**: a weighted average of the ranked regions. The weights are legs 0.25, back 0.20, chest 0.20, shoulders 0.15, arms 0.10 and core 0.10, renormalised over the regions you have.
+- **Placement**: the overall rank appears once you have **5 ranked lifts covering at least 4 regions**. A lift covers the regions of its primary muscles. Before that, the summary shows "Placement: 3/5 lifts", like placement matches in games.
+- **Weightlifting** and **Calisthenics** ranks use the same muscle → region → weighted pipeline on their own lifts only. Each needs 3 lifts.
 
-- **Lift rank**: your best SS for that lift.
-- **Overall rank**: the mean of your best SS in each of the 5 patterns (squat, hinge, horizontal push, vertical push, pull). It appears once 3 patterns are ranked and is marked provisional until all 5 are. A plain mean means fixing a weak pattern raises your overall as much as pushing a strong one.
-- **Muscle ranks** (Body map): each muscle takes the best SS of the lifts that train it as a primary mover, or 85% of a lift that trains it as a secondary mover. Muscles with no ranked lift (calves for now) stay unranked until a standard is added.
+Every level is rounded to 2 decimals before the next one uses it, in Postgres and in the mirror alike.
 
-  | Lift              | Primary                        | Secondary (× 0.85)           |
-  | ----------------- | ------------------------------ | ---------------------------- |
-  | Squats            | Quads, glutes                  | Lower back, core             |
-  | Deadlifts         | Glutes, hamstrings, lower back | Traps, forearms, quads       |
-  | Romanian deadlift | Hamstrings, glutes             | Lower back, forearms         |
-  | Hip thrust        | Glutes                         | Hamstrings                   |
-  | Bench variants    | Chest (close-grip: triceps)    | Triceps, shoulders           |
-  | Dip               | Chest, triceps                 | Shoulders                    |
-  | Overhead press    | Shoulders                      | Triceps, core, traps         |
-  | Pull-up / chin-up | Lats (chin-up: + biceps)       | Biceps, forearms             |
-  | Barbell row       | Lats, traps                    | Biceps, lower back, forearms |
-  | Barbell curl      | Biceps                         | Forearms                     |
+## 10. Personal records
 
-- **Disciplines**: Weightlifting is the overall rank above. **Calisthenics** is a separate rank on the same ladder built from rep and skill standards (pull, push, core, legs; for example first pull-up → Bronze, first muscle-up → Platinum, full front lever → Master). Its tables are finalised in Phase 6.
+Every exercise keeps records, ranked or not (machines and custom exercises too):
 
-## 7. Keeping your rank
+| Record                | Value                                                  |
+| --------------------- | ------------------------------------------------------ |
+| Estimated 1RM         | e1RM of a weight-lift set (1–10 reps)                  |
+| Heaviest weight       | the load (or added load on a bodyweight lift)          |
+| Most reps at a weight | reps, kept separately for each weight (0 = bodyweight) |
+| Best set volume       | weight × reps                                          |
+| Best session volume   | weight × reps over the exercise's sets in one workout  |
+| Longest hold          | seconds, for timed exercises                           |
 
-- **Bodyweight on the day.** Each set is scored with your bodyweight at the time (latest weigh-in within 30 days), the way a meet weighs you in. The set still logs without a recent weigh-in and ranks as soon as you add one. Bodyweight changes never re-score old sets, so a bulk never costs you a rank.
-- **Records last a year, then fade gently.** A record counts in full for 365 days, then loses 1% a month, never below 75%. A long break slowly lowers a rank instead of resetting it, and the comeback is quick because old strength returns fast.
-- **Peak rank is forever.** Your highest rank ever stays on your profile as a badge.
-- **Promotion is instant.** No placement grind and no waiting for a weekly update.
+A value is a record when it beats **every earlier value** of that kind, strictly. The first value for an exercise (or the first set at a new weight) is a **baseline**. It's stored, but not celebrated, so a first workout doesn't show 15 PRs; the summary says "today's numbers are the baseline". Warm-ups, failed sets, assisted sets and flagged sets never set records. Records are rebuilt in order on every recompute, so editing or deleting a workout puts them right. Sets that set a record get `workout_sets.is_pr`.
 
-## 8. Why it never feels stuck
+## 11. Guardrails
 
-| Stage       | What moves                                                                                                                              |
-| ----------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| First month | First rank on each lift is "placed" with a reveal. Iron and Bronze divisions are close together, so most lifts rank up every 2–3 weeks. |
-| Months 1–12 | A division every 2–8 weeks per lift. With 10+ lifts and 12 muscles ranked, something ranks up most weeks.                               |
-| Year 2+     | Divisions take months, but every +2.5 kg moves SS and the bar. Predictions show the exact set to aim for ("95 kg × 5 → Platinum II").   |
-| Always      | XP, streaks, weekly leagues (effort-based), records, muscle balance and goals keep rewarding training even when strength is plateaued.  |
+Sets that look impossible are **flagged for review** instead of ranking or setting records (`rank_flags`, status pending). Full anti-cheat is Phase 13.
 
-Rep PRs count too: 92.5 × 6 beats 92.5 × 5 through the e1RM, so a lifter stuck on weight still ranks up by adding reps.
+- e1RM above a per-lift multiple of bodyweight (bench 4×, squat 5×, deadlift 5.5× … well above every world record). Sets above 10 reps are judged as if they were 10.
+- More than 100 reps with any load on any exercise.
+- Bodyweight lifts above a rep limit (pull-ups 80, push-ups 200 …) and holds above a time limit (front lever 120 s …).
 
-## 9. Fairness and anti-cheat (Phase 13)
+An approved flag lets the set rank; a rejected one keeps it out. The summary says when a set was held back ("If it was a typo, edit the workout").
 
-- Ranks come only from logged sets processed by the server, never a client-sent rank or score.
-- **Verification**: lifts that would reach **Master or Champion** need video before they show as verified or on public boards. Unverified, they still count for you privately.
-- **Outlier checks**: flag an e1RM jump over 15% within 14 days above Gold, and bodyweight changes over 5% within a week (a lower claimed bodyweight raises SS).
-- **Leaderboards** rank by SS (pound for pound) by default; filters add absolute kg and IPF weight classes.
+## 12. History, rewards and predictions
 
-## 10. Still open
+- **Snapshots** (`rank_snapshots`): a row whenever a score changes by 0.1 or more, for every scope (lift, muscle, region, overall, weightlifting, calisthenics). These feed the progression chart in Phase 7.
+- **Events** (`rank_events`): _placed_ (first rank), _rank up_ or _rank down_, whenever the tier or division changes. Each event is tagged with the workout that caused it.
+- **Rewards**: `save_workout` scores a finished workout as it syncs and returns `{ prs, rank_changes, placement, needs_bodyweight, flagged, xp_placeholder }`. The summary screen shows them, with a badge reveal for the biggest rank-up. They're kept in `workout_rewards` and shown on the workout in History.
+- **Predictions** (`get_rank_predictions`). For each lift: the next division's score, turned back into what you'd need at today's bodyweight.
+  - Weightlifting: the e1RM, and the weight for sets of 1, 3, 5 and 8 reps, rounded up to 0.5 kg.
+  - Calisthenics: clean reps, added kg for 1/3/5/8 reps, or hold seconds.
+  - **ETA**: a least-squares line through your best e1RM per session over the last 8 weeks (best score per session for calisthenics). It needs at least 4 sessions, otherwise "Need more sessions"; a flat or falling trend says so instead of guessing.
 
-- **Which standards someone uses.** Onboarding asks men's, women's or "rather not say" (`profiles.sex_for_standards`), explained as used only for fair standards. "Rather not say" ranks on men's (open) standards (decided 2026-10-06). Users can switch in Edit profile.
-- **Calibration against real data.** Lift shares, the pull-up and dip ratios, and the hip thrust and curl standards are v1 estimates. Before launch, check them against OpenPowerlifting and our own beta data, and adjust the shares in `strength.ts` (the tests guard the anchors).
-- **Age.** No age adjustment at launch (the audience is 17–25). Teen and masters coefficients can be added later.
-- **Calisthenics tables**: full rep and skill standards, Phase 6.
+## 13. When ranks are recomputed
+
+`rank_recompute_user` rebuilds one lifter's ranks, records, flags and history from their sets. It's deterministic, so running it again is always safe.
+
+| What happened                                   | When it runs                                  |
+| ----------------------------------------------- | --------------------------------------------- |
+| A workout is finished, or a finished one edited | right away, inside `save_workout`             |
+| A workout is deleted                            | queued (`rank_jobs`), pg_cron within a minute |
+| A weigh-in is added, changed or deleted         | queued                                        |
+| Standards sex or birth year changes             | queued                                        |
+| New standards or settings are published         | everyone with a finished workout is queued    |
+
+If scoring ever fails inside `save_workout`, the save still succeeds and the lifter is queued instead.
+
+## 14. Rebalancing
+
+Standards, thresholds, age factors, region weights and settings all live in tables.
+
+1. Edit `supabase/seed/standards.ts` (or the files in `supabase/seed/standards/`).
+2. Bump `STANDARDS_VERSION`.
+3. Run `pnpm standards:build`. It validates the standards and writes a migration that publishes the version and queues everyone.
+4. Run `pnpm ranks:fake` to regenerate the 50-lifter parity test.
+5. Run `pnpm db:reset && pnpm db:test`.
+
+The distribution table prints in both `pnpm test` and `pnpm db:test`, so the effect of a change is visible straight away.
+
+**Fake-user check (v1).** 50 fake lifters with realistic histories (`supabase/seed/fakeUsers.ts`) are used:
+
+- Their strength is modelled from training age using ExRx-style tables, independently of our standards.
+- Strength is scaled by talent, bodyweight and sex.
+- The mix is 30 men, 15 women and 5 "rather not say", aged 16–52, with gym and calisthenics styles.
+
+| Training age     | Iron | Bronze | Silver | Gold | Platinum | Diamond | Master | Champion |
+| ---------------- | ---: | -----: | -----: | ---: | -------: | ------: | -----: | -------: |
+| 0–6 months (20)  |    1 |     15 |      4 |      |          |         |        |          |
+| 6–12 months (12) |      |      2 |      7 |    2 |        1 |         |        |          |
+| 1–2 years (12)   |      |        |      4 |    6 |        2 |         |        |          |
+| 3–5 years (5)    |      |        |        |      |        4 |       1 |        |          |
+| 8+ years (1)     |      |        |        |      |          |         |      1 |          |
+
+The tests require most beginners in Iron–Silver, most 1–2 year lifters in Gold–Platinum, and at most two lifters in Master and Champion. The first calibration (the 2026-10-06 tier floors) put most 1–2 year lifters in Silver. v1 eases the middle of the ladder, which is why its anchors sit lower than the old floors.
+
+## 15. What it takes (e1RM, kg)
+
+Generated from standards v1. Each cell is where the tier starts; divisions sit evenly in between.
+
+**Men**
+
+| Bodyweight | Lift           | Bronze | Silver |  Gold | Platinum | Diamond | Master | Champion |
+| ---------- | -------------- | -----: | -----: | ----: | -------: | ------: | -----: | -------: |
+| 60 kg      | Squat          |     50 |   67.5 |    85 |    102.5 |   127.5 |  162.5 |    207.5 |
+|            | Bench          |     35 |     50 |  62.5 |       75 |    92.5 |  117.5 |      150 |
+|            | Deadlift       |     55 |   77.5 |    95 |    117.5 |     145 |  182.5 |      235 |
+|            | Overhead press |   22.5 |   32.5 |    40 |       50 |      60 |   77.5 |     97.5 |
+| 75 kg      | Squat          |   57.5 |     80 |   100 |    122.5 |     150 |    190 |      245 |
+|            | Bench          |   42.5 |   57.5 |  72.5 |       90 |     110 |  137.5 |    177.5 |
+|            | Deadlift       |     65 |     90 | 112.5 |    137.5 |     170 |    215 |      275 |
+|            | Overhead press |   27.5 |   37.5 |  47.5 |     57.5 |    72.5 |     90 |      115 |
+| 90 kg      | Squat          |     65 |     90 |   110 |      135 |   167.5 |    210 |      270 |
+|            | Bench          |   47.5 |     65 |    80 |     97.5 |   122.5 |    155 |    197.5 |
+|            | Deadlift       |   72.5 |    100 |   125 |    152.5 |     190 |  237.5 |      305 |
+|            | Overhead press |     30 |   42.5 |  52.5 |       65 |      80 |    100 |    127.5 |
+
+**Women**
+
+| Bodyweight | Lift           | Bronze | Silver | Gold | Platinum | Diamond | Master | Champion |
+| ---------- | -------------- | -----: | -----: | ---: | -------: | ------: | -----: | -------: |
+| 55 kg      | Squat          |   37.5 |   52.5 |   65 |       80 |    97.5 |  122.5 |    157.5 |
+|            | Bench          |   22.5 |     30 | 37.5 |       45 |    57.5 |   72.5 |     92.5 |
+|            | Deadlift       |   42.5 |   57.5 | 72.5 |     87.5 |     110 |  137.5 |    177.5 |
+|            | Overhead press |     15 |     20 | 22.5 |       30 |      35 |     45 |     57.5 |
+| 70 kg      | Squat          |     45 |     60 |   75 |     92.5 |   112.5 |  142.5 |    182.5 |
+|            | Bench          |     25 |     35 | 42.5 |     52.5 |      65 |   82.5 |    107.5 |
+|            | Deadlift       |     50 |   67.5 |   85 |    102.5 |   127.5 |    160 |      205 |
+|            | Overhead press |     15 |   22.5 | 27.5 |     32.5 |    42.5 |   52.5 |     67.5 |
+
+For a 75 kg man the bench lines up with the ExRx (Kilgore) standards: untrained ≈ 50 kg is Bronze, novice ≈ 66 kg Silver, intermediate (about two years) ≈ 82 kg Gold, advanced ≈ 100 kg Platinum, elite ≈ 127 kg Diamond. World-record lifts at every bodyweight, men and women, are Champion (tested).
+
+## 16. What changed from the 2026-10-06 model
+
+Superseded in Phase 6, at the brief's request:
+
+- DOTS "Strength Score" → the 0–1000 Rank Score from a standards table (DOTS now only builds the weightlifting tables).
+- Divisions IV–I with Master and Champion undivided → III–I for every tier but Champion.
+- Records fading after a year (−1% a month, floor 75%) → a 180-day window anchored to your latest set, plus Inactive after 60 days.
+- Epley capped at 12 reps → the mean of Epley and Brzycki, 1–10 reps.
+- Overall as the mean of 5 movement patterns (needing 3) → region-weighted, with placement at 5 lifts across 4 regions.
+- Muscle ranks from the best primary lift (or 85% of a secondary one) → a weighted average by muscle share.
+- "Rather not say" on men's standards → the average of both curves.
+- No age adjustment → age factors.
+- Pull-ups, chin-ups and dips moved from the weightlifting patterns to the Calisthenics discipline (they still count towards muscles and overall).
+
+Peak-rank badges were part of the old model; the history tables make them possible, and they'll ship with the Rank tab (Phase 7).
+
+## 17. Still open
+
+- **Calibration against real data.** v1 standards are estimates checked against published tables and the fake-user model. Before launch, check them against OpenPowerlifting and beta data and publish version 2.
+- **Verification for high ranks** (Master and Champion, video or review), outlier checks on jumps, and review tools for flags: Phase 13 (open decision #8).
+- **Leaderboard age brackets** (open decision #22). Age factors are decided; whether boards also group by age isn't.

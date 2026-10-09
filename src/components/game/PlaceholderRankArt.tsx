@@ -11,7 +11,7 @@ interface PlaceholderRankArtProps {
 
 /**
  * Stand-in until final art is registered in artRegistry.ts: the mockups' hexagon emblem in the
- * tier colour. Chevrons count up through the divisions (IV = 1 … I = 4); top tiers get a star.
+ * tier colour. Chevrons count up through the divisions (III = 1 … I = 3); Champion gets a star.
  */
 export function PlaceholderRankArt({ tier, division, size }: PlaceholderRankArtProps) {
   const color = rankColors[tier].base;

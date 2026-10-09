@@ -20,8 +20,8 @@ export interface DivisionLadderProps {
 const NOTCH_HEIGHT = 6;
 
 /**
- * Signature rank progress: one notch per division (IV → I), filled up to the current point.
- * For tiers without divisions (Master, Champion) use ProgressBar with points instead.
+ * Signature rank progress: one notch per division (III → I), filled up to the current point.
+ * Champion has no divisions: use ProgressBar with points instead.
  */
 export function DivisionLadder({
   tier,

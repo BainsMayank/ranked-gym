@@ -28,6 +28,7 @@ export const skills = defineExercises([
     equipment: 'bodyweight',
     mechanic: 'compound',
     logType: 'duration',
+    rankKey: 'handstand',
     met: 3.5,
     primary: ['front_delts'],
     secondary: ['traps', 'forearms'],

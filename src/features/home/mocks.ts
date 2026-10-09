@@ -6,13 +6,6 @@ import type { RankTier } from '@/theme';
  * Shapes are close to what the API will return, so screens shouldn't need restructuring.
  */
 
-export const today = {
-  planLabel: 'Today · Week 3 of strength plan',
-  title: 'Push day A',
-  exercises: ['Bench', 'Incline DB', 'OHP', 'Lateral raise', 'Dips', 'Pushdown'],
-  durationMin: 55,
-};
-
 export const muscleVolume = {
   targetMin: 10,
   targetMax: 20,

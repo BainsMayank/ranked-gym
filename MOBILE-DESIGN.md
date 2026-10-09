@@ -60,7 +60,7 @@ Dynamic Type: text 28pt and larger is capped at 1.3×, body at 1.6×.
 - **Gradient budget**: one, `RankGlow`, used only behind rank heroes and celebrations.
 - **Motion**: every touchable scales to 0.97 on a spring (`PressableScale`). Durations are 150/240/400. Reduced motion falls back to opacity.
 - **Icons**: Ionicons, outline for inactive and filled for active. UI icons stay monochrome; colour lives in game art.
-- **Haptics** (when `expo-haptics` lands in Phase 4): selection for steppers and toggles, light impact for a logged set, success notification for PRs and rank-ups. Never on plain taps or navigation.
+- **Haptics** (`src/lib/haptics.ts`): selection for steppers, toggles and keypad +/- steps, light impact for a ticked set, success for a saved workout and for the rank-up reveal on the workout summary. Never on plain taps or navigation. A finished rest vibrates.
 
 ### Component posture
 
@@ -73,6 +73,8 @@ Dynamic Type: text 28pt and larger is capped at 1.3×, body at 1.6×.
 - **Colour on game objects only**: rank names use `RankTag` (tier colour on text), progress for a rank uses the tier colour, and everything else stays neutral. Neutral data bars use `ProgressBar tone="neutral"`; colour marks exceptions (under target, ready, new PR).
 - **One white button per screen.** Repeated row actions (Join, Accept, Connect, Cheer) are `outline` or `secondary`.
 - **The signed-in player** is marked with a 2px orange left edge in standings (`LeaderboardRow isYou`).
+- **Logging (Phase 4)**: the signature element is the docked numeric keypad (no system keyboard; 56pt keys, the plate calculator one key away). Set rows are 48pt; a done set fills its tick with `success`, a missed set with `danger`; the set "up next" gets an orange ring on its badge. Suggestions (target, last time) are muted text in empty cells. The rest countdown is the one orange ring on screen. Finish is the screen's one white button.
+- **Mini bar**: a workout in progress docks a raised bar above the tab bar on every tab (orange dot, name, elapsed, rest); its height joins `useTabBarInset()`.
 
 ### Layout from the mockups
 
@@ -113,4 +115,4 @@ Rules: game values (ranks, XP, rewards) always come from the server; components 
 | Glass tab bar                 | Depth the user asked for       | Flagged by the design skill as a common AI habit; kept because content truly scrolls under it. Background swap only; navigator keeps press states and insets. Android fallback. |
 | Division ladder               | Rank-native signature          | Custom control: exposes `accessibilityValue` with a text description.                                                                                                           |
 
-**Deferred**: glass on the top sub-tab strip (each page would need its own scroll inset); final rank art (the user will supply it, and the slots are ready); haptics (Phase 4).
+**Deferred**: glass on the top sub-tab strip (each page would need its own scroll inset); final rank art (the user will supply it, and the slots are ready).

@@ -20,7 +20,7 @@ import { shoulders } from './exercises/shoulders.ts';
 import { skills } from './exercises/skills.ts';
 
 /** Apps re-download the library when this changes (exercise_library_meta.version). */
-export const LIBRARY_VERSION = 1;
+export const LIBRARY_VERSION = 2;
 
 export const exercises: ExerciseSeed[] = [
   ...chest,

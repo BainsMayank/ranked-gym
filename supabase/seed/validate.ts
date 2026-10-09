@@ -107,7 +107,7 @@ export function checkRankKeys(list: ExerciseSeed[]): string[] {
       problems.push(`"${e.slug}": only strength and calisthenics exercises rank.`);
     }
     if (['machine', 'cable', 'smith'].includes(e.equipment)) {
-      problems.push(`"${e.slug}": machines don't rank (RANK_SYSTEM.md §4.3).`);
+      problems.push(`"${e.slug}": machines don't rank (RANK_SYSTEM.md §6).`);
     }
   }
   if (keys.length < MIN_RANKABLE) {

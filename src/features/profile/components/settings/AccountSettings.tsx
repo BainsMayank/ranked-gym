@@ -2,11 +2,11 @@ import { useState } from 'react';
 import { View } from 'react-native';
 
 import { Button, ListGroup, ListItem } from '@/components';
-import { signOut, useAuthStore } from '@/lib/auth';
+import { confirmSignOut, useAuthStore } from '@/lib/auth';
 
 const PROVIDER_LABEL: Record<string, string> = { google: 'Google', email: 'Email code' };
 
-/** Signed-in email and method, and sign out. */
+/** Signed-in email and method, and sign out (warns first if changes haven't synced). */
 export function AccountSettings() {
   const user = useAuthStore((s) => s.session?.user);
   const [signingOut, setSigningOut] = useState(false);
@@ -25,7 +25,7 @@ export function AccountSettings() {
         loading={signingOut}
         onPress={() => {
           setSigningOut(true);
-          void signOut().finally(() => setSigningOut(false));
+          void confirmSignOut().finally(() => setSigningOut(false));
         }}
       />
     </View>
