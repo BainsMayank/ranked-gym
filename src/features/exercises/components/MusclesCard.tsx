@@ -1,21 +1,40 @@
+import { useMemo, useState } from 'react';
 import { View } from 'react-native';
 
-import { Card, Chip, Icon, Text } from '@/components';
-import { muscleLabels, muscleRoles, roleLabels, type Exercise } from '@/lib/exercises';
+import { BodyMap, Card, Chip, Text } from '@/components';
+import {
+  muscleLabels,
+  muscleRoles,
+  roleLabels,
+  type Exercise,
+  type Muscle,
+  type MuscleRole,
+} from '@/lib/exercises';
+import { useTheme } from '@/theme';
 
-/** Muscles worked, grouped by role, beside a slot for the body map (drawn in Phase 7). */
+/** Muscles worked: the body map (primary movers in the signal colour) and the list by role. */
 export function MusclesCard({ exercise }: { exercise: Exercise }) {
+  const { colors } = useTheme();
+  const [width, setWidth] = useState(0);
+  const values = useMemo(() => {
+    const out: Partial<Record<Muscle, MuscleRole>> = {};
+    for (const m of exercise.muscles) out[m.muscle] = m.role;
+    return out;
+  }, [exercise.muscles]);
+  const primaries = exercise.muscles
+    .filter((m) => m.role === 'primary')
+    .map((m) => muscleLabels[m.muscle]);
+
   return (
-    <Card className="gap-lg">
-      <View
-        accessibilityLabel="Body map coming soon"
-        className="h-28 items-center justify-center gap-xs rounded-md bg-surface-raised"
-      >
-        <Icon name="body-outline" size={36} tone="textMuted" />
-        <Text variant="caption" tone="muted">
-          Body map lands with the Rank tab
-        </Text>
-      </View>
+    <Card className="gap-lg" onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
+      {width > 0 ? (
+        <BodyMap<MuscleRole>
+          values={values}
+          colourScale={(role) => (role === 'primary' ? colors.primary : colors.textMuted)}
+          width={Math.min(320, width - 32)}
+          accessibilityLabel={`Body map. Primary: ${primaries.join(', ') || 'none'}`}
+        />
+      ) : null}
       {muscleRoles.map((role) => {
         const list = exercise.muscles.filter((m) => m.role === role);
         if (list.length === 0) return null;

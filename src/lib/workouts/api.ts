@@ -1,5 +1,6 @@
 import { File } from 'expo-file-system';
 
+import { readAllRows } from '@/lib/pagination';
 import { getSupabase } from '@/lib/supabase';
 import type { Database, Json } from '@/types/database';
 
@@ -199,11 +200,14 @@ export async function photoUrl(path: string): Promise<string | null> {
 
 /** Version of every finished workout on the server (cheap; used to find what changed). */
 export async function fetchRemoteWorkoutVersions(): Promise<Map<string, string>> {
-  const { data, error } = await getSupabase()
-    .from('workouts')
-    .select('id, client_updated_at, revision')
-    .eq('status', 'completed');
-  if (error) throw error;
+  const data = await readAllRows((from, to) =>
+    getSupabase()
+      .from('workouts')
+      .select('id, client_updated_at, revision', { count: 'exact' })
+      .eq('status', 'completed')
+      .order('id')
+      .range(from, to),
+  );
   return new Map(data.map((r) => [r.id, `${Date.parse(r.client_updated_at)}:${r.revision}`]));
 }
 

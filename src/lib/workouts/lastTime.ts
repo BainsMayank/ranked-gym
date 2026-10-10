@@ -42,7 +42,7 @@ export function formatPrevious(p: PreviousSet, unit: WeightUnit): string {
   if (p.durationSec !== null && p.reps === null) return formatDuration(p.durationSec);
   if (p.reps === null) return '';
   if (p.weightKg === null || (p.weightKg === 0 && p.weightMode !== 'absolute')) {
-    return `${p.reps} reps`;
+    return `${p.reps} ${p.reps === 1 ? 'rep' : 'reps'}`;
   }
   const w = fromKg(p.weightKg, unit, 0.25);
   const sign = p.weightMode === 'bodyweight' ? '+' : p.weightMode === 'assisted' ? '−' : '';

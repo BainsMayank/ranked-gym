@@ -1,3 +1,5 @@
+import { useAuthStore } from '@/lib/auth/authStore';
+
 import { sqliteQueueStore } from './queue';
 import { useSyncStatusStore } from './status';
 import {
@@ -38,9 +40,16 @@ interface RunnerConfig {
   now: () => number;
   /** Schedule the next retry with a timer (off in tests that step time by hand). */
   timers: boolean;
+  /** No server writes in account-free preview; stop a batch if its account changes. */
+  scope: () => string | undefined;
 }
 
-let config: RunnerConfig = { store: sqliteQueueStore, now: Date.now, timers: true };
+let config: RunnerConfig = {
+  store: sqliteQueueStore,
+  now: Date.now,
+  timers: true,
+  scope: () => useAuthStore.getState().session?.user.id,
+};
 
 function getConfig(): RunnerConfig {
   return config;
@@ -62,6 +71,20 @@ export function configureSync(next: Partial<RunnerConfig> & { reset?: boolean })
 let running: Promise<SyncRunResult> | undefined;
 let again = false;
 let timer: ReturnType<typeof setTimeout> | undefined;
+let generation = 0;
+
+/** Stop retries and invalidate an in-flight batch when its signed-in layout unmounts. */
+export function stopSync(): void {
+  generation += 1;
+  again = false;
+  if (timer) clearTimeout(timer);
+  timer = undefined;
+}
+
+/** Account cleanup waits until an already-started push can no longer touch SQLite. */
+export async function waitForSync(): Promise<void> {
+  await running?.catch(() => undefined);
+}
 
 function rankOf(item: QueueItem): number {
   return handlers.get(item.entity)?.rank(item.op) ?? 99;
@@ -78,8 +101,8 @@ async function refreshStatus(patch: { syncing?: boolean; synced?: boolean } = {}
 
 /** Sets a timer for the next due item (a backoff retry or a delayed draft push). */
 async function scheduleNext(): Promise<void> {
-  const { store, now, timers } = getConfig();
-  if (!timers) return;
+  const { store, now, timers, scope } = getConfig();
+  if (!timers || !scope()) return;
   if (timer) clearTimeout(timer);
   timer = undefined;
   const at = await store.nextDueAt();
@@ -92,29 +115,35 @@ async function scheduleNext(): Promise<void> {
 }
 
 async function drain(): Promise<SyncRunResult> {
-  const { store, now } = getConfig();
+  const { store, now, scope } = getConfig();
+  const account = scope();
+  const batch = generation;
+  const current = () => !!account && account === scope() && batch === generation;
   const result: SyncRunResult = { pushed: 0, failed: 0 };
   // With no connection at all, don't burn attempts; the network watcher runs us when it's back.
-  if (!useSyncStatusStore.getState().online) {
+  if (!account || !useSyncStatusStore.getState().online) {
     await refreshStatus();
     return result;
   }
   const items = (await store.due(now())).sort((a, b) => rankOf(a) - rankOf(b));
   if (items.length) useSyncStatusStore.setState({ syncing: true });
   for (const item of items) {
+    if (!current() || !useSyncStatusStore.getState().online) break;
     const handler = handlers.get(item.entity);
     if (!handler) continue;
     try {
       await handler.push(item.entityId, item.op);
+      if (!current()) break;
       await store.complete(item);
       result.pushed += 1;
     } catch (error) {
+      if (!current()) break;
       await store.fail(item, error, now());
       result.failed += 1;
     }
   }
-  await refreshStatus({ syncing: false, synced: items.length > 0 });
-  await scheduleNext();
+  await refreshStatus({ syncing: false, synced: result.pushed > 0 });
+  if (current()) await scheduleNext();
   return result;
 }
 

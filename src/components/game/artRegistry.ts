@@ -2,7 +2,11 @@ import type { ComponentType } from 'react';
 import type { ImageSourcePropType } from 'react-native';
 
 import type { RankDivision } from '@/lib/game/ranks';
+import type { LeagueDivision } from '@/lib/leagues/types';
 import type { RankTier } from '@/theme';
+
+import { badgeArt } from './badges';
+import { EliteSeasonFrame, LegendSeasonFrame } from './SeasonFrame';
 
 /**
  * Plug-in points for final game art. Components render whatever is registered here and fall back to
@@ -14,6 +18,9 @@ import type { RankTier } from '@/theme';
  *      (add `byDivision: { 2: require(...) }` for per-division art).
  *   3. For vector or animated art, register { kind: 'component', Component } instead
  *      (react-native-svg today; Skia or Lottie once they're approved).
+ *
+ * Rank badges default to the generated metal/enamel art with SVG pips in ./badges; an entry below
+ * replaces a tier's badge.
  */
 
 export interface GameArtProps {
@@ -33,10 +40,29 @@ export type RankArt = GameArt<RankArtProps> & {
   byDivision?: Partial<Record<RankDivision, ImageSourcePropType>>;
 };
 
-export const rankArt: Partial<Record<RankTier, RankArt>> = {};
+export const rankArt: Partial<Record<RankTier, RankArt>> = { ...badgeArt };
+
+export { leagueDivisions, type LeagueDivision } from '@/lib/leagues/types';
+export const leagueArt: Record<LeagueDivision, GameArt> = {
+  rookie: { kind: 'image', source: require('../../../assets/leagues/rookie.png') },
+  contender: { kind: 'image', source: require('../../../assets/leagues/contender.png') },
+  elite: { kind: 'image', source: require('../../../assets/leagues/elite.png') },
+  legend: { kind: 'image', source: require('../../../assets/leagues/legend.png') },
+};
+/** Leagues reward weekly effort; their emblems are separate from the strength-rank ladder. */
+export const leagueTier: Record<LeagueDivision, RankTier> = {
+  rookie: 'bronze',
+  contender: 'gold',
+  elite: 'platinum',
+  legend: 'champion',
+};
 
 /**
  * Avatar frames (cosmetics earned from challenges, seasons, leagues), keyed by cosmetic id from the server.
  * Frame art is drawn over the avatar, so leave a transparent centre sized for the avatar circle.
  */
-export const avatarFrameArt: Record<string, GameArt> = {};
+export const avatarFrameArt: Record<string, GameArt> = {
+  // Season rewards (season_rewards.frame_key): Elite and Legend finishes.
+  'season-elite': { kind: 'component', Component: EliteSeasonFrame },
+  'season-legend': { kind: 'component', Component: LegendSeasonFrame },
+};

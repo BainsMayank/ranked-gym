@@ -31,25 +31,32 @@ Layouts follow the Claude Design mockups in `docs/design/mockups/` (decided 2026
 
 ### 3.1 For You (personal dashboard)
 
-- **Muscle analysis**: which muscles you trained most over a selectable period (for example 7, 14 or 30 days, or custom), using sets and volume per muscle.
-- **Recovery**: estimated recovery % per muscle, based on recent training load and time since it was last trained.
-- **Goals**: add and track personal goals (for example "Bench 100 kg", "Train 4×/week", "Reach 70 kg bodyweight"), with progress.
-- **Overview** for the last 7, 14 or 30 days:
-  - total volume
-  - total duration
-  - records set
-  - calories burned (estimate)
-  - bodyweight trend
+Phase 8 brief, decided 2026-10-09. Read [RECOVERY_MODEL.md](RECOVERY_MODEL.md) for the recovery heuristic and [PHASE_8_PLAN.md](PHASE_8_PLAN.md) for the implementation plan.
+
+- Today card: optional personal greeting inside the card, planned session or recovery suggestion, Start/Resume/Generate, actual training-day streak, and this week's league division and position (links to Leagues; hidden in the signed-out preview).
+- Four entry cards in a 2×2 grid: Muscle Analysis (most-worked muscle), Recovery (mean estimated recovery), Goals (nearest active goal), Overview (this week's volume). Recent PRs/rank-ups follow, then Monday-through-today sessions, volume and time versus the same weekdays last week.
+- Muscle Analysis: 7 days, 30 days, 90 days or custom (up to 366 days), shared BodyMap with sets/volume toggle, ranked muscle list, outlined weekly guidance bands from Plan Engine, neglected muscles and push/pull/legs distribution. Successful completed strength/calisthenics working sets count primary 1.0 and secondary 0.5; stabilisers, warm-ups, failed and unfinished sets are excluded. Muscle totals overlap; never sum them to calculate workout volume.
+- Recovery: fatigue from each eligible set, library muscle weight and RIR (actual RIR, else 10−RPE, else 2), exponential decay with 24–60 hour muscle half-lives, capacity 10, clamped 0–100%. Ready means at least 80%. Recovery speed is slower/normal/faster. The screen advances cached raw fatigue every minute and on foreground; it explicitly mentions sleep, food and stress.
+- Goals: lift (kg × reps in one set), rank (overall/lift division), bodyweight, workouts per calendar week, streak, calendar-month volume, custom checkbox. Server derives baselines/current values, persists completion and creates at most one optional milestone post. Sharing defaults off and follows profile visibility. Four or more observations over at least seven days permit a trend-based estimate; no date is invented for a flat/insufficient trend. Bodyweight changes over about 1% per week receive a gentle warning.
+- Overview: 7, 14 (default), 30 or 90 days, compared with the preceding equal interval; volume, sessions, duration/average, new records excluding baselines, calorie estimates with missing-data notes and bodyweight trend. Daily bars, duration line, training calendar, weigh-in line and seven-day mean of the latest observation per local day. Missing days are not interpolated. All range records link to their workouts in a virtualised list.
+- Signed-in aggregates are computed in Postgres and validated/cached in SQLite KV by account, range and timezone. Cached data renders immediately and refreshes in the background; unsynced workout notices explain temporary differences. Workouts, weigh-ins, goals, foreground and recovery-speed changes invalidate the appropriate data.
+- Account-free development preview stays available. It reads actual on-device workouts through SQLite, stores development goals/weigh-ins/recovery speed locally, and labels its source. It never awards client-computed ranks or publishes posts. Production continues to use the auth gate and authoritative server calculations.
 
 ### 3.2 Feed
 
-- Posts and published workouts from friends.
-- Like and comment.
-- **Copy a workout** into my routines.
+Built in Phase 9 (§10I).
+
+- Posts from friends, people I follow and me, newest first, with pull to refresh, paging, a "New posts" pill (Supabase Realtime) and a "You're all caught up" marker where last visit's posts begin.
+- Post types: workouts (posted automatically from the summary's visibility), text and photo posts (up to 4 photos, an attached workout or PR, @mentions), and celebratory milestones (records, rank-ups, goals, league results).
+- **Respect** (our like) and comments with one level of replies, both optimistic. Edit and delete your own; report others' posts and comments; block people.
+- **Copy a workout** into my routines: a preview where I rename it and keep or blank their weights, then save or open the builder. The routine shows "Copied from @user".
+- A bell on Home lists respects, comments, replies, mentions, friend requests and follows (push arrives in Phase 12).
 
 ### 3.3 Discover
 
-- Content from people I don't know yet, to find training partners and grow together. It should lean towards the same college, city or gym and a similar level.
+- Public posts from people I don't know yet, to find training partners and grow together. Ranked in Postgres by recency, engagement and similarity (same college, same city, similar overall rank, same goal, similar training days), at most two posts per author per page: [DISCOVER_RANKING.md](DISCOVER_RANKING.md).
+- Filters: My college, My city, Similar rank, Same goal, Calisthenics, Beginners. People search by name or @username.
+- "People to train with": public lifters like me, with mutual friends, and Add friend or Follow.
 
 ## 4. Workout tab
 
@@ -105,7 +112,7 @@ A full builder for routines such as "Leg Day":
 
 ### 5.3 Leagues
 
-- Weekly and seasonal competitions (grouped by similar level; promotion and relegation to be decided).
+- Weekly leagues in groups of about 30 at a similar overall rank, scored by League Points that reward effort and progress, not strength. Rookie → Contender → Elite → Legend with promotion and demotion every Monday, 8-week seasons with rewards, custom leagues for friends and challenges. Rules: [RANK_SYSTEM.md](RANK_SYSTEM.md) §18.
 
 ### 5.4 Analysis
 
@@ -200,7 +207,7 @@ Full detail in [MOBILE-DESIGN.md](../MOBILE-DESIGN.md).
 - **Type**: Instrument Sans (400/500/600), nothing heavier than semibold, tabular figures for numbers. The provisional lime primary and a condensed display face were rejected as too loud.
 - **Depth**: borderless surfaces with a lit top edge and soft shadows; a glass bottom tab bar (iOS blur, Android near-opaque); one radial glow reserved for rank and celebration moments.
 - **Game layer**: rarity scale (common, rare, epic, legendary) on the rank hues; rank art and avatar frames plug into a registry; avatars carry rank/rarity rings and a level tag; rank progress uses the division ladder.
-- **Rank badge art**: the user will supply final art; placeholder shields render until it is registered.
+- **Rank and league art** (2026-10-09): original generated metal/enamel PNGs registered centrally; eight rank tiers with live SVG division pips, plus four distinct weekly-league emblems. Licensed MIT anatomy replaces the provisional shapes; source and schematic muscle mapping are documented in `assets/body/README.md`.
 - **Light mode**: designed alongside dark with full token coverage; parity at launch stays open (#19).
 
 ## 10B. Auth and onboarding decisions (Phase 1, 2026-10-06)
@@ -290,6 +297,53 @@ Rules in [RANK_SYSTEM.md](RANK_SYSTEM.md); schema in [SCHEMA.md](SCHEMA.md). Rep
 - **Summary**: after Save the app waits for the sync, then shows a tier-coloured badge reveal for the biggest rank-up (Reanimated spring, success haptic, a fade under reduced motion), the PRs, other rank changes, placement progress and any weigh-in prompt. Offline it says the ranks follow when it syncs. The same rewards show on the workout in History.
 - **Client**: `src/lib/ranks` holds parsers, the API and hooks (`useWorkoutRewards`, `useRanks`, `useRankPredictions`). `src/lib/game/strength.ts` is gone; the logger's e1RM uses the engine formula (no estimate above 10 reps).
 
+## 10H. Rank tab and leagues decisions (Phase 7, 2026-10-09)
+
+Rules in [RANK_SYSTEM.md](RANK_SYSTEM.md) §18–19; schema in [SCHEMA.md](SCHEMA.md). This resolves open decision #6.
+
+- **Leagues, decided with the user**:
+  - pg_cron and SQL (`league_run_cycle`, hourly and idempotent), not an Edge Function, as with the rank engine.
+  - Anyone onboarded with a workout in the last 14 days is placed automatically, and a first workout mid-week joins straight away.
+  - Results show in the app (a sheet on the next open) with a local reminder. Push arrives in Phase 12.
+- **Format**:
+  - Rookie, Contender, Elite and Legend.
+  - Groups of about 30 by overall Rank Score.
+  - The top and bottom 20% move, with no promotion on 0 LP.
+  - 8-week seasons with a badge for everyone and frames for Elite and Legend.
+- **LP formula**: workouts (40 a day), planned sessions (+15), PRs (10, cap 60), lift rank-ups (30, cap 90), beating your 4-week baseline (+50) and score gains (2 per point, cap 60). Absolute strength never counts.
+- **Custom leagues**:
+  - Private, 1–8 weeks, joined by an 8-character code or link.
+  - Scored by LP, attendance, one lift's improvement or volume.
+  - The creator adds challenges.
+  - `community_id` is reserved for Phase 12B.
+- **Clock**: `league_now()` lets tests and `pnpm leagues:simulate` look at fast-forwarded weeks; results never depend on it.
+- **Rank tab**:
+  - My Ranks: hero with placement progress, a progression chart (Victory Native, 1M–All, any scope, rank-up markers), every rankable lift, a lift detail screen and How ranks work.
+  - Body Map: muscle sheet with the lifts behind it and the weakest link.
+  - Analysis: predictions, rank-ups by weekday and time of day, the region donut, strengths and balance ratios.
+  - Records: grouped by exercise, with filters. Share to feed is wired in Phase 9.
+  - Server reads need an account; the signed-out preview shows a sign-in prompt instead of errors.
+- **Percentile**: shown only with 20 or more lifters of your standards sex and bodyweight band, as a percentage only.
+- **Art**:
+  - Rank badges are the generated metal PNGs (Codex pass) with vector pips. The interim SVG set was removed.
+  - Season frames are original SVG components in `avatarFrameArt`.
+  - The shared `BodyMap` now also draws the exercise detail and workout summary muscle maps.
+- **Approved additions**: `victory-native` and `@shopify/react-native-skia` (Skia's install script approved in `pnpm-workspace.yaml`).
+
+## 10I. Social decisions (Phase 9, 2026-10-10)
+
+Schema in [SCHEMA.md](SCHEMA.md) → Social; ranking in [DISCOVER_RANKING.md](DISCOVER_RANKING.md).
+
+- **Graph**: friends are mutual (request → accept); follows are one-way and only for public profiles; blocking ends friendships, requests and follows both ways and hides each person from the other everywhere (posts, comments, profiles, search, Discover, suggestions). `are_friends` is real now (it was a stub).
+- **Visibility (follows the existing privacy copy)**: the more restrictive of a post's and its author's profile visibility wins. A friends-only profile caps public posts at friends; a private profile's posts are only for its author. Only public posts from public profiles reach Discover.
+- **Workout posts**: every finished workout that isn't "Only me" gets a post automatically with the summary's visibility (a private workout gets none); changing the workout's visibility later moves or removes the post. Workout notes never appear.
+- **Milestones**: Settings → Privacy → Share milestones: Ask me (default; Share buttons after a workout, in Records and on league results), Automatically (each workout's best record and biggest rank-up), Never (also turns off goal posts). Milestones are built on the server from the user's own data. Phase 8's `goal_posts` moved into `posts`.
+- **Photos**: up to 4 per post, resized to 1600 px and re-encoded on the phone (which strips EXIF, GPS included; workout photos get the same treatment now that they appear on posts). Private storage with short-lived signed links, cached by path.
+- **Goal and experience** are ranking signals and filters only, never printed on cards (decided with the user). Discover reason chips name only college, city, similar rank and mutual friends.
+- **Friends tab (decided with the user)**: requests and the friends list are real now; search lives in Discover; invites, QR, contacts and leaderboards remain Phase 10.
+- **Moderation**: reports (8 reasons, optional details) are stored for review; review tools stay in Phase 13 (#17 narrowed).
+- **Approved additions**: `expo-image` (cached images in lists) and `expo-image-manipulator` (resizing and EXIF stripping).
+
 ## 11. Open decisions
 
 Resolve these with the user before building the phase that needs them.
@@ -298,17 +352,15 @@ Resolve these with the user before building the phase that needs them.
 | --- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
 | 1   | App name           | Final name, bundle IDs (`com.rankedgym.app` placeholder), store listing, logo.                                                                                                                        | Phase 15 (ideally earlier) |
 | 5   | XP and levels      | XP sources (workouts, PRs, streaks, social), the level curve, and anti-farming caps.                                                                                                                  | Phase 11                   |
-| 6   | Leagues            | Weekly vs seasonal format, season length, group size, promotion/relegation, and the scoring metric (XP? rank gains?).                                                                                 | Phase 7                    |
 | 7   | Streak stakes      | What is at stake: points/XP, cosmetic penalties, or real money. Real money raises legal and payment issues in India, so the recommendation is no money at launch.                                     | Phase 12                   |
 | 8   | Anti-cheat         | Which ranks need verification, evidence type (video?), reviewers (mods/peers), outlier thresholds, and appeals.                                                                                       | Phase 13                   |
-| 10  | Recovery model     | Formula for recovery % per muscle (time decay × volume × RPE?).                                                                                                                                       | Phase 8                    |
 | 11  | Regions            | Source for the college and city lists (curated seed? user-submitted plus moderation?), and verification of college membership (college email?).                                                       | Phase 10                   |
 | 13  | Under-18 consent   | Minimum age is 13 (decided). Still open: DPDP Act handling for 13–17s (verifiable parental consent, no behavioural tracking): consent flow, forcing private visibility, or raising the minimum to 18. | Before Phase 15            |
 | 14  | Referral rewards   | What the inviter and invitee get, and abuse limits.                                                                                                                                                   | Phase 10                   |
-| 17  | Content moderation | Reporting, blocking, moderation tooling for feed, discover and comments.                                                                                                                              | Phase 13                   |
+| 17  | Content moderation | Reporting and blocking shipped in Phase 9. Still open: who reviews reports, tooling, auto-hide thresholds, appeals.                                                                                   | Phase 13                   |
 | 18  | Monetisation       | Free vs premium features; ads (probably not).                                                                                                                                                         | Before Phase 15            |
 | 19  | Light-mode parity  | Is light mode fully supported at launch or best-effort? (Phase 0 builds both; Phase 0B designs both.)                                                                                                 | Phase 14                   |
-| 20  | Charts in Expo Go  | Victory Native needs Skia, which is in Expo Go. Confirm performance on low-end Android when charts land.                                                                                              | Phase 7                    |
+| 20  | Charts in Expo Go  | Victory Native and Skia are installed (Phase 7). Confirm chart performance on low-end Android.                                                                                                        | Phase 14                   |
 | 22  | Age brackets       | Rank age factors are decided (Phase 6). Still open: whether leaderboards also group people by age bracket (onboarding says they do), and which brackets.                                              | Phase 10                   |
 | 23  | Apple sign-in      | Required by the App Store when Google is offered. Needs a dev build (or Expo Go's bundle id) and an Apple Developer account.                                                                          | Before Phase 15            |
 | 25  | Exercise media     | Source for exercise images or clips with a clear licence (or record our own); `exercises.media_url` is ready.                                                                                         | Before Phase 15            |

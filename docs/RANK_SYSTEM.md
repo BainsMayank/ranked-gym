@@ -273,10 +273,85 @@ Superseded in Phase 6, at the brief's request:
 - No age adjustment → age factors.
 - Pull-ups, chin-ups and dips moved from the weightlifting patterns to the Calisthenics discipline (they still count towards muscles and overall).
 
-Peak-rank badges were part of the old model; the history tables make them possible, and they'll ship with the Rank tab (Phase 7).
+Peak-rank badges were part of the old model; the history tables make them possible. They move to the badges work in Phase 11 (the Rank tab shipped without them).
 
 ## 17. Still open
 
+- **Peak-rank badges** (Phase 11 badges).
 - **Calibration against real data.** v1 standards are estimates checked against published tables and the fake-user model. Before launch, check them against OpenPowerlifting and beta data and publish version 2.
 - **Verification for high ranks** (Master and Champion, video or review), outlier checks on jumps, and review tools for flags: Phase 13 (open decision #8).
 - **Leaderboard age brackets** (open decision #22). Age factors are decided; whether boards also group by age isn't.
+
+## 18. Weekly leagues
+
+Leagues reward **effort and progress, never absolute strength**, so an Iron lifter can win their group. Source of truth: `supabase/migrations/*_leagues.sql`; tested in `11_leagues.test.sql`.
+
+### Format
+
+- **Weeks** run Monday 00:00 to Monday 00:00 **IST**. **Seasons** are 8 weeks.
+- **Divisions**: Rookie → Contender → Elite → Legend. Everyone starts in Rookie; your division carries from week to week (`league_standing`).
+- **Placement**: at the weekly reset, everyone onboarded with a completed workout in the last 14 days is placed. Within each division, lifters are sorted by overall Rank Score (unplaced count as 0) and split into `ceil(n / 30)` near-equal groups, so groups hold similar ranks.
+- **Joining mid-week**: a lifter's first completed workout during an open week places them straight away, in their division's group with the closest average score and room (up to 35), or a new group.
+- **Results**: the top 20% of a group (rounded) are promoted and the bottom 20% demoted. Nobody promotes on 0 LP. Rookie can't demote and Legend can't promote. Ties go to whoever's last workout of the week came first, then whoever joined first.
+- **Season rewards**: everyone who played gets a badge for the best division they reached (`season-<n>-<division>`). Elite and Legend also earn an avatar frame (`season-elite`, `season-legend`).
+- **Results reach you** in the app on your next open after the reset (a results sheet, shown once). If notifications are already allowed and **League results** is on, the app also schedules a local reminder for the reset. Push notifications arrive in Phase 12.
+
+### League Points (LP)
+
+LP are counted per IST week, from your workouts and the rank engine's history:
+
+| Source                                                                                                                          | LP         | Cap             |
+| ------------------------------------------------------------------------------------------------------------------------------- | ---------- | --------------- |
+| A completed workout with at least 4 completed working sets                                                                      | 40         | one per IST day |
+| A planned session done within a day of its planned date                                                                         | +15        | one per day     |
+| A PR (records that beat an earlier value; baselines don't count)                                                                | 10 each    | 60 a week       |
+| A lift rank-up, or a lift's first rank                                                                                          | 30 each    | 90 a week       |
+| Beat your baseline: this week's working sets are at least 110% of your own 4-week weekly average (your first week: 2+ workouts) | 50         | once a week     |
+| Strength gain: 2 LP per Rank Score point gained this week on lifts you already had                                              | 2 × points | 60 a week       |
+
+Nothing here grows with how much you lift: a workout is worth the same at Iron and Champion, PRs and rank-ups are relative to you, and score gains are on the 0–1000 scale, where each division is the same step at every tier. A busy week is worth about 400 LP.
+
+LP are computed when read, so editing or deleting a workout corrects them. A week's final LP are frozen when it closes.
+
+### The cycle
+
+`league_run_cycle(p_now)` (pg_cron, hourly at :35; idempotent):
+
+1. Closes every open week that has ended: final points and positions, promotion and demotion, divisions updated.
+2. Finishes every season that has ended and grants its rewards.
+3. Opens the week containing `p_now`, with placement and two challenges per group from a fixed pool.
+4. Closes custom leagues that have ended.
+
+Running it hourly means the Monday reset happens by 00:35 IST and catches up after downtime. `pnpm leagues:simulate` fast-forwards it locally.
+
+### Custom leagues
+
+A lifter can run up to 5 private leagues at a time, for 1–8 weeks, joined by an 8-character invite code (also an invite link). Each is scored one of four ways:
+
+- **League Points**: as above, with weekly caps per IST week.
+- **Attendance**: IST days with a qualifying workout.
+- **Lift improvement**: Rank Score gained on one chosen lift, from your score at the start (or your first score in the league).
+- **Volume**: working-set kilograms. This is the one absolute measure, and it's opt-in among friends.
+
+Custom leagues have no promotion. The creator can add challenges, and leaving as the creator ends the league. `leagues.community_id` lets a league belong to a college, hostel or society in Phase 12B.
+
+### Challenges
+
+- **Most reps** of a lift, where the most wins.
+- **Lift sessions**: train a lift N times (distinct IST days).
+- **Workouts**: N qualifying workouts.
+
+Weekly groups get two automatic challenges; custom-league creators add their own. Challenges show progress and leaders, and don't add LP.
+
+## 19. The Rank tab reads
+
+The app reads ranks only through these owner-only functions (`*_rank_tab.sql`, tested in `09_rank_tab.test.sql`):
+
+- `get_rank_history`: snapshots for the progression chart, plus rank-up markers.
+- `get_rank_events`: rank-ups by weekday and time of day, timed by the workout that caused them.
+- `get_personal_records`: the Records tab.
+- `get_lift_bests`: the set behind each ranked lift.
+- `get_lift_detail`: the sets that counted, history and standards at your bodyweight and age.
+- `get_lift_percentile`: a percentage among lifters of the same standards sex and bodyweight band. It returns nothing until 20 or more lifters are in the cohort, and never returns anyone's identity.
+
+The body map's "built from" and "weakest link" split a server muscle score back into its lifts with the library weights of §9. This is display only.

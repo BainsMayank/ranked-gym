@@ -11,22 +11,22 @@
 
 ## Stack (do not deviate without asking the user)
 
-| Concern              | Choice                                                                                                                                                      |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| App                  | Expo SDK 57, React Native 0.86, React 19.2, TypeScript (strict)                                                                                             |
-| Routing              | Expo Router 57 (file-based, `app/`). Top sub-tabs use `expo-router/js-top-tabs`, bottom tabs use `expo-router/js-tabs`                                      |
-| Styling              | NativeWind 4 (Tailwind 3). Tokens live in `src/theme`                                                                                                       |
-| Server state         | TanStack Query 5 (`src/lib/queryClient.ts`, `networkMode: 'offlineFirst'`)                                                                                  |
-| Client state         | Zustand 5                                                                                                                                                   |
-| Local DB             | expo-sqlite + Drizzle ORM (`src/lib/db`), plus drizzle-kit for migrations                                                                                   |
-| Backend              | Supabase (`@supabase/supabase-js`). Postgres, Auth, Storage, Edge Functions                                                                                 |
-| Charts               | Victory Native (+ `@shopify/react-native-skia`). **Not installed yet**: add it in Phase 7 with `npx expo install victory-native @shopify/react-native-skia` |
-| Graphics             | react-native-svg                                                                                                                                            |
-| Animation / gestures | Reanimated 4 (+ react-native-worklets), react-native-gesture-handler                                                                                        |
-| Tests                | Jest (`jest-expo` preset) + React Native Testing Library 14                                                                                                 |
-| Package manager      | **pnpm** (v12). `nodeLinker: hoisted` in `pnpm-workspace.yaml` is required by Expo                                                                          |
+| Concern              | Choice                                                                                                                                                                     |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| App                  | Expo SDK 57, React Native 0.86, React 19.2, TypeScript (strict)                                                                                                            |
+| Routing              | Expo Router 57 (file-based, `app/`). Top sub-tabs use `expo-router/js-top-tabs`, bottom tabs use `expo-router/js-tabs`                                                     |
+| Styling              | NativeWind 4 (Tailwind 3). Tokens live in `src/theme`                                                                                                                      |
+| Server state         | TanStack Query 5 (`src/lib/queryClient.ts`, `networkMode: 'offlineFirst'`)                                                                                                 |
+| Client state         | Zustand 5                                                                                                                                                                  |
+| Local DB             | expo-sqlite + Drizzle ORM (`src/lib/db`), plus drizzle-kit for migrations                                                                                                  |
+| Backend              | Supabase (`@supabase/supabase-js`). Postgres, Auth, Storage, Edge Functions                                                                                                |
+| Charts               | Victory Native 42 (+ `@shopify/react-native-skia`, bundled in Expo Go): `LineChart` in `src/components/charts`. Simple bars and the donut stay on Views / react-native-svg |
+| Graphics             | react-native-svg                                                                                                                                                           |
+| Animation / gestures | Reanimated 4 (+ react-native-worklets), react-native-gesture-handler                                                                                                       |
+| Tests                | Jest (`jest-expo` preset) + React Native Testing Library 14                                                                                                                |
+| Package manager      | **pnpm** (v12). `nodeLinker: hoisted` in `pnpm-workspace.yaml` is required by Expo                                                                                         |
 
-Approved additions to the stack: `react-native-tab-view` and `react-native-pager-view` (needed by swipeable top tabs), `expo-system-ui`, `expo-font` (a peer dependency of `@expo/vector-icons`), `expo-blur` (glass tab bar), `@expo-google-fonts/instrument-sans` (brand font), `expo-auth-session` + `expo-web-browser` + `expo-crypto` (Google sign-in), `expo-secure-store` (sessions), `zod` (form validation), `supabase` (CLI, dev dependency), `babel-plugin-inline-import` (dev; lets Drizzle's local `.sql` migrations be imported), `@types/node` (dev; types for the Node seed generator), `@shopify/flash-list` (long lists), `expo-haptics` (haptics vocabulary in `src/lib/haptics.ts`), `expo-keep-awake` (logging screen), `expo-notifications` (local rest-timer notifications only), `expo-network` (sync on reconnect), `expo-image-picker` + `expo-file-system` (workout photo).
+Approved additions to the stack: `react-native-tab-view` and `react-native-pager-view` (needed by swipeable top tabs), `expo-system-ui`, `expo-font` (a peer dependency of `@expo/vector-icons`), `expo-blur` (glass tab bar), `@expo-google-fonts/instrument-sans` (brand font), `expo-auth-session` + `expo-web-browser` + `expo-crypto` (Google sign-in), `expo-secure-store` (sessions), `zod` (form validation), `supabase` (CLI, dev dependency), `babel-plugin-inline-import` (dev; lets Drizzle's local `.sql` migrations be imported), `@types/node` (dev; types for the Node seed generator), `@shopify/flash-list` (long lists), `expo-haptics` (haptics vocabulary in `src/lib/haptics.ts`), `expo-keep-awake` (logging screen), `expo-notifications` (local rest-timer notifications only), `expo-network` (sync on reconnect), `expo-image-picker` + `expo-file-system` (workout photo), `victory-native` + `@shopify/react-native-skia` (charts; Skia's install script approved in `pnpm-workspace.yaml`), `expo-image` (cached images in lists), `expo-image-manipulator` (resize photos and strip EXIF before upload).
 
 ### Expo changes fast: don't trust memory
 
@@ -36,6 +36,7 @@ APIs move between SDKs. SDK 56+ removed `@react-navigation/*` imports, for examp
 - pnpm 12 blocks dependency build scripts. If an install fails with `ERR_PNPM_IGNORED_BUILDS`, check the package and approve it with `pnpm approve-builds <pkg>` (this writes to `allowBuilds` in `pnpm-workspace.yaml`).
 - Must run in **Expo Go**. Only use libraries bundled in Expo Go until we deliberately move to dev builds. Never hand-edit `ios/` or `android/` (they're generated and git-ignored).
 - ESLint is pinned to **v9**: `eslint-plugin-react` (used by `eslint-config-expo`) crashes on ESLint 10.
+- Keep React DOM aligned with React (19.2.3), `@react-native/metro-config` aligned with React Native (0.86.3), and `test-renderer` at 1.2.0 while using React 19.2. Later test-renderer releases pull a reconciler requiring React 19.3. `pnpm check` verifies peer compatibility.
 - RNTL 14: `render` and `userEvent` are **async**. Use `await render(...)` and `await user.press(...)`.
 
 ## Folder conventions
@@ -45,10 +46,15 @@ app/                     Routes only (thin files that render a feature screen). 
   _layout.tsx            Providers: GestureHandler, SafeArea, QueryClient, ThemeProvider, nav theme
   index.tsx              Redirects to /home
   (tabs)/_layout.tsx     Bottom tabs: Home, Workout, Rank, Friends, Profile (this order)
-  (tabs)/home/           Top tabs: index (For You), feed, discover
+  (tabs)/home/           Top tabs: index (For You), feed, discover (Feed and Discover screens live in features/social)
   (tabs)/workout/        Hub: My Plan, New Workout, Routines
   (tabs)/rank/           Top tabs: index (Ranks), body-map (Body), leagues, analysis, records
-  (tabs)/friends/        Stack: index (hub with invite), leaderboards
+  lift/[key].tsx         Lift detail (history, sets that counted, standards, percentile)
+  leagues/               new (create custom), join (?code=), [id] (standings, challenges), history, season/[id] (recap)
+  (tabs)/friends/        Stack: index (hub: invite, real requests and friends), leaderboards
+  post/                  [id]/index (post, workout breakdown, comments), [id]/copy (copy workout → routine), new (composer; ?edit=id)
+  u/[username].tsx       Someone's profile: Add friend, Follow, Block, their posts
+  notifications.tsx      Respects, comments, mentions, requests, follows (bell on Home)
   (tabs)/profile/        Stack: index, edit, settings/index, settings/[section]
   plan/                  new (questionnaire), preview, index (overview: calendar, volume), why, day/[id] (session: start, swap, move, regenerate, skip)
   routine/[id].tsx       Routine editor (full screen; id 'new' creates one)
@@ -64,7 +70,11 @@ app/                     Routes only (thin files that render a feature screen). 
 src/
   components/            Shared, feature-agnostic UI (barrel: '@/components')
     navigation/          TopTabsNavigator (swipeable route tabs using our TopTabs bar), GlassTabBarBackground
-    game/                Game layer UI: RankBadge, DivisionLadder, RankGlow, artRegistry (final art slots)
+    game/                Game layer UI: RankBadge, LeagueBadge, DivisionLadder, RankGlow, SeasonFrame, artRegistry (rank, league and frame art)
+    body/                BodyMap (licensed anatomy, one path per muscle key, zoom); shared by Rank, Home, exercises, summary
+    charts/              BarChart (Views), LineChart (Victory Native), DonutChart (svg)
+    social/              ShareToFeedButton (share a record, rank-up or league result)
+    workout/             LoggedExercise (a finished exercise's sets; history and post detail)
   features/<feature>/    Everything for one feature: screens/, components/, hooks/, api/, store.ts, types.ts
   lib/                   supabase.ts (typed client), queryClient.ts, units.ts, db/ (Drizzle client, schema, ensureDb migrations), utils/
     exercises/           Exercise library: taxonomy (muscles, regions, enums), types, search, SQLite repository, sync, hooks, useExercisePicker
@@ -76,7 +86,10 @@ src/
     profile/             Option lists, zod field schemas, useProfile / useUpdateProfile, bodyweight, username check
     forms/               useZodForm (text forms validated by zod)
     game/                Rank model shared by features (divisions III–I, labels, ordering), rankKeys, engine/ (TypeScript mirror of the Postgres rank engine; see docs/RANK_SYSTEM.md)
-    ranks/               Server rank results: parsers, api, hooks (useWorkoutRewards, useRanks, useRankPredictions), display formatting
+    ranks/               Server rank results: parsers, api, hooks (ranks, ladder, lifts, history, events, records, lift detail, percentile), pure helpers (muscle breakdown, balance, analysis, chart series, record grouping)
+    leagues/             Weekly and custom leagues: types, parsers, api, hooks, countdown, results reminder
+    social/              Phase 9: types, parsers, api (RPCs), hooks (feed, discover, posts, graph, notifications, realtime), cache (optimistic patches), media (pick, upload, batched signed URLs), mentions, caughtUp
+    photos/              compressPhoto (resize + re-encode: strips EXIF/GPS) for workout and post photos
   theme/                 tokens.ts (single source of truth), displayColor (Expo Go fix), ThemeProvider, themeStore
   types/                 Global/ambient types; database.ts is generated (pnpm db:types), never hand-edited
 supabase/                config.toml, migrations/, tests/database/ (pgTAP), templates/ (auth emails), functions/, seed.sql,
@@ -120,11 +133,13 @@ MOBILE-DESIGN.md         Approved design system: rules, risks, game layer
 - Screens inside the tabs must use `Screen` (or pad by `useTabBarInset()`), because the glass tab bar (and the workout mini bar above it) float over content.
 - **Game layer**: rank model in `src/lib/game` (`rankLabel`, `compareRanks`, `rankFromServer`, divisions III–I, Champion undivided). How ranks are earned is specified in [docs/RANK_SYSTEM.md](docs/RANK_SYSTEM.md). Final rank art and avatar frames are registered in `src/components/game/artRegistry.ts`, never hard-coded in screens.
 - **Ranks**: computed only in Postgres (`rank_recompute_user`, run by `save_workout` and pg_cron jobs); read them through `@/lib/ranks` (`useWorkoutRewards`, `useRanks`, `useRankPredictions`). `src/lib/game/engine` mirrors the SQL rules in TypeScript for tests, previews and the fake-user check: change both together, then `pnpm ranks:fake` (the generated `08_rank_distribution` test fails if they disagree). Rebalance standards in `supabase/seed/standards.ts` + `pnpm standards:build` (bump `STANDARDS_VERSION`); never edit the generated migration. Engine files must stay free of RN and `@/` imports (Node runs them) and import siblings with `.ts` extensions.
-- Base components (`@/components`): Screen (title, `onBack`, pinned `footer`), SyncStatus (sync cloud), Text, Button (primary, accent, secondary, outline, ghost, destructive), Card, IconButton, Icon, Chip, Tag, Input, SelectField, NumberStepper, Sheet, EmptyState, Skeleton, Avatar, ProgressBar, SegmentedControl, TopTabs (segmented), SectionHeader, Stat, ListGroup + ListItem, BarChart, PressableScale, OptionCard (radio tile; `wide` for rows), StepProgress, PlaceholderScreen. `Screen` takes `avoidKeyboard` for forms. Game components: RankBadge, RankTag, HexEmblem, DivisionLadder, RankGlow, LeaderboardRow, BadgeTile, StreakChip. See them at `/dev/components` (Profile → Component gallery in dev builds).
+- Base components (`@/components`): Screen (title, `onBack`, pinned `footer`), SyncStatus (sync cloud), Text, Button (primary, accent, secondary, outline, ghost, destructive), Card, IconButton, Icon, Chip, Tag, Input, SelectField, NumberStepper, Sheet, EmptyState, Skeleton, Avatar, ProgressBar, SegmentedControl, TopTabs (segmented), SectionHeader, Stat, ListGroup + ListItem, BarChart, PressableScale, OptionCard (radio tile; `wide` for rows), StepProgress, PlaceholderScreen. `Screen` takes `avoidKeyboard` for forms. Game components: RankBadge, LeagueBadge, RankTag, HexEmblem, DivisionLadder, RankGlow, LeaderboardRow, BadgeTile, StreakChip. Visuals: BodyMap, LineChart, DonutChart, BarChart. Workout and social: LoggedExercise, ShareToFeedButton. See them at `/dev/components` (Profile → Component gallery in dev builds).
 - **Exercises**: take muscle keys, equipment and log types from `@/lib/exercises` (never free-text muscle names). Pick exercises with `useExercisePicker()` (`await pick({ multiple: true })`), read the library with `useExercises()` / `useExercise(id)` (local SQLite, works offline). The official library changes only through `supabase/seed/` + `pnpm exercises:build`.
 - **Routines**: read and write through `@/lib/routines` hooks (local SQLite first; every write queues a push). Set-type rules live in `setRules.ts` (warm-ups never count); never re-derive them in screens. The editor (`src/features/workout/editor`) keeps its working copy in a Zustand store: apply edits with `editRoutine(action)` so each is one undo step and supersets stay valid.
 - **Workouts**: the live session is a Zustand store per session (`src/features/workout/session/store.ts`; `activeSession` for the workout in progress, `createSessionStore('edit')` for editing history). Edit it with the pure actions in `session/actions.ts` via `store.getState().apply(...)`; tick through `tickSet` (controller) so rest, superset focus and haptics stay consistent. Persistence, rest timers and notifications live in `session/controller.ts`; never write workout rows from screens. Start sessions with `useStartWorkout()` (one in progress at a time). Server totals (duration, volume, calories) and `is_pr` come from Postgres; the client only previews.
+- **Leagues**: everything server-side (`*_leagues.sql`, rules in RANK_SYSTEM.md §18). LP reward effort and relative progress only, never absolute strength; `league_run_cycle(p_now)` is the only thing that closes weeks or seasons. Read through `@/lib/leagues` hooks; writes (create, join, leave, challenges) go through the RPCs. Rank and league queries are gated by `useServerReads()` (signed in), so the signed-out dev preview shows a sign-in prompt instead of errors. Never `db:reset` to iterate on league SQL: tear down and `supabase migration up --local`, or `create or replace` the function.
 - **Plans**: generate with `generatePlan()` from `@/lib/plans` (pure; same answers + seed = same plan) and lay out dates with `schedulePlan()`; rules live in docs/PLAN_ENGINE.md, never in screens. Save through `useCreatePlan` / `useSavePlan` (one local transaction, queued); edit routines through `editRoutineForDay` (scope `day` forks a copy, `every` edits the shared routine and its deload copy). Start planned sessions with `useStartWorkout()({ kind: 'planDay', planDayId })`, which applies progression; finishing marks the day done. Plan routines (`source = 'plan'`) stay out of the Routines list. Engine changes show up in the 10 profile snapshots: review the diff.
+- **Social**: who sees what is decided only in Postgres (`can_view_post_row`: the more restrictive of post and profile visibility, friendships, blocks; rules in SCHEMA.md → Social). Read through `@/lib/social` hooks (definer RPCs); write through its mutations (RPCs, never table inserts, except Respect on `post_likes`). Posts are never built by the client: workout posts come from a trigger, milestones from `create_milestone_post`. Respect and comments are optimistic through `patchPost`/`addCommentLocally` in `lib/social/cache.ts`. Images use `expo-image` with `cacheKey` = storage path; photos go through `compressPhoto` before upload. Discover ranking changes need docs/DISCOVER_RANKING.md and `12_social` updated together.
 - **Mock data**: until each backend phase lands, screens read typed placeholder data from `src/features/<feature>/mocks.ts`. Replace a mocks file with real queries (TanStack Query / Drizzle) without changing the screens.
 
 ## Commands
@@ -139,7 +154,7 @@ pnpm format           # prettier --write (format:check to verify)
 pnpm test             # jest
 pnpm check            # typecheck + lint + format:check + test (must pass before done)
 pnpm expo:doctor      # expo-doctor (plain `pnpm doctor` is pnpm's own command)
-pnpm db:start         # local Supabase in Docker incl. Storage (Colima: `colima start` first); db:stop to stop
+pnpm db:start         # local Supabase in Docker incl. Storage and Realtime (Colima: `colima start` first); db:stop to stop
 pnpm db:reset         # rebuild the local DB from migrations + seed
 pnpm db:test          # pgTAP tests in supabase/tests/database (RLS proofs); db:test:remote runs them on the linked project
 pnpm db:types         # regenerate src/types/database.ts from the local DB (db:types:remote for the linked project)
@@ -147,6 +162,9 @@ pnpm db:push          # apply migrations to the linked hosted project
 pnpm exercises:build  # validate supabase/seed/exercises.ts and write the library migration
 pnpm standards:build  # validate supabase/seed/standards.ts and write the strength standards migration
 pnpm ranks:fake       # regenerate the 50-fake-lifter parity test (08_rank_distribution) after engine/standards changes
+pnpm dev:seed         # LOCAL: the 50 fake lifters + demo@fake.test as real accounts with full rank and league history (~5 min)
+pnpm leagues:simulate # LOCAL: fast-forward the weekly league cycle (--weeks N); run dev:seed first
+pnpm social:acceptance # LOCAL: Phase 9 done-when checks as social.a/b/c@fake.test over the real API; run dev:seed first
 pnpm db:local:generate # new local SQLite migration in drizzle/ after changing src/lib/db/schema.ts
 ```
 

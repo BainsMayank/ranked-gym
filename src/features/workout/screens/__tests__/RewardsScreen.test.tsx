@@ -13,6 +13,11 @@ let mockState: RewardsState | undefined;
 const mockDismissAll = jest.fn();
 const mockPush = jest.fn();
 
+// Milestone sharing (Phase 9) talks to the server; these screens only need its shape.
+jest.mock('@/lib/social/hooks', () => ({
+  useMilestoneMode: () => ({ data: 'ask' }),
+  useMilestonePost: () => ({ mutate: jest.fn(), isPending: false }),
+}));
 jest.mock('expo-router', () => ({
   useRouter: () => ({ dismissAll: mockDismissAll, push: mockPush, back: jest.fn() }),
   useLocalSearchParams: () => ({ id: 'aaaaaaaa-0000-0000-0000-000000000002' }),

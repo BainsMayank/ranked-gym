@@ -80,6 +80,7 @@ export const routineDocSchema = z.object({
   estimatedDurationMin: int(0, 1440),
   source: z.enum(routineSources),
   sourceRef: z.string().max(100).nullable(),
+  sourceLabel: z.string().max(40).nullable().optional(),
   sortOrder: z.number().int(),
   archived: z.boolean(),
   updatedAt: z.string(),

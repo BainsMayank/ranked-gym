@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
 
@@ -41,12 +42,34 @@ export function RoutineMetaHeader({
     editRoutine((d) => updateMeta(d, { description: t.trim() || null })),
   );
 
+  const credit = doc.source === 'copied' && doc.sourceLabel ? doc.sourceLabel : null;
+  const creditUser = credit?.startsWith('@') ? credit.slice(1) : null;
+
   return (
     <View className="gap-lg pb-lg">
+      {credit ? (
+        <Text variant="caption" tone="muted">
+          Copied from{' '}
+          <Text
+            variant="caption"
+            tone="primary"
+            accessibilityRole="link"
+            onPress={
+              creditUser
+                ? () => router.push({ pathname: '/u/[username]', params: { username: creditUser } })
+                : undefined
+            }
+          >
+            {credit}
+          </Text>
+        </Text>
+      ) : null}
       {restored ? (
         <View className="flex-row items-center justify-between gap-md">
           <Text variant="caption" tone="muted" className="flex-1">
-            Restored your unsaved changes.
+            {credit
+              ? 'Not saved yet. Save to add it to your routines.'
+              : 'Restored your unsaved changes.'}
           </Text>
           <Button label="Discard" variant="ghost" size="sm" onPress={onDiscard} />
         </View>

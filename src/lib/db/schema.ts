@@ -115,6 +115,7 @@ export const routines = sqliteTable(
     estimatedDurationMin: integer('estimated_duration_min').notNull(),
     source: text('source').$type<RoutineSource>().notNull(),
     sourceRef: text('source_ref'),
+    sourceLabel: text('source_label'),
     sortOrder: integer('sort_order').notNull(),
     archived: integer('archived', { mode: 'boolean' }).notNull(),
     updatedAt: text('updated_at').notNull(),

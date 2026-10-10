@@ -1,5 +1,12 @@
 import { createMemoryStore } from '../__fixtures__/memoryStore';
-import { configureSync, flushNow, registerSyncHandler, retryNow, runSync } from '../runner';
+import {
+  configureSync,
+  flushNow,
+  registerSyncHandler,
+  retryNow,
+  runSync,
+  stopSync,
+} from '../runner';
 import { syncStateOf, useSyncStatusStore } from '../status';
 import { backoffMs, STUCK_ATTEMPTS } from '../types';
 
@@ -51,7 +58,13 @@ beforeEach(() => {
   server = createServer();
   local.clear();
   useSyncStatusStore.setState({ online: true, syncing: false, lastSyncedAt: null });
-  configureSync({ reset: true, store: memory.store, now: () => clock, timers: false });
+  configureSync({
+    reset: true,
+    store: memory.store,
+    now: () => clock,
+    timers: false,
+    scope: () => 'account-a',
+  });
   registerSyncHandler('workout', {
     rank: () => 3,
     push: async (id) => {
@@ -193,4 +206,37 @@ it('flushNow pushes held-back drafts too (sign-out)', async () => {
   expect(await flushNow()).toEqual({ pushed: 1, failed: 0 });
   expect(server.rows.get('w1')?.version).toBe(1);
   expect(memory.rows.size).toBe(0);
+});
+
+it('leaves preview writes queued without attempting a server push', async () => {
+  configureSync({ scope: () => undefined });
+  saveLocally({ id: 'w1', name: 'Preview', version: 1 });
+  expect(await runSync()).toEqual({ pushed: 0, failed: 0 });
+  expect(server.calls).toEqual([]);
+  expect(memory.rows.get('workout:w1')?.attempts).toBe(0);
+});
+
+it('stops the batch if the account changes while a push is in flight', async () => {
+  let account: string | undefined = 'account-a';
+  configureSync({ scope: () => account });
+  saveLocally({ id: 'w1', name: 'First', version: 1 });
+  saveLocally({ id: 'w2', name: 'Second', version: 1 });
+  const push = jest.fn(async () => {
+    account = 'account-b';
+  });
+  registerSyncHandler('workout', { rank: () => 3, push });
+  expect(await runSync()).toEqual({ pushed: 0, failed: 0 });
+  expect(push).toHaveBeenCalledTimes(1);
+  expect(memory.rows.size).toBe(2);
+  expect(useSyncStatusStore.getState().syncing).toBe(false);
+});
+
+it('does not continue a batch after the network watcher stops', async () => {
+  saveLocally({ id: 'w1', name: 'First', version: 1 });
+  saveLocally({ id: 'w2', name: 'Second', version: 1 });
+  const push = jest.fn(async () => stopSync());
+  registerSyncHandler('workout', { rank: () => 3, push });
+  await runSync();
+  expect(push).toHaveBeenCalledTimes(1);
+  expect(memory.rows.size).toBe(2);
 });

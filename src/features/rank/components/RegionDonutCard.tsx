@@ -1,104 +1,100 @@
 import { View } from 'react-native';
-import Svg, { Circle } from 'react-native-svg';
 
-import { Card, Text } from '@/components';
+import { Card, DonutChart, Text } from '@/components';
+import { regionLabels } from '@/lib/exercises/taxonomy';
 import { tierName } from '@/lib/game';
+import {
+  ladderPosition,
+  musclesByTier,
+  regionShares,
+  type CurrentRank,
+  type RankLadder,
+} from '@/lib/ranks';
 import { rankColors, useTheme } from '@/theme';
 
-import { overall, regions, tierCounts } from '../mocks';
+import { formatScore } from '../format';
 
-const SIZE = 132;
-const STROKE = 18;
-const R = (SIZE - STROKE) / 2;
-const C = 2 * Math.PI * R;
-
-/** Where rank points come from (donut) and how many muscles sit in each tier (stacked bar). */
-export function RegionDonutCard() {
+/** Where rank points come from (donut by region) and how many muscles sit in each tier. */
+export function RegionDonutCard({
+  ranks,
+  overall,
+  ladder,
+}: {
+  ranks: readonly CurrentRank[];
+  overall: CurrentRank | null;
+  ladder: RankLadder | undefined;
+}) {
   const { colors } = useTheme();
-  const offsets = regions.map((_, i) =>
-    regions.slice(0, i).reduce((sum, r) => sum + r.share * C, 0),
-  );
-  const totalMuscles = tierCounts.reduce((s, t) => s + t.count, 0);
+  const shares = regionShares(ranks);
+  const tiers = musclesByTier(ranks);
+  const tracked = tiers.reduce((s, t) => s + t.count, 0);
+  const tierOf = (score: number) => (ladder ? ladderPosition(score, ladder).tier : 'iron');
 
   return (
     <Card className="gap-lg">
       <Text variant="subheading">Rank points by body region</Text>
-      <View className="flex-row items-center gap-lg">
-        <View
-          accessible
-          accessibilityRole="image"
-          accessibilityLabel={`Rank points by region: ${regions.map((r) => `${r.name} ${Math.round(r.share * 100)}%`).join(', ')}`}
-          className="items-center justify-center"
-        >
-          <Svg width={SIZE} height={SIZE} style={{ transform: [{ rotate: '-90deg' }] }}>
-            <Circle
-              cx={SIZE / 2}
-              cy={SIZE / 2}
-              r={R}
-              stroke={colors.surfaceRaised}
-              strokeWidth={STROKE}
-              fill="none"
-            />
-            {regions.map((r, i) => {
-              const len = r.share * C;
-              return (
-                <Circle
-                  key={r.name}
-                  cx={SIZE / 2}
-                  cy={SIZE / 2}
-                  r={R}
-                  stroke={rankColors[r.tier].base}
-                  strokeWidth={STROKE}
-                  fill="none"
-                  strokeDasharray={`${Math.max(0, len - 3)} ${C}`}
-                  strokeDashoffset={-(offsets[i] ?? 0)}
-                />
-              );
-            })}
-          </Svg>
-          <View className="absolute items-center">
+      {shares.length === 0 ? (
+        <Text tone="muted">Log a squat, a bench press and a row to fill this in.</Text>
+      ) : (
+        <View className="flex-row items-center gap-lg">
+          <DonutChart
+            slices={shares.map((s) => ({
+              key: s.region,
+              value: s.score,
+              color: rankColors[tierOf(s.score)].base,
+            }))}
+            accessibilityLabel={`Rank points by region: ${shares.map((s) => `${regionLabels[s.region]} ${Math.round(s.share * 100)}%`).join(', ')}`}
+          >
             <Text variant="heading" numeric>
-              {overall.strengthScore.toLocaleString('en-IN')}
+              {overall?.score != null ? formatScore(overall.score) : '—'}
             </Text>
             <Text variant="overline" tone="muted">
-              SS
+              Overall
             </Text>
+          </DonutChart>
+          <View className="flex-1 gap-sm">
+            {shares.map((s) => (
+              <View key={s.region} className="flex-row items-center gap-sm">
+                <View
+                  className="h-2.5 w-2.5 rounded-sm"
+                  style={{ backgroundColor: rankColors[tierOf(s.score)].base }}
+                />
+                <Text variant="label" className="flex-1">
+                  {regionLabels[s.region]}
+                </Text>
+                <Text variant="label" numeric>
+                  {Math.round(s.share * 100)}%
+                </Text>
+              </View>
+            ))}
           </View>
         </View>
-        <View className="flex-1 gap-sm">
-          {regions.map((r) => (
-            <View key={r.name} className="flex-row items-center gap-sm">
-              <View
-                className="h-2.5 w-2.5 rounded-sm"
-                style={{ backgroundColor: rankColors[r.tier].base }}
-              />
-              <Text variant="label" className="flex-1">
-                {r.name}
-              </Text>
-              <Text variant="label" numeric>
-                {Math.round(r.share * 100)}%
-              </Text>
-            </View>
-          ))}
-        </View>
-      </View>
+      )}
       <View className="gap-xs">
         <Text variant="caption" tone="muted">
-          Muscles by tier ({totalMuscles} tracked)
+          Muscles by tier ({tracked} tracked)
         </Text>
         <View className="h-2 flex-row gap-xxs">
-          {tierCounts.map((t) => (
+          {tiers.map((t) => (
             <View
               key={t.tier}
               className="rounded-full"
-              style={{ flex: t.count, backgroundColor: rankColors[t.tier].base }}
+              style={{
+                flex: t.count,
+                backgroundColor: t.tier === 'unranked' ? colors.border : rankColors[t.tier].base,
+              }}
             />
           ))}
         </View>
-        <View className="flex-row justify-between">
-          {tierCounts.map((t) => (
-            <Text key={t.tier} variant="caption" style={{ color: rankColors[t.tier].base }}>
-              {t.count} {tierName(t.tier)}
+        <View className="flex-row flex-wrap gap-x-md gap-y-xxs">
+          {tiers.map((t) => (
+            <Text
+              key={t.tier}
+              variant="caption"
+              style={t.tier === 'unranked' ? undefined : { color: rankColors[t.tier].base }}
+              tone={t.tier === 'unranked' ? 'muted' : 'default'}
+            >
+              {t.count} {t.tier === 'unranked' ? 'unranked' : tierName(t.tier)}
             </Text>
           ))}
         </View>

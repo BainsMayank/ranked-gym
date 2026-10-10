@@ -2,6 +2,16 @@
 
 Third-party data and assets used in Ranked Gym, with their licences. Add an entry whenever outside content is used.
 
+## Body map
+
+- **Source**: [react-native-body-highlighter](https://github.com/HichamELBSI/react-native-body-highlighter), ELABBASSI Hicham, revision `8ed39ac2ae9cb46fb79d77eedec7e5b029a75174`.
+- **Licence**: [MIT](https://github.com/HichamELBSI/react-native-body-highlighter/blob/main/LICENSE), checked 2026-10-09; full notice retained in `assets/body/LICENSE`.
+- **Use**: four male/female front/back SVG contour datasets. Original colours removed, canonical training regions assigned in an adapter, view boxes retained. Details and schematic subdivision limitations in `assets/body/README.md`. The upstream package is not a runtime dependency.
+
+## Rank and league emblems
+
+- Original project artwork generated with OpenAI image generation on 2026-10-09; no third-party game assets or icon pack copied. Eight transparent rank masters and four weekly-league masters; existing rank tokens supplied as palette direction. See `assets/ranks/README.md` and `docs/design/artwork/PROMPTS.md`.
+
 ## Exercise library
 
 - **Source**: [free-exercise-db](https://github.com/yuhonas/free-exercise-db) by yuhonas (data originally from exercises.json).

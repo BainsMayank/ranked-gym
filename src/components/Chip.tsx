@@ -1,4 +1,4 @@
-import { Pressable } from 'react-native';
+import { PressableScale } from './PressableScale';
 
 import { cn } from '@/lib/utils';
 
@@ -25,13 +25,13 @@ export function Chip({
   className,
 }: ChipProps) {
   return (
-    <Pressable
+    <PressableScale
       accessibilityRole={onPress ? 'button' : 'text'}
       accessibilityLabel={accessibilityLabel ?? label}
       accessibilityState={{ selected, disabled: !!disabled }}
       onPress={onPress}
       disabled={disabled || !onPress}
-      hitSlop={4}
+      hitSlop={6}
       className={cn(
         'min-h-8 flex-row items-center gap-xs self-start rounded-full px-md active:opacity-70',
         selected ? 'bg-text' : 'bg-surface-raised',
@@ -43,6 +43,6 @@ export function Chip({
       <Text variant="label" tone={selected ? 'inverse' : 'default'}>
         {label}
       </Text>
-    </Pressable>
+    </PressableScale>
   );
 }

@@ -43,7 +43,13 @@ export function BarChart({
       className={cn('gap-xs', className)}
     >
       <View
-        className="flex-row items-end gap-xs"
+        className={
+          data.length > 60
+            ? 'flex-row items-end'
+            : data.length > 30
+              ? 'flex-row items-end gap-xxs'
+              : 'flex-row items-end gap-xs'
+        }
         style={{ height: height + (showValues ? 18 : 0) }}
       >
         {data.map((d, i) => (
@@ -56,7 +62,7 @@ export function BarChart({
             <View
               className="w-full rounded-sm"
               style={{
-                height: Math.max(3, (d.value / max) * height),
+                height: d.value > 0 ? Math.max(3, (d.value / max) * height) : 0,
                 backgroundColor: i === highlightIndex ? colors.primary : colors.edge,
               }}
             />

@@ -1,8 +1,10 @@
 import { Tag } from '@/components';
+import { daysLeft, useLeagueHome } from '@/lib/leagues';
 
-import { season } from '../mocks';
-
-/** Current season and time left, for the Rank header. */
+/** Current league season and days left, for the Rank header. */
 export function SeasonTag() {
-  return <Tag label={season.label} />;
+  const { data } = useLeagueHome();
+  if (!data?.season) return null;
+  const left = daysLeft(data.season.endsAt);
+  return <Tag label={`Season ${data.season.number} · ${left} day${left === 1 ? '' : 's'} left`} />;
 }

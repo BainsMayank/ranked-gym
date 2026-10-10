@@ -1,4 +1,5 @@
 import { useAuthStore } from '@/lib/auth/authStore';
+import { assertAccount, requireAccount } from '@/lib/auth/scope';
 import { queryClient } from '@/lib/queryClient';
 import { pendingIds, registerSyncHandler, runSync } from '@/lib/sync';
 
@@ -42,7 +43,13 @@ export function registerWorkoutSync(): void {
     // After routines (a workout may point at a routine made offline); deletes last.
     rank: (op) => (op === 'upsert' ? 3 : 5),
     push: async (id, op) => {
-      if (op === 'delete') return deleteRemoteWorkout(signedInUserId(), id);
+      if (op === 'delete') {
+        await deleteRemoteWorkout(signedInUserId(), id);
+        void queryClient.invalidateQueries({ queryKey: ['insights'] });
+        void queryClient.invalidateQueries({ queryKey: ['ranks'] });
+        void queryClient.invalidateQueries({ queryKey: ['leagues'] });
+        return;
+      }
       const record = await loadWorkoutRecord(id);
       if (!record) return;
       // A draft the server never saw needs no "discarded" push.
@@ -58,6 +65,8 @@ export function registerWorkoutSync(): void {
       // The server scores finished workouts as they arrive; the summary screen is waiting.
       if (result.rewards) await saveWorkoutRewards(id, result.rewards);
       void queryClient.invalidateQueries({ queryKey: ['ranks'] });
+      void queryClient.invalidateQueries({ queryKey: ['insights'] });
+      void queryClient.invalidateQueries({ queryKey: ['leagues'] });
     },
   });
 
@@ -79,6 +88,7 @@ export interface WorkoutPullResult {
 
 /** Pushes pending changes, then brings finished workouts on this device up to date. */
 export async function syncWorkouts(): Promise<WorkoutPullResult> {
+  const account = requireAccount();
   registerWorkoutSync();
   await runSync();
 
@@ -92,6 +102,7 @@ export async function syncWorkouts(): Promise<WorkoutPullResult> {
     .map(([id]) => id);
   const removeIds = [...local.keys()].filter((id) => !remote.has(id) && !pending.has(id));
   const docs = await fetchRemoteWorkouts(changed);
+  assertAccount(account);
   await applyWorkoutPull({ docs, removeIds });
   return { downloaded: docs.length, removed: removeIds.length };
 }

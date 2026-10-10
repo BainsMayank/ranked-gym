@@ -36,6 +36,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     'expo-sqlite',
     'expo-web-browser',
     'expo-secure-store',
+    'expo-image',
   ],
   experiments: {
     typedRoutes: true,

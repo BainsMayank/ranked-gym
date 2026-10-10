@@ -53,4 +53,11 @@ module.exports = defineConfig([
     files: ['src/theme/**'],
     rules: { 'no-restricted-syntax': 'off' },
   },
+  {
+    files: ['scripts/**/*.cjs'],
+    languageOptions: {
+      sourceType: 'commonjs',
+      globals: { __dirname: 'readonly' },
+    },
+  },
 ]);

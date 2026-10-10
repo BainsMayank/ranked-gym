@@ -67,7 +67,7 @@ Dynamic Type: text 28pt and larger is capped at 1.3×, body at 1.6×.
 - **`Button` `primary` is inverted** (white on dark, black on light): the one main action per screen. `accent` (orange fill) is for game moments such as joining a challenge or claiming a reward.
 - **Selected state is inverted** for `SegmentedControl` and `Chip`. No tinted pills.
 - **Lists are grouped with hairlines**, not stacks of cards. A `Card` is a discrete, often tappable object.
-- **The signature element is the division ladder** (`DivisionLadder`): rank progress as notches IV → I, never a generic rounded bar.
+- **The signature element is the division ladder** (`DivisionLadder`): rank progress as notches III → I (three per tier), never a generic rounded bar.
 - **Avoid**: greeting headers ("Hi, Mayank 👋"), icon-plus-number stat tiles, tinted icon chips on every row, badge confetti, and emoji as icons.
 - **Sub-tabs are segmented** (`TopTabs`): a pill track with a sliding inverted segment, matching the mockups.
 - **Colour on game objects only**: rank names use `RankTag` (tier colour on text), progress for a rank uses the tier colour, and everything else stays neutral. Neutral data bars use `ProgressBar tone="neutral"`; colour marks exceptions (under target, ready, new PR).
@@ -95,14 +95,14 @@ Layouts follow `docs/design/mockups/` (15 screens). Deliberate differences from 
 
 Everything a ranked, competitive app will need plugs in here without restyling screens:
 
-| Need                                | Where                                            | How it extends                                                                                                                                                                  |
-| ----------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Rank model                          | `src/lib/game/ranks.ts`                          | Divisions, tiers without divisions, labels, ordering/compare. Change the division count here (open decision #3).                                                                |
-| Rank icons (final art)              | `src/components/game/artRegistry.ts` → `rankArt` | Register a PNG/WebP per tier (optionally per division) or a component (SVG now; Skia or Lottie once approved). `RankBadge` uses the placeholder shield until art is registered. |
-| Avatars                             | `Avatar` (`ring`, `level`, `frameId`)            | Rank or rarity ring, level tag, cosmetic frames from `avatarFrameArt` keyed by server cosmetic id.                                                                              |
-| Rarity (badges, cosmetics, rewards) | `rarities` / `rarityColors` in tokens            | Four rarities on the rank hues.                                                                                                                                                 |
-| Rank progress                       | `DivisionLadder`, `ProgressBar` (`rankTier`)     | Ladder for tiers with divisions; points bar for Master/Champion.                                                                                                                |
-| Celebration and hero moments        | `RankGlow`, `Button` `accent`                    | Tier-coloured glow; orange CTA for game actions.                                                                                                                                |
+| Need                                | Where                                            | How it extends                                                                                                                                                            |
+| ----------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Rank model                          | `src/lib/game/ranks.ts`                          | Divisions, tiers without divisions, labels, ordering/compare. Change the division count here (open decision #3).                                                          |
+| Rank icons (registered art)         | `src/components/game/artRegistry.ts` → `rankArt` | Original PNG masters with vector division pips are registered for all eight tiers. Individual entries can be replaced with images or components without changing screens. |
+| Avatars                             | `Avatar` (`ring`, `level`, `frameId`)            | Rank or rarity ring, level tag, cosmetic frames from `avatarFrameArt` keyed by server cosmetic id.                                                                        |
+| Rarity (badges, cosmetics, rewards) | `rarities` / `rarityColors` in tokens            | Four rarities on the rank hues.                                                                                                                                           |
+| Rank progress                       | `DivisionLadder`, `ProgressBar` (`rankTier`)     | Ladder for tiers with divisions; points bar for Master/Champion.                                                                                                          |
+| Celebration and hero moments        | `RankGlow`, `Button` `accent`                    | Tier-coloured glow; orange CTA for game actions.                                                                                                                          |
 
 Rules: game values (ranks, XP, rewards) always come from the server; components only display them. New game art goes through the registry, never hard-coded in screens.
 
@@ -115,4 +115,35 @@ Rules: game values (ranks, XP, rewards) always come from the server; components 
 | Glass tab bar                 | Depth the user asked for       | Flagged by the design skill as a common AI habit; kept because content truly scrolls under it. Background swap only; navigator keeps press states and insets. Android fallback. |
 | Division ladder               | Rank-native signature          | Custom control: exposes `accessibilityValue` with a text description.                                                                                                           |
 
-**Deferred**: glass on the top sub-tab strip (each page would need its own scroll inset); final rank art (the user will supply it, and the slots are ready).
+**Artwork update (2026-10-09)**: eight original metal/enamel rank masters and four separate weekly-league emblems are registered in `artRegistry.ts`. Tier palette stays unchanged. Division pips are vector UI, independent of the image. Licensed MIT male/female anatomy contours replace the provisional body shapes; see `assets/body/README.md` for source and canonical mapping. Use the shared `BodyMap` for ranks, volume and recovery; screens provide values and a token-based colour scale.
+
+**Rank tab and leagues (Phase 7)**:
+
+- **Shared visuals**: Rank-tab charts are the shared `LineChart` (Victory Native, tier bands behind the line, a rank-coloured dot per rank-up), `BarChart` (weekday and time of day; the strongest bar in orange) and `DonutChart` (region share in tier colours).
+- **Hero and lists**: the overall hero keeps one hero moment (a display-size rank, `RankGlow`, `DivisionLadder`) and becomes a placement card with notches before placement. Lift rows show a tier-coloured progress bar plus a muted "Next: … at …" line.
+- **Leagues**: a `LeagueBadge` hero in the league's tier glow (Rookie bronze, Contender gold, Elite platinum, Legend champion). Standings use `LeaderboardRow` with promotion and demotion `ZoneDivider`s. The LP breakdown is a plain list, the Monday result is a one-time sheet, and the chat is a placeholder card.
+- **Season frames**: `SeasonFrame` (Elite, Legend) is drawn in SVG and registered in `avatarFrameArt` as `season-elite` and `season-legend`.
+- **Signed out**: the dev preview shows a sign-in prompt on every server-backed sub-tab instead of errors.
+
+**Deferred**: glass on the top sub-tab strip (each page would need its own scroll inset); smaller production image derivatives and low-end Android decoding checks.
+
+## Phase 8: Home insights
+
+App Read remains ranked fitness for iOS/Android, unified brand, dials **6 / 5 / 4**. No new palette, typeface or visual tokens. Nav Read: Home → For You → Muscle Analysis / Recovery / Goals / Overview, with normal back to Home; Goals → Create/Edit and Overview → Log bodyweight sheet. Existing tab order and deep links stay intact.
+
+Today is the main action, the four entry cards are destinations, and dense metrics use grouped lists. A small greeting **inside Today** is explicitly requested by the Phase 8 brief; the Home header remains content-first. The shared BodyMap is reused for weighted volume and recovery. Recovery colours use existing semantic tokens plus a text legend and exact percentages; muscle range bands and push/pull/legs distribution extend the base ProgressBar. Goal progress uses the base DonutChart. All controls use the base press feedback and sheets respect reduced motion.
+
+Cached data appears immediately, with explicit offline/sync notices. Account-free development uses local data with a source note. Today shows this week's league division and position (hidden in the signed-out preview). See [Phase 8 review](docs/design/phase8/REVIEW.md) for coverage and device limits.
+
+## Phase 9: Feed, Discover and social
+
+App read and dials unchanged (**6 / 5 / 4**); no new tokens, fonts or one-off colours. Nav read: Home → Feed / Discover (top tabs) → push `post/[id]`, `u/[username]`, `notifications`; `post/new` (composer) and `post/[id]/copy` slide up as card screens with an explicit close; the bell lives in the Home header. Deep links: `/post/:id`, `/u/:username`, `/notifications`.
+
+- **Feed posts are full width, separated by hairlines**, not a stack of cards: author row (rank-ringed avatar, @username, time, visibility icon), then the content, then actions. Text never sits in a card.
+- **Milestones are the loud reward**: records, rank-ups, goals and league results sit in a raised `Card` with one game object each (a `display` numeric PR in `success`, the registered `RankBadge` art with `RankTag`, a complete `DonutChart`, a `LeagueBadge`). `RankGlow` appears only behind a rank-up on its own post screen, never in lists.
+- **Workout posts**: name, one muted line of totals (duration · volume · sets, not stat tiles), the first three exercises with their best set as a hairline list with `PR` tags, a small front `BodyMap` thumbnail (most-trained muscles in orange) and the workout photo.
+- **Respect** is our like: a thumbs-up toggle that turns `primary` when given, with a selection haptic and the base press spring (reduced motion falls back to opacity). Comments and Copy workout (`ghost`) share the row.
+- **Discover** keeps the same post rows, with an overline naming why (Same college · Similar rank) and the "People to train with" carousel of small cards (Add friend `outline`, Follow `ghost`). Filters are inverted `Chip`s.
+- **One white button per screen** holds: the composer's Post, Copy's Save routine, a profile's Add friend/Accept. Repeated row actions (Accept, Decline, Cancel, Share) are `outline` or `ghost`. The "New posts" pill is the one floating inverted control and only appears when there are new posts.
+- **States**: post-shaped skeletons, an `EmptyState` with an action, inline errors with Try again, an offline notice over cached posts, pull to refresh, and a "You're all caught up" hairline divider. Signed-out preview shows the sign-in prompt.
+- **Images**: `expo-image` with `recyclingKey` and `cacheKey` = storage path, 4:5 to 1.91:1, up to four per post in a paged row with a "2 / 4" counter on a translucent background chip.

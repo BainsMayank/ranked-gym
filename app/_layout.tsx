@@ -20,6 +20,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { ToastHost } from '@/components';
+import { clearWorkoutSession } from '@/features/workout/session/clearSession';
 import { useAuthBootstrap, useAuthStore } from '@/lib/auth';
 import { useAuthGate, type GateScreen } from '@/lib/auth/useAuthGate';
 import { queryClient } from '@/lib/queryClient';
@@ -77,6 +78,11 @@ function RootNavigator({ screen }: { screen: GateScreen }) {
           />
         </Stack.Protected>
         <Stack.Protected guard={screen === 'app'}>
+          <Stack.Screen name="insights/muscles" options={{ headerShown: false }} />
+          <Stack.Screen name="insights/recovery" options={{ headerShown: false }} />
+          <Stack.Screen name="insights/goals" options={{ headerShown: false }} />
+          <Stack.Screen name="insights/overview" options={{ headerShown: false }} />
+          <Stack.Screen name="goals/edit" options={{ headerShown: false }} />
           <Stack.Screen name="(tabs)" options={{ headerShown: false, animation: 'fade' }} />
           <Stack.Screen name="plan/new" options={{ headerShown: false }} />
           <Stack.Screen name="plan/preview" options={{ headerShown: false }} />
@@ -113,6 +119,23 @@ function RootNavigator({ screen }: { screen: GateScreen }) {
           />
           <Stack.Screen name="exercises/[id]" options={{ headerShown: false }} />
           <Stack.Screen name="exercises/new" options={{ headerShown: false }} />
+          <Stack.Screen name="lift/[key]" options={{ headerShown: false }} />
+          <Stack.Screen name="leagues/new" options={{ headerShown: false }} />
+          <Stack.Screen name="leagues/join" options={{ headerShown: false }} />
+          <Stack.Screen name="leagues/[id]" options={{ headerShown: false }} />
+          <Stack.Screen name="leagues/history" options={{ headerShown: false }} />
+          <Stack.Screen name="leagues/season/[id]" options={{ headerShown: false }} />
+          <Stack.Screen name="post/[id]/index" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="post/[id]/copy"
+            options={{ headerShown: false, animation: 'slide_from_bottom' }}
+          />
+          <Stack.Screen
+            name="post/new"
+            options={{ headerShown: false, animation: 'slide_from_bottom', gestureEnabled: false }}
+          />
+          <Stack.Screen name="u/[username]" options={{ headerShown: false }} />
+          <Stack.Screen name="notifications" options={{ headerShown: false }} />
         </Stack.Protected>
         <Stack.Screen
           name="dev/components"
@@ -125,7 +148,7 @@ function RootNavigator({ screen }: { screen: GateScreen }) {
 
 /** Waits for the font, the saved session and (when signed in) the profile before hiding the splash. */
 function AppGate({ fontsReady }: { fontsReady: boolean }) {
-  useAuthBootstrap();
+  useAuthBootstrap(clearWorkoutSession);
   const { screen } = useAuthGate();
   // Once booted, keep the navigator mounted: a later 'loading' (profile fetching right after sign-in)
   // just parks on the blank index route until the gate settles.

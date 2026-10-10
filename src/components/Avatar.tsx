@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Image as ExpoImage } from 'expo-image';
 import { Image, View } from 'react-native';
 
 import { cn } from '@/lib/utils';
@@ -68,7 +69,13 @@ export function Avatar({ name, uri, size = 'md', ring, frameId, level, className
         style={{ width: d, height: d }}
       >
         {showImage ? (
-          <Image source={{ uri }} style={{ width: d, height: d }} onError={() => setFailed(true)} />
+          <ExpoImage
+            source={{ uri }}
+            style={{ width: d, height: d }}
+            cachePolicy="memory-disk"
+            recyclingKey={uri}
+            onError={() => setFailed(true)}
+          />
         ) : (
           <Text variant={textVariant[size]} tone="muted">
             {initials(name)}

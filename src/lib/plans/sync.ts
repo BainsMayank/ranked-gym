@@ -1,3 +1,4 @@
+import { assertAccount, requireAccount } from '@/lib/auth/scope';
 import { registerRoutineSync } from '@/lib/routines/sync';
 import { pendingIds, registerSyncHandler, runSync } from '@/lib/sync';
 
@@ -36,6 +37,7 @@ export interface PlanPullResult {
 }
 
 export async function syncPlans(): Promise<PlanPullResult> {
+  const account = requireAccount();
   registerPlanSync();
   await runSync();
   const [remote, local, pending] = await Promise.all([
@@ -48,6 +50,7 @@ export async function syncPlans(): Promise<PlanPullResult> {
     .map(([id]) => id);
   const removeIds = [...local.keys()].filter((id) => !remote.has(id) && !pending.has(id));
   const docs = await fetchRemotePlans(changed);
+  assertAccount(account);
   await applyPlanPull({ docs, removeIds });
   return { downloaded: docs.length, removed: removeIds.length };
 }

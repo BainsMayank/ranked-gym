@@ -15,6 +15,7 @@ import {
 
 import { ExerciseAbout } from '../components/ExerciseAbout';
 import { ExerciseHistoryList } from '../components/ExerciseHistoryList';
+import { ExerciseRecords } from '../components/ExerciseRecords';
 
 const tabs = [
   { key: 'about', label: 'About' },
@@ -23,7 +24,7 @@ const tabs = [
 ] as const;
 type TabKey = (typeof tabs)[number]['key'];
 
-/** Exercise detail: muscles and how-to, your history with it, and records (Phase 6). */
+/** Exercise detail: muscles and how-to, your history with it, and its records. */
 export function ExerciseDetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -64,13 +65,7 @@ export function ExerciseDetailScreen() {
         <TopTabs tabs={tabs} activeKey={tab} onChange={(key) => setTab(key as TabKey)} />
         {tab === 'about' ? <ExerciseAbout exercise={exercise} /> : null}
         {tab === 'history' ? <ExerciseHistoryList exerciseId={exercise.id} /> : null}
-        {tab === 'records' ? (
-          <EmptyState
-            icon="trophy-outline"
-            title="No records yet"
-            description="Your best weight, reps and estimated 1RM will show here."
-          />
-        ) : null}
+        {tab === 'records' ? <ExerciseRecords exerciseId={exercise.id} /> : null}
       </View>
     </Screen>
   );

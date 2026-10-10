@@ -58,7 +58,7 @@ export function useStartWorkout() {
       id: randomUUID(),
       now,
       newId: randomUUID,
-      bodyweightKg: userId ? readCachedBodyweight(userId) : null,
+      bodyweightKg: readCachedBodyweight(userId ?? 'device-preview'),
       visibility: profile?.visibility ?? 'friends',
       oneRepMax: (id) => best.get(id) ?? null,
     };

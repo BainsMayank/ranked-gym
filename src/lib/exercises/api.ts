@@ -1,5 +1,6 @@
 import { randomUUID } from 'expo-crypto';
 
+import { readAllRows } from '@/lib/pagination';
 import { getSupabase } from '@/lib/supabase';
 import type { Database } from '@/types/database';
 
@@ -58,22 +59,28 @@ export async function fetchLibraryVersion(): Promise<number> {
 }
 
 export async function fetchOfficialExercises(): Promise<Exercise[]> {
-  const { data, error } = await getSupabase()
-    .from('exercises')
-    .select(EXERCISE_COLUMNS)
-    .is('created_by', null)
-    .returns<ExerciseRow[]>();
-  if (error) throw error;
+  const data = await readAllRows((from, to) =>
+    getSupabase()
+      .from('exercises')
+      .select(EXERCISE_COLUMNS, { count: 'exact' })
+      .is('created_by', null)
+      .order('id')
+      .range(from, to)
+      .returns<ExerciseRow[]>(),
+  );
   return data.map(exerciseFromRow);
 }
 
 export async function fetchCustomExercises(userId: string): Promise<Exercise[]> {
-  const { data, error } = await getSupabase()
-    .from('exercises')
-    .select(EXERCISE_COLUMNS)
-    .eq('created_by', userId)
-    .returns<ExerciseRow[]>();
-  if (error) throw error;
+  const data = await readAllRows((from, to) =>
+    getSupabase()
+      .from('exercises')
+      .select(EXERCISE_COLUMNS, { count: 'exact' })
+      .eq('created_by', userId)
+      .order('id')
+      .range(from, to)
+      .returns<ExerciseRow[]>(),
+  );
   return data.map(exerciseFromRow);
 }
 

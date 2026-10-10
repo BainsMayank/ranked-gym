@@ -49,3 +49,16 @@ export { StepProgress } from './StepProgress';
 export { ReorderList, type ReorderListProps } from './ReorderList';
 export { showToast, ToastHost, type ToastOptions } from './Toast';
 export { SyncStatus, type SyncStatusProps } from './SyncStatus';
+export { BodyMap, type BodyMapProps } from './body/BodyMap';
+export { LeagueBadge, type LeagueBadgeProps } from './game/LeagueBadge';
+export type { BodyOutline, BodySide } from './body/paths';
+export {
+  LineChart,
+  type LineBand,
+  type LineChartProps,
+  type LineMarker,
+  type LinePoint,
+} from './charts/LineChart';
+export { DonutChart, type DonutChartProps, type DonutSlice } from './charts/DonutChart';
+export { LoggedExercise } from './workout/LoggedExercise';
+export { ShareToFeedButton } from './social/ShareToFeedButton';

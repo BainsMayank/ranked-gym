@@ -1,6 +1,12 @@
+import Constants from 'expo-constants';
+
+import { assertAccount } from '@/lib/auth/scope';
+import { readSupabaseConfig } from '@/lib/supabase';
+
 import { fetchCustomExercises, fetchLibraryVersion, fetchOfficialExercises } from './api';
 import {
   countOfficialExercises,
+  readLocalLibrarySource,
   readLocalLibraryVersion,
   replaceCustomExercises,
   replaceOfficialExercises,
@@ -18,16 +24,23 @@ export interface LibrarySyncResult {
  * custom exercises.
  */
 export async function syncExerciseLibrary(userId: string): Promise<LibrarySyncResult> {
-  const [remoteVersion, localVersion, localCount] = await Promise.all([
+  const source = readSupabaseConfig(Constants.expoConfig?.extra)?.url.replace(/\/+$/, '');
+  if (!source) throw new Error('Supabase is not configured');
+  const [remoteVersion, localVersion, localCount, localSource] = await Promise.all([
     fetchLibraryVersion(),
     readLocalLibraryVersion(),
     countOfficialExercises(),
+    readLocalLibrarySource(),
   ]);
 
-  const downloaded = remoteVersion !== localVersion || localCount === 0;
+  const downloaded = remoteVersion !== localVersion || localCount === 0 || source !== localSource;
   if (downloaded) {
-    await replaceOfficialExercises(await fetchOfficialExercises(), remoteVersion);
+    const official = await fetchOfficialExercises();
+    assertAccount(userId);
+    await replaceOfficialExercises(official, remoteVersion, source);
   }
-  await replaceCustomExercises(await fetchCustomExercises(userId));
+  const custom = await fetchCustomExercises(userId);
+  assertAccount(userId);
+  await replaceCustomExercises(custom);
   return { version: remoteVersion, downloaded };
 }

@@ -1,8 +1,6 @@
 import type { Rank } from '@/lib/game';
 
-/** Layout data until friends, invites and leaderboards land (Phase 10). */
-
-export const summary = { friends: 38, activeNow: 6 };
+/** Layout data until invites and leaderboards land (Phase 10). Friends and requests are real. */
 
 export const invite = {
   code: 'MAYANK-7Q2',
@@ -16,48 +14,6 @@ export const standings = [
   { label: 'Among friends', value: '#3' },
   { label: 'Delhi', value: '#1,204' },
   { label: 'Global', value: 'Top 21%' },
-];
-
-export const requests: { name: string; meta: string; rank: Rank }[] = [
-  { name: 'Pranav K.', meta: 'DTU · 4 mutual friends', rank: { tier: 'gold', division: 3 } },
-  { name: 'Ananya J.', meta: 'Found you via Discover', rank: { tier: 'silver', division: 2 } },
-];
-
-export const friends: {
-  name: string;
-  rank: Rank;
-  status: string;
-  training: boolean;
-  action: 'Cheer' | 'View' | 'Nudge';
-}[] = [
-  {
-    name: 'Aarav Rana',
-    rank: { tier: 'gold', division: 2 },
-    status: 'Training now · Leg day · 18-day streak',
-    training: true,
-    action: 'Cheer',
-  },
-  {
-    name: 'Dev P.',
-    rank: { tier: 'platinum', division: 2 },
-    status: 'Worked out 3h ago · 41-day streak',
-    training: false,
-    action: 'View',
-  },
-  {
-    name: 'Ishita Sharma',
-    rank: { tier: 'silver', division: 1 },
-    status: 'Worked out yesterday · 9-day streak',
-    training: false,
-    action: 'View',
-  },
-  {
-    name: 'Riya S.',
-    rank: { tier: 'bronze', division: 3 },
-    status: 'Inactive for 6 days · streak lost',
-    training: false,
-    action: 'Nudge',
-  },
 ];
 
 export const scopes = [

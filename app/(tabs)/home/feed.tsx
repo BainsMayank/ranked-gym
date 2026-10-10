@@ -1,3 +1,3 @@
-import { FeedScreen } from '@/features/home/screens/FeedScreen';
+import { FeedScreen } from '@/features/social/screens/FeedScreen';
 
 export default FeedScreen;

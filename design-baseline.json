@@ -1,248 +1,670 @@
 {
   "tool": "mobile-design-review",
   "version": 1,
-  "date": "2026-10-08",
-  "scope": "Phase 4 screens: Logging (header, set rows, keypad, rest sheet and bar, plates, exercise/set/text/rest-time sheets, reorder), mini bar, Finish, Generate, History, Workout detail, Edit workout, hub start options, exercise History tab, Profile history row, Settings → Training (bar, plates, rest sound); base Sheet",
-  "designDoc": "MOBILE-DESIGN.md",
+  "date": "2026-10-10",
+  "scope": "Phase 9 social: Feed, Discover, Post detail, Composer, Copy workout, User profile, Notifications, Friends hub, Rewards share prompts, Records share, Privacy (share milestones), Finish visibility note, Routine editor credit",
+  "designDoc": "MOBILE-DESIGN.md (Phase 9 section)",
   "designScore": "A",
   "slopScore": "A",
-  "scoreNote": "Mean 3.7 (A); no open high. Before the fix pass: two open highs (FINDING-010, -011) capped Design at B.",
+  "scoreNote": "Phase 9 scope only. Mean of categories 3.95 (one open medium in performance). No open high findings; 3 highs found during the live pass were fixed in this session.",
   "categories": {
     "navigation": "A",
-    "anatomy": "B",
+    "anatomy": "A",
     "typography": "A",
     "color": "A",
     "surfaces": "A",
-    "states": "B",
-    "interaction": "B",
+    "states": "A",
+    "interaction": "A",
     "forms": "A",
-    "performance": "A",
+    "performance": "A-",
     "copy": "A"
   },
   "trunkTest": {
-    "workout-hub": "PASS",
-    "logging": "PASS",
-    "finish": "PASS",
-    "generate": "PASS",
-    "history": "PASS",
-    "workout-detail (deep link)": "PASS",
-    "edit-workout": "PASS",
-    "settings-training": "PASS"
+    "Feed": "PASS",
+    "Discover": "PASS",
+    "Post detail (deep link)": "PASS",
+    "Composer": "PASS",
+    "Copy workout (deep link)": "PASS",
+    "User profile (deep link)": "PASS",
+    "Notifications (deep link)": "PASS",
+    "Friends hub": "PASS"
   },
   "findings": [
     {
-      "id": "FINDING-001",
+      "id": "FINDING-026",
+      "impact": "high",
+      "category": "anatomy",
+      "summary": "Female cropping and reversed right glute/abductor assignment",
+      "status": "fixed",
+      "scope": "Phase 7 carryover"
+    },
+    {
+      "id": "FINDING-027",
       "impact": "high",
       "category": "copy",
-      "tell": 41,
-      "summary": "Settings → Training 'Default rest' was saved but read by nothing (dead setting)",
+      "tell": 33,
+      "summary": "Sample personal ranks/leagues presented as live data, with dead event actions",
+      "status": "fixed",
+      "scope": "Phase 7 carryover"
+    },
+    {
+      "id": "FINDING-028",
+      "impact": "medium",
+      "category": "interaction",
+      "tell": 19,
+      "summary": "Base segmented controls have 40pt targets",
+      "status": "fixed",
+      "fixedIn": "Phase 8: Chip 32+12pt hit region, segmented control 48pt; shared PressableScale",
+      "scope": "Phase 7 carryover"
+    },
+    {
+      "id": "FINDING-029",
+      "impact": "medium",
+      "category": "anatomy",
+      "summary": "Chest/deltoid subdivisions and hip abductor representation are schematic",
+      "status": "open",
+      "scope": "Phase 7 carryover"
+    },
+    {
+      "id": "FINDING-030",
+      "impact": "medium",
+      "category": "performance",
+      "summary": "Full-resolution emblem masters require production sizing and Android memory checks",
+      "status": "open",
+      "scope": "Phase 7 carryover"
+    },
+    {
+      "id": "FINDING-031",
+      "impact": "medium",
+      "category": "states",
+      "summary": "Several Phase 7 sections remain explicitly labelled example previews",
+      "status": "open",
+      "scope": "Phase 7 carryover"
+    },
+    {
+      "id": "FINDING-032",
+      "impact": "medium",
+      "category": "states",
+      "summary": "Muscle sheet contributing lifts and weakest-link suggestions remain incomplete",
+      "status": "open",
+      "scope": "Phase 7 carryover"
+    },
+    {
+      "id": "FINDING-033",
+      "impact": "medium",
+      "category": "typography",
+      "summary": "Sample progression chart has 10pt labels and obsolete four-division axis",
+      "status": "open",
+      "scope": "Phase 7 carryover"
+    },
+    {
+      "id": "FINDING-034",
+      "impact": "high",
+      "category": "states",
+      "tell": 38,
+      "summary": "Account-free development Home hid all four entry points behind a sign-in message",
       "status": "fixed"
     },
     {
-      "id": "FINDING-002",
-      "impact": "medium",
-      "category": "anatomy",
-      "summary": "Hub Routines heading holds a reorder icon plus two text buttons; likely to crowd or wrap at 360dp Android widths",
-      "status": "open"
-    },
-    {
-      "id": "FINDING-003",
-      "impact": "medium",
-      "category": "interaction",
-      "summary": "Chip touch target is 32pt + 4pt hitSlop (40pt), under 44pt; used for the rest and folder chips",
-      "status": "open"
-    },
-    {
-      "id": "FINDING-004",
-      "impact": "medium",
-      "category": "states",
-      "summary": "Training settings changed offline wait silently (mutation paused) with no 'saves when you're online' note",
-      "status": "fixed",
-      "fixedIn": "Phase 4 (Settings → Training shows a saving/offline note)"
-    },
-    {
-      "id": "FINDING-005",
-      "impact": "medium",
-      "category": "navigation",
-      "summary": "ReorderList doesn't auto-scroll while dragging, so long routine lists need several drags (Move up/down actions still work)",
-      "status": "open"
-    },
-    {
-      "id": "FINDING-006",
-      "impact": "polish",
-      "category": "copy",
-      "summary": "Swipe action reads 'Copy' but the menu and screen-reader action say 'Duplicate'",
-      "status": "open"
-    },
-    {
-      "id": "FINDING-007",
-      "impact": "polish",
-      "category": "color",
-      "summary": "Warm-up (warning orange) and top-set (primary orange) badges are two close oranges side by side",
-      "status": "open"
-    },
-    {
-      "id": "FINDING-008",
-      "impact": "polish",
-      "category": "interaction",
-      "summary": "Starter routine 'Added' stays tappable and adds another copy",
-      "status": "open"
-    },
-    {
-      "id": "FINDING-009",
-      "impact": "polish",
-      "category": "color",
-      "summary": "'No colour' option uses a ban icon that reads as 'forbidden'",
-      "status": "open"
-    },
-    {
-      "id": "FINDING-010",
+      "id": "FINDING-035",
       "impact": "high",
-      "category": "forms",
-      "summary": "Rename and note sheets: the keyboard covered the input and Save (base Sheet had no keyboard avoidance; Phase 3 folder sheet affected too)",
-      "status": "fixed",
-      "fixedIn": "Phase 4 review"
-    },
-    {
-      "id": "FINDING-011",
-      "impact": "high",
-      "category": "forms",
-      "summary": "In an empty or generated workout, ticking set 2 saved no weight: suggestions ignored the set just lifted",
-      "status": "fixed",
-      "fixedIn": "Phase 4 review"
-    },
-    {
-      "id": "FINDING-012",
-      "impact": "medium",
-      "category": "color",
-      "summary": "'Turn on' in the rest sheet's notification prompt was invisible (secondary button on a raised panel)",
-      "status": "fixed",
-      "fixedIn": "Phase 4 review"
-    },
-    {
-      "id": "FINDING-013",
-      "impact": "medium",
-      "category": "anatomy",
-      "summary": "The up-next ring added 2px and shifted that row's cells out of line",
-      "status": "fixed",
-      "fixedIn": "Phase 4 review"
-    },
-    {
-      "id": "FINDING-014",
-      "impact": "medium",
       "category": "states",
-      "summary": "Done sets showed grey suggestions as if they were logged values",
-      "status": "fixed",
-      "fixedIn": "Phase 4 review"
+      "tell": 38,
+      "summary": "Offline cold start could remain on skeletons indefinitely",
+      "status": "fixed"
     },
     {
-      "id": "FINDING-015",
+      "id": "FINDING-036",
       "impact": "medium",
-      "category": "states",
-      "summary": "Calories missing: the bodyweight cache never filled; the weigh-in hint showed on past workouts",
-      "status": "fixed",
-      "fixedIn": "Phase 4 review"
+      "category": "performance",
+      "tell": 13,
+      "summary": "Overview capped range records instead of providing the full virtualised list",
+      "status": "fixed"
     },
     {
-      "id": "FINDING-016",
+      "id": "FINDING-037",
       "impact": "medium",
-      "category": "states",
-      "summary": "History rows had no duration (only the server computed it)",
-      "status": "fixed",
-      "fixedIn": "Phase 4 review"
-    },
-    {
-      "id": "FINDING-017",
-      "impact": "medium",
-      "category": "navigation",
-      "summary": "Edit workout: swipe or Android back could drop edits without asking",
-      "status": "fixed",
-      "fixedIn": "Phase 4 review"
-    },
-    {
-      "id": "FINDING-018",
-      "impact": "medium",
-      "category": "states",
-      "summary": "Generator shows 'Nothing fits yet' while the exercise library is still loading on a first launch (needs a loading state)",
-      "status": "open"
-    },
-    {
-      "id": "FINDING-019",
-      "impact": "polish",
       "category": "interaction",
-      "summary": "Rest sheet opens after every set (as briefed); consider a setting to start rests in the bar",
-      "status": "open"
+      "summary": "Base sheet and progress motion ignored Reduce Motion",
+      "status": "fixed"
     },
     {
-      "id": "FINDING-020",
+      "id": "FINDING-038",
       "impact": "medium",
-      "category": "anatomy",
-      "summary": "Logging set row (badge, Last, 3 cells, tick) is unverified at 360dp Android widths and 1.6x text; may crowd",
+      "category": "states",
+      "summary": "League standing is explicitly unavailable because the Phase 7 backend is incomplete",
       "status": "open"
     },
     {
-      "id": "FINDING-021",
-      "impact": "polish",
-      "category": "copy",
-      "summary": "Volume had no digit grouping ('1200 kg')",
-      "status": "fixed",
-      "fixedIn": "Phase 4 review"
+      "id": "FINDING-039",
+      "impact": "medium",
+      "category": "forms",
+      "summary": "Custom ranges and deadlines use manual ISO-date inputs rather than a date picker",
+      "status": "open"
     },
     {
-      "id": "FINDING-022",
-      "impact": "polish",
-      "category": "copy",
-      "summary": "Generator rep range used an en-dash ('6–10'); editor uses '8-10'",
-      "status": "fixed",
-      "fixedIn": "Phase 4 review"
+      "id": "FINDING-040",
+      "impact": "medium",
+      "category": "interaction",
+      "tell": 35,
+      "summary": "Preexisting Feed preview story/actions still have incomplete press feedback and social behaviour",
+      "status": "open"
     },
     {
-      "id": "FINDING-023",
+      "id": "FINDING-041",
       "impact": "polish",
-      "category": "copy",
-      "summary": "Save toast said 'syncs when you're online' even when online",
-      "status": "fixed",
-      "fixedIn": "Phase 4 review"
+      "category": "anatomy",
+      "summary": "Two-column entry titles may truncate at maximum font scale; narrow Android remains unverified",
+      "status": "open"
     },
     {
-      "id": "FINDING-024",
-      "impact": "polish",
+      "id": "FINDING-042",
+      "impact": "medium",
+      "category": "copy",
+      "summary": "Empty duration chart auto-scaled below zero and rounded fractional ticks to duplicate labels",
+      "status": "fixed",
+      "fixedIn": "Overview duration uses a nonnegative domain with at least ten minutes of scale"
+    },
+    {
+      "id": "FINDING-043",
+      "impact": "high",
       "category": "surfaces",
-      "summary": "History is a stack of cards (each workout is a discrete tappable object, consistent with routine cards)",
+      "summary": "Friends hub \"Add friends\" cards collapsed to empty slivers (flex-1 on a pressable Card collapses its height); pre-existing, now a live entry point",
+      "status": "fixed",
+      "fixedIn": "Cards wrapped in a flex-1 View"
+    },
+    {
+      "id": "FINDING-044",
+      "impact": "medium",
+      "category": "anatomy",
+      "summary": "Workout post: full-height muscle thumbnail left a gap and \"3 × Exercise\" beside \"47.5 × 5\" read as sets × reps twice",
+      "status": "fixed",
+      "fixedIn": "Thumbnail 56pt beside the text column; rows show the exercise name only"
+    },
+    {
+      "id": "FINDING-045",
+      "impact": "medium",
+      "category": "color",
+      "summary": "Three orange ghost buttons under every comment made long threads loud",
+      "status": "fixed",
+      "fixedIn": "Muted text actions (Reply, Delete, Report) with 44pt hit areas"
+    },
+    {
+      "id": "FINDING-046",
+      "impact": "medium",
+      "category": "color",
+      "summary": "Repeated row actions (Decline, Cancel) were orange ghost buttons and plain counts used the signal colour",
+      "status": "fixed",
+      "fixedIn": "Secondary buttons; counts only on pending Requests"
+    },
+    {
+      "id": "FINDING-047",
+      "impact": "high",
+      "category": "navigation",
+      "summary": "Copy workout → Edit in builder opened \"Routine not found\" for a draft-only routine",
+      "status": "fixed",
+      "fixedIn": "Editor treats a never-saved routine with a draft as a new routine"
+    },
+    {
+      "id": "FINDING-048",
+      "impact": "high",
+      "category": "states",
+      "summary": "Copy preview left out every exercise when the device library ids differed from the server",
+      "status": "fixed",
+      "fixedIn": "Uses the server custom flag instead of local id lookups"
+    },
+    {
+      "id": "FINDING-049",
+      "impact": "medium",
+      "category": "copy",
+      "summary": "\"1 reps\" in set summaries",
+      "status": "fixed",
+      "fixedIn": "Singular \"1 rep\" in the shared set formatter"
+    },
+    {
+      "id": "FINDING-050",
+      "impact": "medium",
+      "category": "copy",
+      "summary": "Profile said \"No posts yet\" to non-friends of a friends-only profile",
+      "status": "fixed",
+      "fixedIn": "\"Nothing shared with you yet\" with an explanation"
+    },
+    {
+      "id": "FINDING-051",
+      "impact": "medium",
+      "category": "performance",
+      "summary": "Post detail renders up to 300 comments in a ScrollView map (tell 13)",
+      "status": "open",
+      "tell": 13
+    },
+    {
+      "id": "FINDING-052",
+      "impact": "polish",
+      "category": "interaction",
+      "summary": "Notifications list each respect separately; group them (\"Aarav and 4 others\")",
       "status": "open"
     },
     {
-      "id": "FINDING-025",
-      "impact": "medium",
-      "category": "states",
-      "summary": "Signing out drops unsynced workouts (and routines) with no warning; warn when the outbox has items",
-      "status": "fixed",
-      "fixedIn": "Phase 4 (Settings → Account sign-out checks the outbox: 'Try to sync first' or 'Sign out anyway', confirmSignOut in src/lib/auth)"
+      "id": "FINDING-053",
+      "impact": "polish",
+      "category": "interaction",
+      "summary": "A whole post body is one PressableScale, so long posts scale on press and the photo pager sits inside a pressable",
+      "status": "open"
+    },
+    {
+      "id": "FINDING-054",
+      "impact": "polish",
+      "category": "forms",
+      "summary": "Editing a photo post can remove photos but not add new ones",
+      "status": "open"
+    },
+    {
+      "id": "FINDING-055",
+      "impact": "polish",
+      "category": "copy",
+      "summary": "Dev-seed avatars are initials only; real avatars untested in lists",
+      "status": "open"
     }
   ],
   "dismissedGrepHits": [
-    "en dash in rep ranges (8–10) and the empty-cell marker: numeric ranges, not prose dashes",
-    "ScrollView + map in ReorderRoutinesScreen, TemplatesScreen, SummaryFooter: bounded lists (user's routines, 10 templates, at most 20 muscles)",
-    "Alert.alert in WorkoutScreen and RoutineBuilderScreen: destructive confirmations only"
+    "Alert.alert x5 in social: all destructive confirmations (discard post, delete post/comment, block, cancel request, remove friend)",
+    "ScrollView+map in DiscoverScreen (6 static filter chips), PeopleCarousel (<=12 suggestions), PhotoPager (<=4 photos): bounded"
   ],
   "unverified": [
-    "Android (no emulator run): 360dp widths, back button, keyboard",
-    "1.3x / 1.6x font scale",
-    "light mode on the new screens",
-    "rest notification delivery (permission left to the user)",
-    "photo pick and upload",
-    "real 60-minute session, airplane mode and phone restart"
+    "Android: Pixel 6a emulator exists but Expo Go is not installed; 100-post feed scroll on mid-range Android NOT verified",
+    "1.3x/1.6x font scale on Feed, Discover and post detail",
+    "New-posts pill and live bell count seen in the app UI (Realtime delivery verified by pnpm social:acceptance, not on screen)",
+    "Offline rollback of Respect and comments on device (covered by Jest cache tests)",
+    "VoiceOver pass over post cards and notifications",
+    "Keyboard on Android for the comment box and composer"
   ],
+  "report": "docs/PROGRESS.md (Phase 9 design review)",
   "previousCategories": {
-    "navigation": "A-",
+    "navigation": "A",
     "anatomy": "A-",
     "typography": "A",
     "color": "A",
     "surfaces": "A",
     "states": "A-",
     "interaction": "A-",
-    "forms": "A",
+    "forms": "A-",
     "performance": "A",
     "copy": "A"
-  }
+  },
+  "previousReviews": [
+    {
+      "tool": "mobile-design-review",
+      "version": 1,
+      "date": "2026-10-08",
+      "scope": "Phase 4 screens: Logging (header, set rows, keypad, rest sheet and bar, plates, exercise/set/text/rest-time sheets, reorder), mini bar, Finish, Generate, History, Workout detail, Edit workout, hub start options, exercise History tab, Profile history row, Settings → Training (bar, plates, rest sound); base Sheet",
+      "designDoc": "MOBILE-DESIGN.md",
+      "designScore": "A",
+      "slopScore": "A",
+      "scoreNote": "Mean 3.7 (A); no open high. Before the fix pass: two open highs (FINDING-010, -011) capped Design at B.",
+      "categories": {
+        "navigation": "A",
+        "anatomy": "B",
+        "typography": "A",
+        "color": "A",
+        "surfaces": "A",
+        "states": "B",
+        "interaction": "B",
+        "forms": "A",
+        "performance": "A",
+        "copy": "A"
+      },
+      "trunkTest": {
+        "workout-hub": "PASS",
+        "logging": "PASS",
+        "finish": "PASS",
+        "generate": "PASS",
+        "history": "PASS",
+        "workout-detail (deep link)": "PASS",
+        "edit-workout": "PASS",
+        "settings-training": "PASS"
+      },
+      "findings": [
+        {
+          "id": "FINDING-001",
+          "impact": "high",
+          "category": "copy",
+          "tell": 41,
+          "summary": "Settings → Training 'Default rest' was saved but read by nothing (dead setting)",
+          "status": "fixed"
+        },
+        {
+          "id": "FINDING-002",
+          "impact": "medium",
+          "category": "anatomy",
+          "summary": "Hub Routines heading holds a reorder icon plus two text buttons; likely to crowd or wrap at 360dp Android widths",
+          "status": "open"
+        },
+        {
+          "id": "FINDING-003",
+          "impact": "medium",
+          "category": "interaction",
+          "summary": "Chip touch target is 32pt + 4pt hitSlop (40pt), under 44pt; used for the rest and folder chips",
+          "status": "fixed",
+          "fixedIn": "Phase 8: Chip 32+12pt hit region, segmented control 48pt; shared PressableScale"
+        },
+        {
+          "id": "FINDING-004",
+          "impact": "medium",
+          "category": "states",
+          "summary": "Training settings changed offline wait silently (mutation paused) with no 'saves when you're online' note",
+          "status": "fixed",
+          "fixedIn": "Phase 4 (Settings → Training shows a saving/offline note)"
+        },
+        {
+          "id": "FINDING-005",
+          "impact": "medium",
+          "category": "navigation",
+          "summary": "ReorderList doesn't auto-scroll while dragging, so long routine lists need several drags (Move up/down actions still work)",
+          "status": "open"
+        },
+        {
+          "id": "FINDING-006",
+          "impact": "polish",
+          "category": "copy",
+          "summary": "Swipe action reads 'Copy' but the menu and screen-reader action say 'Duplicate'",
+          "status": "open"
+        },
+        {
+          "id": "FINDING-007",
+          "impact": "polish",
+          "category": "color",
+          "summary": "Warm-up (warning orange) and top-set (primary orange) badges are two close oranges side by side",
+          "status": "open"
+        },
+        {
+          "id": "FINDING-008",
+          "impact": "polish",
+          "category": "interaction",
+          "summary": "Starter routine 'Added' stays tappable and adds another copy",
+          "status": "open"
+        },
+        {
+          "id": "FINDING-009",
+          "impact": "polish",
+          "category": "color",
+          "summary": "'No colour' option uses a ban icon that reads as 'forbidden'",
+          "status": "open"
+        },
+        {
+          "id": "FINDING-010",
+          "impact": "high",
+          "category": "forms",
+          "summary": "Rename and note sheets: the keyboard covered the input and Save (base Sheet had no keyboard avoidance; Phase 3 folder sheet affected too)",
+          "status": "fixed",
+          "fixedIn": "Phase 4 review"
+        },
+        {
+          "id": "FINDING-011",
+          "impact": "high",
+          "category": "forms",
+          "summary": "In an empty or generated workout, ticking set 2 saved no weight: suggestions ignored the set just lifted",
+          "status": "fixed",
+          "fixedIn": "Phase 4 review"
+        },
+        {
+          "id": "FINDING-012",
+          "impact": "medium",
+          "category": "color",
+          "summary": "'Turn on' in the rest sheet's notification prompt was invisible (secondary button on a raised panel)",
+          "status": "fixed",
+          "fixedIn": "Phase 4 review"
+        },
+        {
+          "id": "FINDING-013",
+          "impact": "medium",
+          "category": "anatomy",
+          "summary": "The up-next ring added 2px and shifted that row's cells out of line",
+          "status": "fixed",
+          "fixedIn": "Phase 4 review"
+        },
+        {
+          "id": "FINDING-014",
+          "impact": "medium",
+          "category": "states",
+          "summary": "Done sets showed grey suggestions as if they were logged values",
+          "status": "fixed",
+          "fixedIn": "Phase 4 review"
+        },
+        {
+          "id": "FINDING-015",
+          "impact": "medium",
+          "category": "states",
+          "summary": "Calories missing: the bodyweight cache never filled; the weigh-in hint showed on past workouts",
+          "status": "fixed",
+          "fixedIn": "Phase 4 review"
+        },
+        {
+          "id": "FINDING-016",
+          "impact": "medium",
+          "category": "states",
+          "summary": "History rows had no duration (only the server computed it)",
+          "status": "fixed",
+          "fixedIn": "Phase 4 review"
+        },
+        {
+          "id": "FINDING-017",
+          "impact": "medium",
+          "category": "navigation",
+          "summary": "Edit workout: swipe or Android back could drop edits without asking",
+          "status": "fixed",
+          "fixedIn": "Phase 4 review"
+        },
+        {
+          "id": "FINDING-018",
+          "impact": "medium",
+          "category": "states",
+          "summary": "Generator shows 'Nothing fits yet' while the exercise library is still loading on a first launch (needs a loading state)",
+          "status": "open"
+        },
+        {
+          "id": "FINDING-019",
+          "impact": "polish",
+          "category": "interaction",
+          "summary": "Rest sheet opens after every set (as briefed); consider a setting to start rests in the bar",
+          "status": "open"
+        },
+        {
+          "id": "FINDING-020",
+          "impact": "medium",
+          "category": "anatomy",
+          "summary": "Logging set row (badge, Last, 3 cells, tick) is unverified at 360dp Android widths and 1.6x text; may crowd",
+          "status": "open"
+        },
+        {
+          "id": "FINDING-021",
+          "impact": "polish",
+          "category": "copy",
+          "summary": "Volume had no digit grouping ('1200 kg')",
+          "status": "fixed",
+          "fixedIn": "Phase 4 review"
+        },
+        {
+          "id": "FINDING-022",
+          "impact": "polish",
+          "category": "copy",
+          "summary": "Generator rep range used an en-dash ('6–10'); editor uses '8-10'",
+          "status": "fixed",
+          "fixedIn": "Phase 4 review"
+        },
+        {
+          "id": "FINDING-023",
+          "impact": "polish",
+          "category": "copy",
+          "summary": "Save toast said 'syncs when you're online' even when online",
+          "status": "fixed",
+          "fixedIn": "Phase 4 review"
+        },
+        {
+          "id": "FINDING-024",
+          "impact": "polish",
+          "category": "surfaces",
+          "summary": "History is a stack of cards (each workout is a discrete tappable object, consistent with routine cards)",
+          "status": "open"
+        },
+        {
+          "id": "FINDING-025",
+          "impact": "medium",
+          "category": "states",
+          "summary": "Signing out drops unsynced workouts (and routines) with no warning; warn when the outbox has items",
+          "status": "fixed",
+          "fixedIn": "Phase 4 (Settings → Account sign-out checks the outbox: 'Try to sync first' or 'Sign out anyway', confirmSignOut in src/lib/auth)"
+        }
+      ],
+      "dismissedGrepHits": [
+        "en dash in rep ranges (8–10) and the empty-cell marker: numeric ranges, not prose dashes",
+        "ScrollView + map in ReorderRoutinesScreen, TemplatesScreen, SummaryFooter: bounded lists (user's routines, 10 templates, at most 20 muscles)",
+        "Alert.alert in WorkoutScreen and RoutineBuilderScreen: destructive confirmations only"
+      ],
+      "unverified": [
+        "Android (no emulator run): 360dp widths, back button, keyboard",
+        "1.3x / 1.6x font scale",
+        "light mode on the new screens",
+        "rest notification delivery (permission left to the user)",
+        "photo pick and upload",
+        "real 60-minute session, airplane mode and phone restart"
+      ],
+      "previousCategories": {
+        "navigation": "A-",
+        "anatomy": "A-",
+        "typography": "A",
+        "color": "A",
+        "surfaces": "A",
+        "states": "A-",
+        "interaction": "A-",
+        "forms": "A",
+        "performance": "A",
+        "copy": "A"
+      }
+    },
+    {
+      "tool": "mobile-design-review",
+      "version": 1,
+      "date": "2026-10-09",
+      "scope": "Phase 7 artwork: My Ranks, Body Map, Leagues, Analysis and shared rank/league emblems; static screens and rendered assets",
+      "designDoc": "MOBILE-DESIGN.md",
+      "designScore": "A",
+      "slopScore": "A",
+      "scoreNote": "Mean 3.7; AI Slop mean 3.95. No open scoped high. Native authenticated screens unverified; full Phase 7 remains incomplete.",
+      "categories": {
+        "navigation": "A",
+        "anatomy": "A-",
+        "typography": "A-",
+        "color": "A",
+        "surfaces": "A",
+        "states": "B",
+        "interaction": "A-",
+        "forms": "A",
+        "performance": "A-",
+        "copy": "A"
+      },
+      "trunkTest": {
+        "my-ranks": "N/A: authenticated screen not rendered",
+        "body-map": "N/A: authenticated screen not rendered",
+        "leagues": "N/A: authenticated screen not rendered",
+        "analysis": "N/A: authenticated screen not rendered"
+      },
+      "findings": [
+        {
+          "id": "FINDING-026",
+          "impact": "high",
+          "category": "anatomy",
+          "summary": "Female cropping and reversed right glute/abductor assignment",
+          "status": "fixed"
+        },
+        {
+          "id": "FINDING-027",
+          "impact": "high",
+          "category": "copy",
+          "tell": 33,
+          "summary": "Sample personal ranks/leagues presented as live data, with dead event actions",
+          "status": "fixed"
+        },
+        {
+          "id": "FINDING-028",
+          "impact": "medium",
+          "category": "interaction",
+          "tell": 19,
+          "summary": "Base segmented controls have 40pt targets",
+          "status": "fixed",
+          "fixedIn": "Phase 8: Chip 32+12pt hit region, segmented control 48pt; shared PressableScale"
+        },
+        {
+          "id": "FINDING-029",
+          "impact": "medium",
+          "category": "anatomy",
+          "summary": "Chest/deltoid subdivisions and hip abductor representation are schematic",
+          "status": "open"
+        },
+        {
+          "id": "FINDING-030",
+          "impact": "medium",
+          "category": "performance",
+          "summary": "Full-resolution emblem masters require production sizing and Android memory checks",
+          "status": "open"
+        },
+        {
+          "id": "FINDING-031",
+          "impact": "medium",
+          "category": "states",
+          "summary": "Several Phase 7 sections remain explicitly labelled example previews",
+          "status": "open"
+        },
+        {
+          "id": "FINDING-032",
+          "impact": "medium",
+          "category": "states",
+          "summary": "Muscle sheet contributing lifts and weakest-link suggestions remain incomplete",
+          "status": "open"
+        },
+        {
+          "id": "FINDING-033",
+          "impact": "medium",
+          "category": "typography",
+          "summary": "Sample progression chart has 10pt labels and obsolete four-division axis",
+          "status": "open"
+        }
+      ],
+      "dismissedGrepHits": [
+        "Dashes are numeric ranges, empty table cells or source comments, not prose.",
+        "Two SVG gradients in unused BadgeBase are game artwork, not app chrome; registry uses PNG masters.",
+        "TierStrip maps eight fixed tiers; body and muscle grid have a bounded canonical taxonomy.",
+        "League stat triplet communicates position, points and promotion threshold within a game object.",
+        "No inline screen hex, magic top padding, JS-thread animation, alert spam or duplicate gesture root found.",
+        "Records no-op share button is preexisting and outside this pass; Phase 9 wiring remains pending."
+      ],
+      "unverified": [
+        "Authenticated native screens and Trunk Test",
+        "Native pinch/pan, sheet gestures, VoiceOver",
+        "Dynamic Type 1.3x/1.6x",
+        "Android widths, edge-to-edge and back behavior",
+        "Scroll performance and bitmap memory",
+        "Splash/font loading",
+        "50-user seeded weekly/seasonal league cycle"
+      ],
+      "report": "docs/design/artwork/REVIEW.md"
+    },
+    {
+      "date": "2026-10-09",
+      "scope": "Phase 8: For You, Muscle Analysis, Recovery, Goals, Create/Edit goal, Overview, Log bodyweight, celebration sheet, Feed milestone portion, Home header and changed base controls",
+      "designScore": "A",
+      "slopScore": "A",
+      "categories": {
+        "navigation": "A",
+        "anatomy": "A-",
+        "typography": "A",
+        "color": "A",
+        "surfaces": "A",
+        "states": "A-",
+        "interaction": "A-",
+        "forms": "A-",
+        "performance": "A",
+        "copy": "A"
+      }
+    }
+  ]
 }

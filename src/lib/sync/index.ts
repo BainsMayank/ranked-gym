@@ -16,6 +16,7 @@ export {
   registerSyncHandler,
   retryNow,
   runSync,
+  stopSync,
   type SyncHandler,
   type SyncRunResult,
 } from './runner';

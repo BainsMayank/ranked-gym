@@ -117,8 +117,10 @@ export function useEditorSession(routeId: string | undefined) {
   return {
     id,
     isNew,
+    /** Never saved, but opened from a draft (a copied workout). */
+    draftOnly: !isNew && saved.isFetched && !saved.data && restored,
     loading: !doc,
-    notFound: !isNew && saved.isFetched && !saved.data,
+    notFound: !isNew && saved.isFetched && !saved.data && !restored,
     restored,
     env,
     save,

@@ -9,6 +9,7 @@ import { useSyncStatusStore } from '@/lib/sync';
 import { useTheme } from '@/theme';
 
 import { RewardsBody } from '../rewards/RewardsBody';
+import { ShareMilestones } from '../rewards/ShareMilestones';
 
 /** How long to wait for the server before saying it'll show up later. */
 export const REWARDS_WAIT_MS = 10_000;
@@ -44,7 +45,10 @@ export function RewardsScreen() {
       footer={<Button label="Done" fullWidth onPress={() => router.dismissAll()} />}
     >
       {ready ? (
-        <RewardsBody rewards={ready} unit={unit} reveal />
+        <View className="gap-xl">
+          <RewardsBody rewards={ready} unit={unit} reveal />
+          <ShareMilestones rewards={ready} />
+        </View>
       ) : waiting ? (
         <View className="items-center gap-md py-xxxl" accessibilityLiveRegion="polite">
           <ActivityIndicator color={colors.textMuted} />

@@ -49,10 +49,12 @@ export interface FakeWorkout {
   sets: FakeSet[];
 }
 
+export type FakeStyle = 'gym' | 'calisthenics' | 'hybrid';
+
 export interface FakeUser {
   id: string;
   level: PersonaLevel;
-  style: 'gym' | 'calisthenics';
+  style: FakeStyle;
   sex: ProfileSex;
   age: number;
   bodyweightKg: number;
@@ -224,10 +226,29 @@ export function makeFakeUsers(seed = 20261008): FakeUser[] {
   return users;
 }
 
+/**
+ * The dev seed's demo account (`pnpm dev:seed`): a man about 14 months in who trains barbell and
+ * calisthenics lifts three times a week, so every Rank sub-tab has something to show. Separate
+ * from makeFakeUsers(), which the parity test pins.
+ */
+export function makeDemoUser(id: string, seed = 7): FakeUser {
+  return buildHistory(rng(seed), {
+    id,
+    level: 'intermediate',
+    style: 'hybrid',
+    sex: 'male',
+    body: 'male',
+    age: 21,
+    bodyweightKg: 74,
+    trainingMonths: 14,
+    talent: 1.05,
+  });
+}
+
 interface Profile {
   id: string;
   level: PersonaLevel;
-  style: 'gym' | 'calisthenics';
+  style: FakeStyle;
   sex: ProfileSex;
   body: StandardsSex;
   age: number;
@@ -252,7 +273,9 @@ function buildHistory(r: ReturnType<typeof rng>, p: Profile): FakeUser {
   const lifts: string[] =
     p.style === 'gym'
       ? [...gymLifts, 'pullUp']
-      : ['pullUp', 'dip', 'pushUp', 'pistolSquat', 'lSit', 'frontLever'];
+      : p.style === 'hybrid'
+        ? [...gymLifts, 'pullUp', 'dip', 'pushUp', 'lSit']
+        : ['pullUp', 'dip', 'pushUp', 'pistolSquat', 'lSit', 'frontLever'];
   const liftNoise = new Map(lifts.map((l) => [l, 1 + 0.05 * r.gauss()]));
   const ref = p.body === 'male' ? 75 : 60;
   const allometry = (ref / p.bodyweightKg) ** (1 / 3);

@@ -1,13 +1,11 @@
 import { ScrollView, View } from 'react-native';
 
 import { RankBadge, Text } from '@/components';
-import { compareRanks, tierName } from '@/lib/game';
+import { compareRanks, tierName, type Rank } from '@/lib/game';
 import { rankColors, rankTiers } from '@/theme';
 
-import { overall } from '../mocks';
-
 /** Every tier in order; reached tiers in colour, the current one labelled, later ones dimmed. */
-export function TierStrip() {
+export function TierStrip({ rank }: { rank: Rank | null }) {
   return (
     <ScrollView
       horizontal
@@ -16,8 +14,8 @@ export function TierStrip() {
       contentContainerClassName="gap-md px-lg"
     >
       {rankTiers.map((tier) => {
-        const reached = compareRanks({ tier, division: 3 }, overall.rank) <= 0;
-        const current = tier === overall.rank.tier;
+        const reached = rank ? compareRanks({ tier, division: 3 }, rank) <= 0 : false;
+        const current = tier === rank?.tier;
         return (
           <View key={tier} className="items-center gap-xxs" style={{ opacity: reached ? 1 : 0.35 }}>
             <RankBadge tier={tier} size={32} />

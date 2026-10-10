@@ -13,6 +13,7 @@ import Animated, {
   interpolate,
   useAnimatedStyle,
   useSharedValue,
+  useReducedMotion,
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
@@ -41,21 +42,22 @@ export function Sheet({ visible, onClose, title, children }: SheetProps) {
   const { height: screenHeight } = useWindowDimensions();
   const [mounted, setMounted] = useState(visible);
   const translateY = useSharedValue(screenHeight);
+  const reducedMotion = useReducedMotion();
 
   // Mount immediately when opened; unmount only after the close animation finishes.
   if (visible && !mounted) setMounted(true);
 
   useEffect(() => {
     if (visible) {
-      translateY.set(withSpring(0, SPRING));
+      translateY.set(reducedMotion ? withTiming(0, { duration: 0 }) : withSpring(0, SPRING));
     } else {
       translateY.set(
-        withTiming(screenHeight, { duration: 220 }, (finished) => {
+        withTiming(screenHeight, { duration: reducedMotion ? 0 : 220 }, (finished) => {
           if (finished) scheduleOnRN(setMounted, false);
         }),
       );
     }
-  }, [visible, screenHeight, translateY]);
+  }, [visible, screenHeight, translateY, reducedMotion]);
 
   const pan = Gesture.Pan()
     .onUpdate((e) => {

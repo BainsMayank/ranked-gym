@@ -200,6 +200,13 @@ export function FinishScreen() {
             onChange={setVisibility}
             accessibilityLabel="Who can see this workout"
           />
+          <Text variant="caption" tone="muted">
+            {(visibility ?? doc.visibility) === 'private'
+              ? 'Only you. It won’t be posted.'
+              : (visibility ?? doc.visibility) === 'public'
+                ? 'Posted to your feed. Anyone can see it, unless your profile is more private.'
+                : 'Posted to your friends’ feeds. Notes stay private either way.'}
+          </Text>
         </View>
         {deviated ? (
           <ListGroup>

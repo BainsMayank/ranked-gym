@@ -1,3 +1,4 @@
+import { assertAccount, requireAccount } from '@/lib/auth/scope';
 import { ensureDb } from '@/lib/db/ensureDb';
 import { routineFolders } from '@/lib/db/schema';
 import { pendingIds, registerSyncHandler, runSync } from '@/lib/sync';
@@ -62,6 +63,7 @@ export interface PullResult {
 
 /** Pushes pending changes, then brings this device up to date with the server. */
 export async function syncRoutines(): Promise<PullResult> {
+  const account = requireAccount();
   registerRoutineSync();
   await runSync();
 
@@ -87,6 +89,7 @@ export async function syncRoutines(): Promise<PullResult> {
   );
 
   const docs = await fetchRemoteDocs(changed);
+  assertAccount(account);
   await applyPull({
     folders: remoteFolders.filter((f) => !pending.has(f.id)),
     removeFolderIds,

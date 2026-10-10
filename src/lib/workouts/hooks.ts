@@ -93,6 +93,7 @@ export function useLastDone() {
 
 /** After a local write: refresh what reads workouts and push in the background. */
 export function afterWorkoutWrite(queryClient: QueryClient): void {
+  void queryClient.invalidateQueries({ queryKey: ['insights'] });
   void queryClient.invalidateQueries({ queryKey: workoutKeys.all });
   // Finishing a planned session marks its plan day done (plans read the same SQLite).
   void queryClient.invalidateQueries({ queryKey: ['plans'] });
@@ -134,6 +135,7 @@ export function useWorkoutSync() {
     queryFn: async () => {
       const result = await syncWorkouts();
       if (result.downloaded || result.removed) {
+        await queryClient.invalidateQueries({ queryKey: ['insights'] });
         await queryClient.invalidateQueries({ queryKey: workoutKeys.all });
       }
       return result;

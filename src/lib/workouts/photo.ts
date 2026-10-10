@@ -1,11 +1,13 @@
 import { Directory, File, Paths } from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
 
+import { compressPhoto } from '@/lib/photos/compress';
+
 /**
  * The optional workout photo. Picked from the library (no permission prompt: the system picker
- * only hands over what the user chose), compressed, and copied into the app's documents folder so
- * it survives until the upload goes through (the picker's own copy lives in a cache that can be
- * cleared).
+ * only hands over what the user chose), re-encoded (which strips EXIF, GPS included: the photo can
+ * appear on the workout's post) and copied into the app's documents folder so it survives until
+ * the upload goes through (the picker's own copy lives in a cache that can be cleared).
  */
 export async function pickWorkoutPhoto(workoutId: string): Promise<string | null> {
   const result = await ImagePicker.launchImageLibraryAsync({
@@ -21,7 +23,9 @@ export async function pickWorkoutPhoto(workoutId: string): Promise<string | null
   if (!dir.exists) dir.create({ intermediates: true, idempotent: true });
   // A new name each time, so an image cache never shows the previous photo.
   const target = new File(dir, `${workoutId}-${Date.now()}.jpg`);
-  await new File(asset.uri).copy(target);
+  const clean = await compressPhoto(asset.uri, asset.width, asset.height);
+  await new File(clean.uri).copy(target);
+  deleteLocalPhoto(clean.uri);
   return target.uri;
 }
 

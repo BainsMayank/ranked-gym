@@ -1,3 +1,4 @@
+import { readAllRows } from '@/lib/pagination';
 import { getSupabase } from '@/lib/supabase';
 import type { Database, Json } from '@/types/database';
 
@@ -26,6 +27,7 @@ export function docToPayload(doc: RoutineDoc): Json {
     estimated_duration_min: doc.estimatedDurationMin,
     source: doc.source,
     source_ref: doc.sourceRef,
+    source_label: doc.sourceLabel ?? null,
     sort_order: doc.sortOrder,
     archived: doc.archived,
     exercises: doc.exercises.map((e) => ({
@@ -69,6 +71,7 @@ export function docFromRow(row: RoutineDocRow): RoutineDoc {
     estimatedDurationMin: row.estimated_duration_min,
     source: row.source,
     sourceRef: row.source_ref,
+    sourceLabel: row.source_label,
     sortOrder: row.sort_order,
     archived: row.archived,
     updatedAt: row.updated_at,
@@ -127,10 +130,13 @@ export async function deleteRemoteFolder(id: string): Promise<void> {
 }
 
 export async function fetchRemoteFolders(): Promise<RoutineFolder[]> {
-  const { data, error } = await getSupabase()
-    .from('routine_folders')
-    .select('id, name, sort_order, updated_at');
-  if (error) throw error;
+  const data = await readAllRows((from, to) =>
+    getSupabase()
+      .from('routine_folders')
+      .select('id, name, sort_order, updated_at', { count: 'exact' })
+      .order('id')
+      .range(from, to),
+  );
   return data.map((f) => ({
     id: f.id,
     name: f.name,
@@ -141,8 +147,13 @@ export async function fetchRemoteFolders(): Promise<RoutineFolder[]> {
 
 /** Ids and versions of every routine on the server (cheap; used to find what changed). */
 export async function fetchRemoteVersions(): Promise<Map<string, string>> {
-  const { data, error } = await getSupabase().from('routines').select('id, updated_at');
-  if (error) throw error;
+  const data = await readAllRows((from, to) =>
+    getSupabase()
+      .from('routines')
+      .select('id, updated_at', { count: 'exact' })
+      .order('id')
+      .range(from, to),
+  );
   return new Map(data.map((r) => [r.id, r.updated_at]));
 }
 

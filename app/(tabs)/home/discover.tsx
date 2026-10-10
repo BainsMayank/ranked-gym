@@ -1,3 +1,3 @@
-import { DiscoverScreen } from '@/features/home/screens/DiscoverScreen';
+import { DiscoverScreen } from '@/features/social/screens/DiscoverScreen';
 
 export default DiscoverScreen;

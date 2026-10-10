@@ -1,41 +1,55 @@
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 
-import { RankTag, Text } from '@/components';
+import { PressableScale, RankTag, Text } from '@/components';
+import {
+  muscleLabels,
+  MUSCLES_BY_REGION,
+  muscleRegions,
+  regionLabels,
+  type Muscle,
+} from '@/lib/exercises/taxonomy';
+import type { CurrentRank } from '@/lib/ranks';
 import { rankLabel } from '@/lib/game';
-import { cn } from '@/lib/utils';
-
-import { muscleIds, muscles, type MuscleId } from '../mocks';
 
 interface MuscleGridProps {
-  selected: MuscleId;
-  onSelect: (id: MuscleId) => void;
+  selected: Muscle | null;
+  ranks: Partial<Record<Muscle, CurrentRank>>;
+  onSelect: (muscle: Muscle) => void;
 }
 
-/** Every tracked muscle with its rank; the accessible way to pick a muscle on the body map. */
-export function MuscleGrid({ selected, onSelect }: MuscleGridProps) {
+/** Accessible alternative to small anatomical targets; grouped by the canonical six regions. */
+export function MuscleGrid({ selected, ranks, onSelect }: MuscleGridProps) {
   return (
-    <View className="flex-row flex-wrap gap-sm">
-      {muscleIds.map((id) => {
-        const m = muscles[id];
-        const isSel = id === selected;
-        return (
-          <Pressable
-            key={id}
-            accessibilityRole="radio"
-            accessibilityLabel={`${m.name}, ${rankLabel(m.rank.tier, m.rank.division)}`}
-            accessibilityState={{ selected: isSel, checked: isSel }}
-            onPress={() => onSelect(id)}
-            style={{ flexBasis: '31%', flexGrow: 1 }}
-            className={cn(
-              'min-h-14 items-center justify-center gap-xxs rounded-md bg-surface px-xs py-sm',
-              isSel && 'border border-text',
-            )}
-          >
-            <Text variant="label">{m.name}</Text>
-            <RankTag tier={m.rank.tier} division={m.rank.division} />
-          </Pressable>
-        );
-      })}
+    <View className="gap-xl">
+      {muscleRegions.map((region) => (
+        <View key={region} className="gap-xs">
+          <Text variant="overline" tone="muted">
+            {regionLabels[region]}
+          </Text>
+          {MUSCLES_BY_REGION[region].map((muscle) => {
+            const rank = ranks[muscle]?.rank;
+            return (
+              <PressableScale
+                key={muscle}
+                accessibilityRole="button"
+                accessibilityLabel={`${muscleLabels[muscle]}, ${rank ? rankLabel(rank.tier, rank.division) : 'Unranked'}. View muscle rank.`}
+                accessibilityState={{ selected: muscle === selected }}
+                className="min-h-14 flex-row items-center justify-between gap-md border-b border-border py-sm"
+                onPress={() => onSelect(muscle)}
+              >
+                <Text className="flex-1">{muscleLabels[muscle]}</Text>
+                {rank ? (
+                  <RankTag tier={rank.tier} division={rank.division} />
+                ) : (
+                  <Text variant="caption" tone="muted">
+                    Unranked
+                  </Text>
+                )}
+              </PressableScale>
+            );
+          })}
+        </View>
+      ))}
     </View>
   );
 }

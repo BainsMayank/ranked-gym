@@ -3,6 +3,53 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 export type Database = {
   public: {
     Tables: {
+      blocks: {
+        Row: {
+          blocked_id: string;
+          blocker_id: string;
+          created_at: string;
+        };
+        Insert: {
+          blocked_id: string;
+          blocker_id: string;
+          created_at?: string;
+        };
+        Update: {
+          blocked_id?: string;
+          blocker_id?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'blocks_blocked_id_fkey';
+            columns: ['blocked_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'blocks_blocked_id_fkey';
+            columns: ['blocked_id'];
+            isOneToOne: false;
+            referencedRelation: 'public_profile_cards';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'blocks_blocker_id_fkey';
+            columns: ['blocker_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'blocks_blocker_id_fkey';
+            columns: ['blocker_id'];
+            isOneToOne: false;
+            referencedRelation: 'public_profile_cards';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       bodyweight_logs: {
         Row: {
           created_at: string;
@@ -38,6 +85,68 @@ export type Database = {
             columns: ['user_id'];
             isOneToOne: false;
             referencedRelation: 'public_profile_cards';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      comments: {
+        Row: {
+          author_id: string;
+          body: string | null;
+          created_at: string;
+          deleted_at: string | null;
+          edited_at: string | null;
+          id: string;
+          parent_id: string | null;
+          post_id: string;
+        };
+        Insert: {
+          author_id: string;
+          body?: string | null;
+          created_at?: string;
+          deleted_at?: string | null;
+          edited_at?: string | null;
+          id?: string;
+          parent_id?: string | null;
+          post_id: string;
+        };
+        Update: {
+          author_id?: string;
+          body?: string | null;
+          created_at?: string;
+          deleted_at?: string | null;
+          edited_at?: string | null;
+          id?: string;
+          parent_id?: string | null;
+          post_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'comments_author_id_fkey';
+            columns: ['author_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'comments_author_id_fkey';
+            columns: ['author_id'];
+            isOneToOne: false;
+            referencedRelation: 'public_profile_cards';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'comments_parent_id_fkey';
+            columns: ['parent_id'];
+            isOneToOne: false;
+            referencedRelation: 'comments';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'comments_post_id_fkey';
+            columns: ['post_id'];
+            isOneToOne: false;
+            referencedRelation: 'posts';
             referencedColumns: ['id'];
           },
         ];
@@ -173,6 +282,548 @@ export type Database = {
           },
         ];
       };
+      follows: {
+        Row: {
+          created_at: string;
+          followee_id: string;
+          follower_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          followee_id: string;
+          follower_id: string;
+        };
+        Update: {
+          created_at?: string;
+          followee_id?: string;
+          follower_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'follows_followee_id_fkey';
+            columns: ['followee_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'follows_followee_id_fkey';
+            columns: ['followee_id'];
+            isOneToOne: false;
+            referencedRelation: 'public_profile_cards';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'follows_follower_id_fkey';
+            columns: ['follower_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'follows_follower_id_fkey';
+            columns: ['follower_id'];
+            isOneToOne: false;
+            referencedRelation: 'public_profile_cards';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      friendships: {
+        Row: {
+          addressee_id: string;
+          created_at: string;
+          id: string;
+          requester_id: string;
+          responded_at: string | null;
+          status: Database['public']['Enums']['friendship_status'];
+        };
+        Insert: {
+          addressee_id: string;
+          created_at?: string;
+          id?: string;
+          requester_id: string;
+          responded_at?: string | null;
+          status?: Database['public']['Enums']['friendship_status'];
+        };
+        Update: {
+          addressee_id?: string;
+          created_at?: string;
+          id?: string;
+          requester_id?: string;
+          responded_at?: string | null;
+          status?: Database['public']['Enums']['friendship_status'];
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'friendships_addressee_id_fkey';
+            columns: ['addressee_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'friendships_addressee_id_fkey';
+            columns: ['addressee_id'];
+            isOneToOne: false;
+            referencedRelation: 'public_profile_cards';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'friendships_requester_id_fkey';
+            columns: ['requester_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'friendships_requester_id_fkey';
+            columns: ['requester_id'];
+            isOneToOne: false;
+            referencedRelation: 'public_profile_cards';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      goals: {
+        Row: {
+          achieved_at: string | null;
+          auto_post: boolean;
+          created_at: string;
+          deadline: string | null;
+          id: string;
+          start_value: number;
+          status: string;
+          target: NonNullable<Json>;
+          type: string;
+          updated_at: string;
+          user_id: string;
+          goal_observations: Json | null;
+          goal_target_value: number | null;
+        };
+        Insert: {
+          achieved_at?: string | null;
+          auto_post?: boolean;
+          created_at?: string;
+          deadline?: string | null;
+          id?: string;
+          start_value?: number;
+          status?: string;
+          target: NonNullable<Json>;
+          type: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Update: {
+          achieved_at?: string | null;
+          auto_post?: boolean;
+          created_at?: string;
+          deadline?: string | null;
+          id?: string;
+          start_value?: number;
+          status?: string;
+          target?: NonNullable<Json>;
+          type?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'goals_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'goals_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'public_profile_cards';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      league_challenges: {
+        Row: {
+          created_at: string;
+          created_by: string | null;
+          ends_at: string;
+          id: string;
+          kind: Database['public']['Enums']['challenge_kind'];
+          league_id: string;
+          rank_key: string | null;
+          starts_at: string;
+          target: number | null;
+          title: string;
+        };
+        Insert: {
+          created_at?: string;
+          created_by?: string | null;
+          ends_at: string;
+          id?: string;
+          kind: Database['public']['Enums']['challenge_kind'];
+          league_id: string;
+          rank_key?: string | null;
+          starts_at: string;
+          target?: number | null;
+          title: string;
+        };
+        Update: {
+          created_at?: string;
+          created_by?: string | null;
+          ends_at?: string;
+          id?: string;
+          kind?: Database['public']['Enums']['challenge_kind'];
+          league_id?: string;
+          rank_key?: string | null;
+          starts_at?: string;
+          target?: number | null;
+          title?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'league_challenges_created_by_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'league_challenges_created_by_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'public_profile_cards';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'league_challenges_league_id_fkey';
+            columns: ['league_id'];
+            isOneToOne: false;
+            referencedRelation: 'leagues';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'league_challenges_rank_key_fkey';
+            columns: ['rank_key'];
+            isOneToOne: false;
+            referencedRelation: 'rank_lifts';
+            referencedColumns: ['rank_key'];
+          },
+        ];
+      };
+      league_members: {
+        Row: {
+          final_points: number | null;
+          final_position: number | null;
+          joined_at: string;
+          league_id: string;
+          outcome: Database['public']['Enums']['league_outcome'] | null;
+          result_seen_at: string | null;
+          seed_score: number;
+          user_id: string;
+        };
+        Insert: {
+          final_points?: number | null;
+          final_position?: number | null;
+          joined_at?: string;
+          league_id: string;
+          outcome?: Database['public']['Enums']['league_outcome'] | null;
+          result_seen_at?: string | null;
+          seed_score?: number;
+          user_id: string;
+        };
+        Update: {
+          final_points?: number | null;
+          final_position?: number | null;
+          joined_at?: string;
+          league_id?: string;
+          outcome?: Database['public']['Enums']['league_outcome'] | null;
+          result_seen_at?: string | null;
+          seed_score?: number;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'league_members_league_id_fkey';
+            columns: ['league_id'];
+            isOneToOne: false;
+            referencedRelation: 'leagues';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'league_members_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'league_members_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'public_profile_cards';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      league_seasons: {
+        Row: {
+          ends_at: string;
+          id: number;
+          number: number;
+          starts_at: string;
+          status: Database['public']['Enums']['league_status'];
+        };
+        Insert: {
+          ends_at: string;
+          id?: never;
+          number: number;
+          starts_at: string;
+          status?: Database['public']['Enums']['league_status'];
+        };
+        Update: {
+          ends_at?: string;
+          id?: never;
+          number?: number;
+          starts_at?: string;
+          status?: Database['public']['Enums']['league_status'];
+        };
+        Relationships: [];
+      };
+      league_standing: {
+        Row: {
+          division: Database['public']['Enums']['league_division'];
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          division?: Database['public']['Enums']['league_division'];
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          division?: Database['public']['Enums']['league_division'];
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'league_standing_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: true;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'league_standing_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: true;
+            referencedRelation: 'public_profile_cards';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      league_weeks: {
+        Row: {
+          closed_at: string | null;
+          ends_at: string;
+          id: number;
+          season_id: number;
+          starts_at: string;
+          status: Database['public']['Enums']['league_status'];
+          week_no: number;
+        };
+        Insert: {
+          closed_at?: string | null;
+          ends_at: string;
+          id?: never;
+          season_id: number;
+          starts_at: string;
+          status?: Database['public']['Enums']['league_status'];
+          week_no: number;
+        };
+        Update: {
+          closed_at?: string | null;
+          ends_at?: string;
+          id?: never;
+          season_id?: number;
+          starts_at?: string;
+          status?: Database['public']['Enums']['league_status'];
+          week_no?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'league_weeks_season_id_fkey';
+            columns: ['season_id'];
+            isOneToOne: false;
+            referencedRelation: 'league_seasons';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      leagues: {
+        Row: {
+          community_id: string | null;
+          created_at: string;
+          division: Database['public']['Enums']['league_division'] | null;
+          ends_at: string;
+          group_no: number | null;
+          id: string;
+          invite_code: string | null;
+          kind: Database['public']['Enums']['league_kind'];
+          max_members: number;
+          name: string;
+          owner_id: string | null;
+          scoring: Database['public']['Enums']['league_scoring'];
+          scoring_rank_key: string | null;
+          starts_at: string;
+          status: Database['public']['Enums']['league_status'];
+          week_id: number | null;
+        };
+        Insert: {
+          community_id?: string | null;
+          created_at?: string;
+          division?: Database['public']['Enums']['league_division'] | null;
+          ends_at: string;
+          group_no?: number | null;
+          id?: string;
+          invite_code?: string | null;
+          kind: Database['public']['Enums']['league_kind'];
+          max_members?: number;
+          name: string;
+          owner_id?: string | null;
+          scoring?: Database['public']['Enums']['league_scoring'];
+          scoring_rank_key?: string | null;
+          starts_at: string;
+          status?: Database['public']['Enums']['league_status'];
+          week_id?: number | null;
+        };
+        Update: {
+          community_id?: string | null;
+          created_at?: string;
+          division?: Database['public']['Enums']['league_division'] | null;
+          ends_at?: string;
+          group_no?: number | null;
+          id?: string;
+          invite_code?: string | null;
+          kind?: Database['public']['Enums']['league_kind'];
+          max_members?: number;
+          name?: string;
+          owner_id?: string | null;
+          scoring?: Database['public']['Enums']['league_scoring'];
+          scoring_rank_key?: string | null;
+          starts_at?: string;
+          status?: Database['public']['Enums']['league_status'];
+          week_id?: number | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'leagues_owner_id_fkey';
+            columns: ['owner_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'leagues_owner_id_fkey';
+            columns: ['owner_id'];
+            isOneToOne: false;
+            referencedRelation: 'public_profile_cards';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'leagues_scoring_rank_key_fkey';
+            columns: ['scoring_rank_key'];
+            isOneToOne: false;
+            referencedRelation: 'rank_lifts';
+            referencedColumns: ['rank_key'];
+          },
+          {
+            foreignKeyName: 'leagues_week_id_fkey';
+            columns: ['week_id'];
+            isOneToOne: false;
+            referencedRelation: 'league_weeks';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      notifications: {
+        Row: {
+          actor_id: string;
+          comment_id: string | null;
+          created_at: string;
+          id: string;
+          kind: Database['public']['Enums']['notification_kind'];
+          post_id: string | null;
+          read_at: string | null;
+          user_id: string;
+        };
+        Insert: {
+          actor_id: string;
+          comment_id?: string | null;
+          created_at?: string;
+          id?: string;
+          kind: Database['public']['Enums']['notification_kind'];
+          post_id?: string | null;
+          read_at?: string | null;
+          user_id: string;
+        };
+        Update: {
+          actor_id?: string;
+          comment_id?: string | null;
+          created_at?: string;
+          id?: string;
+          kind?: Database['public']['Enums']['notification_kind'];
+          post_id?: string | null;
+          read_at?: string | null;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'notifications_actor_id_fkey';
+            columns: ['actor_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notifications_actor_id_fkey';
+            columns: ['actor_id'];
+            isOneToOne: false;
+            referencedRelation: 'public_profile_cards';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notifications_comment_id_fkey';
+            columns: ['comment_id'];
+            isOneToOne: false;
+            referencedRelation: 'comments';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notifications_post_id_fkey';
+            columns: ['post_id'];
+            isOneToOne: false;
+            referencedRelation: 'posts';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notifications_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'notifications_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'public_profile_cards';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       personal_records: {
         Row: {
           achieved_at: string;
@@ -236,8 +887,22 @@ export type Database = {
             foreignKeyName: 'personal_records_workout_id_fkey';
             columns: ['workout_id'];
             isOneToOne: false;
+            referencedRelation: 'home_working_sets';
+            referencedColumns: ['workout_id'];
+          },
+          {
+            foreignKeyName: 'personal_records_workout_id_fkey';
+            columns: ['workout_id'];
+            isOneToOne: false;
             referencedRelation: 'workouts';
             referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'personal_records_workout_set_id_fkey';
+            columns: ['workout_set_id'];
+            isOneToOne: false;
+            referencedRelation: 'home_working_sets';
+            referencedColumns: ['set_id'];
           },
           {
             foreignKeyName: 'personal_records_workout_set_id_fkey';
@@ -391,6 +1056,136 @@ export type Database = {
           },
         ];
       };
+      post_likes: {
+        Row: {
+          created_at: string;
+          post_id: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          post_id: string;
+          user_id?: string;
+        };
+        Update: {
+          created_at?: string;
+          post_id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'post_likes_post_id_fkey';
+            columns: ['post_id'];
+            isOneToOne: false;
+            referencedRelation: 'posts';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'post_likes_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'post_likes_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'public_profile_cards';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      posts: {
+        Row: {
+          author_id: string;
+          body: string | null;
+          comment_count: number;
+          created_at: string;
+          data: NonNullable<Json>;
+          edited_at: string | null;
+          goal_id: string | null;
+          id: string;
+          like_count: number;
+          media: NonNullable<Json>;
+          milestone_key: string | null;
+          type: Database['public']['Enums']['post_type'];
+          visibility: Database['public']['Enums']['profile_visibility'];
+          workout_id: string | null;
+          workout_summary: Json | null;
+        };
+        Insert: {
+          author_id: string;
+          body?: string | null;
+          comment_count?: number;
+          created_at?: string;
+          data?: NonNullable<Json>;
+          edited_at?: string | null;
+          goal_id?: string | null;
+          id?: string;
+          like_count?: number;
+          media?: NonNullable<Json>;
+          milestone_key?: string | null;
+          type: Database['public']['Enums']['post_type'];
+          visibility?: Database['public']['Enums']['profile_visibility'];
+          workout_id?: string | null;
+          workout_summary?: Json | null;
+        };
+        Update: {
+          author_id?: string;
+          body?: string | null;
+          comment_count?: number;
+          created_at?: string;
+          data?: NonNullable<Json>;
+          edited_at?: string | null;
+          goal_id?: string | null;
+          id?: string;
+          like_count?: number;
+          media?: NonNullable<Json>;
+          milestone_key?: string | null;
+          type?: Database['public']['Enums']['post_type'];
+          visibility?: Database['public']['Enums']['profile_visibility'];
+          workout_id?: string | null;
+          workout_summary?: Json | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'posts_author_id_fkey';
+            columns: ['author_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'posts_author_id_fkey';
+            columns: ['author_id'];
+            isOneToOne: false;
+            referencedRelation: 'public_profile_cards';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'posts_goal_id_fkey';
+            columns: ['goal_id'];
+            isOneToOne: false;
+            referencedRelation: 'goals';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'posts_workout_id_fkey';
+            columns: ['workout_id'];
+            isOneToOne: false;
+            referencedRelation: 'home_working_sets';
+            referencedColumns: ['workout_id'];
+          },
+          {
+            foreignKeyName: 'posts_workout_id_fkey';
+            columns: ['workout_id'];
+            isOneToOne: false;
+            referencedRelation: 'workouts';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       profiles: {
         Row: {
           avatar_url: string | null;
@@ -516,6 +1311,13 @@ export type Database = {
             foreignKeyName: 'rank_events_workout_id_fkey';
             columns: ['workout_id'];
             isOneToOne: false;
+            referencedRelation: 'home_working_sets';
+            referencedColumns: ['workout_id'];
+          },
+          {
+            foreignKeyName: 'rank_events_workout_id_fkey';
+            columns: ['workout_id'];
+            isOneToOne: false;
             referencedRelation: 'workouts';
             referencedColumns: ['id'];
           },
@@ -557,6 +1359,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: 'public_profile_cards';
             referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'rank_flags_workout_set_id_fkey';
+            columns: ['workout_set_id'];
+            isOneToOne: true;
+            referencedRelation: 'home_working_sets';
+            referencedColumns: ['set_id'];
           },
           {
             foreignKeyName: 'rank_flags_workout_set_id_fkey';
@@ -809,6 +1618,13 @@ export type Database = {
             foreignKeyName: 'ranks_current_best_set_id_fkey';
             columns: ['best_set_id'];
             isOneToOne: false;
+            referencedRelation: 'home_working_sets';
+            referencedColumns: ['set_id'];
+          },
+          {
+            foreignKeyName: 'ranks_current_best_set_id_fkey';
+            columns: ['best_set_id'];
+            isOneToOne: false;
             referencedRelation: 'workout_sets';
             referencedColumns: ['id'];
           },
@@ -822,6 +1638,68 @@ export type Database = {
           {
             foreignKeyName: 'ranks_current_user_id_fkey';
             columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'public_profile_cards';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      reports: {
+        Row: {
+          comment_id: string | null;
+          created_at: string;
+          details: string | null;
+          id: string;
+          post_id: string | null;
+          reason: Database['public']['Enums']['report_reason'];
+          reporter_id: string;
+          status: string;
+        };
+        Insert: {
+          comment_id?: string | null;
+          created_at?: string;
+          details?: string | null;
+          id?: string;
+          post_id?: string | null;
+          reason: Database['public']['Enums']['report_reason'];
+          reporter_id?: string;
+          status?: string;
+        };
+        Update: {
+          comment_id?: string | null;
+          created_at?: string;
+          details?: string | null;
+          id?: string;
+          post_id?: string | null;
+          reason?: Database['public']['Enums']['report_reason'];
+          reporter_id?: string;
+          status?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'reports_comment_id_fkey';
+            columns: ['comment_id'];
+            isOneToOne: false;
+            referencedRelation: 'comments';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'reports_post_id_fkey';
+            columns: ['post_id'];
+            isOneToOne: false;
+            referencedRelation: 'posts';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'reports_reporter_id_fkey';
+            columns: ['reporter_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'reports_reporter_id_fkey';
+            columns: ['reporter_id'];
             isOneToOne: false;
             referencedRelation: 'public_profile_cards';
             referencedColumns: ['id'];
@@ -1004,6 +1882,7 @@ export type Database = {
           name: string;
           sort_order: number;
           source: Database['public']['Enums']['routine_source'];
+          source_label: string | null;
           source_ref: string | null;
           updated_at: string;
           user_id: string;
@@ -1019,6 +1898,7 @@ export type Database = {
           name: string;
           sort_order?: number;
           source?: Database['public']['Enums']['routine_source'];
+          source_label?: string | null;
           source_ref?: string | null;
           updated_at?: string;
           user_id?: string;
@@ -1034,6 +1914,7 @@ export type Database = {
           name?: string;
           sort_order?: number;
           source?: Database['public']['Enums']['routine_source'];
+          source_label?: string | null;
           source_ref?: string | null;
           updated_at?: string;
           user_id?: string;
@@ -1055,6 +1936,55 @@ export type Database = {
           },
           {
             foreignKeyName: 'routines_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'public_profile_cards';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      season_rewards: {
+        Row: {
+          badge_key: string;
+          best_division: Database['public']['Enums']['league_division'];
+          frame_key: string | null;
+          granted_at: string;
+          season_id: number;
+          user_id: string;
+        };
+        Insert: {
+          badge_key: string;
+          best_division: Database['public']['Enums']['league_division'];
+          frame_key?: string | null;
+          granted_at?: string;
+          season_id: number;
+          user_id: string;
+        };
+        Update: {
+          badge_key?: string;
+          best_division?: Database['public']['Enums']['league_division'];
+          frame_key?: string | null;
+          granted_at?: string;
+          season_id?: number;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'season_rewards_season_id_fkey';
+            columns: ['season_id'];
+            isOneToOne: false;
+            referencedRelation: 'league_seasons';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'season_rewards_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'season_rewards_user_id_fkey';
             columns: ['user_id'];
             isOneToOne: false;
             referencedRelation: 'public_profile_cards';
@@ -1127,8 +2057,10 @@ export type Database = {
           bar_weight_kg: number;
           created_at: string;
           effort_metric: Database['public']['Enums']['effort_metric'];
+          milestone_posts: Database['public']['Enums']['milestone_post_mode'];
           notification_prefs: NonNullable<Json>;
           plate_inventory: NonNullable<Json>;
+          recovery_speed: string;
           rest_timer_default_sec: number;
           theme: Database['public']['Enums']['theme_mode'];
           updated_at: string;
@@ -1138,8 +2070,10 @@ export type Database = {
           bar_weight_kg?: number;
           created_at?: string;
           effort_metric?: Database['public']['Enums']['effort_metric'];
+          milestone_posts?: Database['public']['Enums']['milestone_post_mode'];
           notification_prefs?: NonNullable<Json>;
           plate_inventory?: NonNullable<Json>;
+          recovery_speed?: string;
           rest_timer_default_sec?: number;
           theme?: Database['public']['Enums']['theme_mode'];
           updated_at?: string;
@@ -1149,8 +2083,10 @@ export type Database = {
           bar_weight_kg?: number;
           created_at?: string;
           effort_metric?: Database['public']['Enums']['effort_metric'];
+          milestone_posts?: Database['public']['Enums']['milestone_post_mode'];
           notification_prefs?: NonNullable<Json>;
           plate_inventory?: NonNullable<Json>;
+          recovery_speed?: string;
           rest_timer_default_sec?: number;
           theme?: Database['public']['Enums']['theme_mode'];
           updated_at?: string;
@@ -1216,6 +2152,13 @@ export type Database = {
             foreignKeyName: 'workout_exercises_workout_id_fkey';
             columns: ['workout_id'];
             isOneToOne: false;
+            referencedRelation: 'home_working_sets';
+            referencedColumns: ['workout_id'];
+          },
+          {
+            foreignKeyName: 'workout_exercises_workout_id_fkey';
+            columns: ['workout_id'];
+            isOneToOne: false;
             referencedRelation: 'workouts';
             referencedColumns: ['id'];
           },
@@ -1265,6 +2208,13 @@ export type Database = {
             foreignKeyName: 'workout_revisions_workout_id_fkey';
             columns: ['workout_id'];
             isOneToOne: false;
+            referencedRelation: 'home_working_sets';
+            referencedColumns: ['workout_id'];
+          },
+          {
+            foreignKeyName: 'workout_revisions_workout_id_fkey';
+            columns: ['workout_id'];
+            isOneToOne: false;
             referencedRelation: 'workouts';
             referencedColumns: ['id'];
           },
@@ -1303,6 +2253,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: 'public_profile_cards';
             referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'workout_rewards_workout_id_fkey';
+            columns: ['workout_id'];
+            isOneToOne: true;
+            referencedRelation: 'home_working_sets';
+            referencedColumns: ['workout_id'];
           },
           {
             foreignKeyName: 'workout_rewards_workout_id_fkey';
@@ -1498,6 +2455,45 @@ export type Database = {
       };
     };
     Views: {
+      home_working_sets: {
+        Row: {
+          at: string | null;
+          exercise_id: string | null;
+          reps: number | null;
+          rir: number | null;
+          rpe: number | null;
+          set_id: string | null;
+          started_at: string | null;
+          user_id: string | null;
+          volume_kg: number | null;
+          weight_kg: number | null;
+          weight_mode: Database['public']['Enums']['weight_mode'] | null;
+          workout_id: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'workout_exercises_exercise_id_fkey';
+            columns: ['exercise_id'];
+            isOneToOne: false;
+            referencedRelation: 'exercises';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'workouts_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'workouts_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'public_profile_cards';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       public_profile_cards: {
         Row: {
           avatar_url: string | null;
@@ -1514,8 +2510,24 @@ export type Database = {
       };
     };
     Functions: {
+      add_comment: {
+        Args: { p_body: string; p_id: string; p_parent?: string; p_post: string };
+        Returns: string;
+      };
       are_friends: { Args: { a: string; b: string }; Returns: boolean };
+      block_user: { Args: { p_user: string }; Returns: undefined };
       can_use_exercise: { Args: { p_exercise_id: string }; Returns: boolean };
+      can_view_comment: { Args: { comment: string; viewer: string }; Returns: boolean };
+      can_view_post: { Args: { post: string; viewer: string }; Returns: boolean };
+      can_view_post_row: {
+        Args: {
+          author: string;
+          viewer: string;
+          vis: Database['public']['Enums']['profile_visibility'];
+        };
+        Returns: boolean;
+      };
+      can_view_profile: { Args: { owner: string; viewer: string }; Returns: boolean };
       can_view_profile_details: {
         Args: {
           owner: string;
@@ -1523,6 +2535,133 @@ export type Database = {
           vis: Database['public']['Enums']['profile_visibility'];
         };
         Returns: boolean;
+      };
+      can_view_workout_photo: { Args: { path: string; viewer: string }; Returns: boolean };
+      cancel_friend_request: { Args: { p_id: string }; Returns: undefined };
+      create_custom_league: {
+        Args: {
+          p_name: string;
+          p_rank_key?: string;
+          p_scoring: Database['public']['Enums']['league_scoring'];
+          p_weeks: number;
+        };
+        Returns: Json;
+      };
+      create_league_challenge: {
+        Args: {
+          p_kind: Database['public']['Enums']['challenge_kind'];
+          p_league: string;
+          p_rank_key?: string;
+          p_target?: number;
+          p_title: string;
+        };
+        Returns: string;
+      };
+      create_milestone_post: {
+        Args: {
+          p_kind: Database['public']['Enums']['post_type'];
+          p_ref: Json;
+          p_visibility?: Database['public']['Enums']['profile_visibility'];
+        };
+        Returns: string;
+      };
+      create_post: { Args: { p: Json }; Returns: string };
+      delete_comment: { Args: { p_id: string }; Returns: undefined };
+      edit_comment: { Args: { p_body: string; p_id: string }; Returns: undefined };
+      edit_post: {
+        Args: {
+          p_body: string;
+          p_id: string;
+          p_keep_media?: string[];
+          p_visibility?: Database['public']['Enums']['profile_visibility'];
+        };
+        Returns: undefined;
+      };
+      follow_user: { Args: { p_user: string }; Returns: undefined };
+      get_discover: {
+        Args: { p_as_of?: string; p_exclude?: string[]; p_filters?: string[]; p_limit?: number };
+        Returns: Json;
+      };
+      get_feed: {
+        Args: { p_before_at?: string; p_before_id?: string; p_limit?: number };
+        Returns: Json;
+      };
+      get_friend_requests: { Args: Record<PropertyKey, never>; Returns: Json };
+      get_friends: { Args: Record<PropertyKey, never>; Returns: Json };
+      get_goals: { Args: { p_zone?: string }; Returns: Json };
+      get_home_analytics: {
+        Args: { p_end: string; p_start: string; p_zone?: string };
+        Returns: Json;
+      };
+      get_league_challenges: { Args: { p_league: string }; Returns: Json };
+      get_league_history: { Args: Record<PropertyKey, never>; Returns: Json };
+      get_league_home: { Args: Record<PropertyKey, never>; Returns: Json };
+      get_league_standings: { Args: { p_league: string }; Returns: Json };
+      get_lift_bests: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          achieved_at: string;
+          bodyweight_kg: number;
+          duration_sec: number;
+          e1rm: number;
+          exercise_name: string;
+          log_type: Database['public']['Enums']['exercise_log_type'];
+          rank_key: string;
+          reps: number;
+          weight_kg: number;
+        }[];
+      };
+      get_lift_detail: { Args: { p_rank_key: string }; Returns: Json };
+      get_lift_percentile: { Args: { p_rank_key: string }; Returns: Json };
+      get_notifications: {
+        Args: { p_before_at?: string; p_before_id?: string; p_limit?: number };
+        Returns: Json;
+      };
+      get_people_suggestions: { Args: { p_limit?: number }; Returns: Json };
+      get_personal_records: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          achieved_at: string;
+          exercise_id: string;
+          exercise_name: string;
+          kind: Database['public']['Enums']['pr_kind'];
+          log_type: Database['public']['Enums']['exercise_log_type'];
+          previous_value: number;
+          rank_key: string;
+          set_duration_sec: number;
+          set_reps: number;
+          set_weight_kg: number;
+          set_weight_mode: Database['public']['Enums']['weight_mode'];
+          value: number;
+          weight_kg: number;
+          workout_id: string;
+          workout_name: string;
+        }[];
+      };
+      get_post: { Args: { p_id: string }; Returns: Json };
+      get_profile: { Args: { p_username: string }; Returns: Json };
+      get_rank_events: {
+        Args: { p_since: string };
+        Returns: {
+          at: string;
+          from_division: number;
+          from_tier: Database['public']['Enums']['rank_tier'];
+          key: string;
+          kind: Database['public']['Enums']['rank_event_kind'];
+          scope: Database['public']['Enums']['rank_scope'];
+          score: number;
+          to_division: number;
+          to_tier: Database['public']['Enums']['rank_tier'];
+          workout_id: string;
+        }[];
+      };
+      get_rank_history: {
+        Args: {
+          p_key: string;
+          p_scope: Database['public']['Enums']['rank_scope'];
+          p_since: string;
+        };
+        Returns: Json;
       };
       get_rank_predictions: { Args: Record<PropertyKey, never>; Returns: Json };
       get_ranks: {
@@ -1539,8 +2678,84 @@ export type Database = {
           tier: Database['public']['Enums']['rank_tier'];
         }[];
       };
+      get_season_recap: { Args: { p_season: number }; Returns: Json };
+      get_unread_notification_count: { Args: Record<PropertyKey, never>; Returns: number };
+      get_user_posts: {
+        Args: { p_before_at?: string; p_before_id?: string; p_limit?: number; p_user: string };
+        Returns: Json;
+      };
       get_workout_rewards: { Args: { p_workout: string }; Returns: Json };
+      goal_observations: {
+        Args: { g: Database['public']['Tables']['goals']['Row'] };
+        Returns: Json;
+      };
+      goal_target_value: {
+        Args: { g: Database['public']['Tables']['goals']['Row'] };
+        Returns: number;
+      };
+      goal_value: {
+        Args: { g: Database['public']['Tables']['goals']['Row']; p_now: string; p_zone: string };
+        Returns: number;
+      };
+      is_blocked: { Args: { a: string; b: string }; Returns: boolean };
+      is_league_member: { Args: { p_league: string }; Returns: boolean };
       is_reserved_username: { Args: { name: string }; Returns: boolean };
+      join_league: { Args: { p_code: string }; Returns: string };
+      league_add_challenges: { Args: { p_league: string; p_pick: number }; Returns: undefined };
+      league_challenge_value: {
+        Args: { c: Database['public']['Tables']['league_challenges']['Row']; p_user: string };
+        Returns: number;
+      };
+      league_close_league: { Args: { p_at: string; p_league: string }; Returns: undefined };
+      league_lp: { Args: { p_from: string; p_to: string; p_user: string }; Returns: number };
+      league_lp_breakdown: {
+        Args: { p_from: string; p_to: string; p_user: string };
+        Returns: Json;
+      };
+      league_member_points: {
+        Args: {
+          p_league: Database['public']['Tables']['leagues']['Row'];
+          p_to: string;
+          p_user: string;
+        };
+        Returns: number;
+      };
+      league_now: { Args: Record<PropertyKey, never>; Returns: string };
+      league_open_week: { Args: { p_now: string }; Returns: number };
+      league_place: {
+        Args: {
+          p_at: string;
+          p_user: string;
+          p_week: Database['public']['Tables']['league_weeks']['Row'];
+        };
+        Returns: string;
+      };
+      league_qualifying_workouts: {
+        Args: { p_from: string; p_to: string; p_user: string };
+        Returns: {
+          ist_day: string;
+          plan_day_id: string;
+          sets: number;
+          started_at: string;
+          workout_id: string;
+        }[];
+      };
+      league_ranking: {
+        Args: { p_league: string; p_to: string };
+        Returns: {
+          last_at: string;
+          place: number;
+          points: number;
+          user_id: string;
+        }[];
+      };
+      league_run_cycle: { Args: { p_now?: string }; Returns: Json };
+      league_seed_score: { Args: { p_at: string; p_user: string }; Returns: number };
+      league_week_start: { Args: { p_at: string }; Returns: string };
+      league_zone_size: { Args: { p_members: number }; Returns: number };
+      leave_league: { Args: { p_league: string }; Returns: undefined };
+      mark_league_result_seen: { Args: { p_league: string }; Returns: undefined };
+      mark_notifications_read: { Args: { p_ids?: string[] }; Returns: number };
       owns_plan: { Args: { p_plan_id: string }; Returns: boolean };
       owns_routine: { Args: { p_routine_id: string }; Returns: boolean };
       owns_routine_exercise: { Args: { p_routine_exercise_id: string }; Returns: boolean };
@@ -1612,11 +2827,23 @@ export type Database = {
         Args: { p_score: number; p_version: number };
         Returns: Record<string, unknown>;
       };
+      recovery_half_life: { Args: { p: Database['public']['Enums']['muscle'] }; Returns: number };
       refresh_workout_totals: { Args: { p_id: string }; Returns: undefined };
       region_of_muscle: {
         Args: { m: Database['public']['Enums']['muscle'] };
         Returns: Database['public']['Enums']['muscle_region'];
       };
+      remove_friend: { Args: { p_user: string }; Returns: undefined };
+      report_content: {
+        Args: {
+          p_comment?: string;
+          p_details?: string;
+          p_post?: string;
+          p_reason: Database['public']['Enums']['report_reason'];
+        };
+        Returns: undefined;
+      };
+      respond_friend_request: { Args: { p_accept: boolean; p_id: string }; Returns: string };
       save_custom_exercise: {
         Args: {
           p_equipment: Database['public']['Enums']['equipment'];
@@ -1628,14 +2855,86 @@ export type Database = {
         };
         Returns: string;
       };
+      save_goal: {
+        Args: {
+          p_archive?: boolean;
+          p_auto_post?: boolean;
+          p_deadline?: string;
+          p_id: string;
+          p_target: Json;
+          p_type: string;
+          p_zone?: string;
+        };
+        Returns: string;
+      };
       save_plan: { Args: { p: Json }; Returns: string };
       save_routine: { Args: { p: Json }; Returns: string };
       save_workout: { Args: { p: Json }; Returns: Json };
+      search_profiles: { Args: { p_limit?: number; p_query: string }; Returns: Json };
+      send_friend_request: { Args: { p_user: string }; Returns: string };
       set_workout_photo: { Args: { p_id: string; p_path?: string }; Returns: undefined };
+      social_build_milestone: {
+        Args: { p_kind: Database['public']['Enums']['post_type']; p_ref: Json; p_user: string };
+        Returns: Json;
+      };
+      social_friends_of: { Args: { p_user: string }; Returns: string[] };
+      social_insert_milestone: {
+        Args: {
+          p_built: Json;
+          p_kind: Database['public']['Enums']['post_type'];
+          p_user: string;
+          p_visibility: Database['public']['Enums']['profile_visibility'];
+        };
+        Returns: string;
+      };
+      social_mentions: { Args: { p_text: string }; Returns: string[] };
+      social_mutual_friends: { Args: { a: string; b: string }; Returns: number };
+      social_notify: {
+        Args: {
+          p_actor: string;
+          p_comment?: string;
+          p_kind: Database['public']['Enums']['notification_kind'];
+          p_post?: string;
+          p_user: string;
+        };
+        Returns: undefined;
+      };
+      social_notify_mentions: {
+        Args: {
+          p_actor: string;
+          p_comment: string;
+          p_post: string;
+          p_skip?: string[];
+          p_text: string;
+        };
+        Returns: undefined;
+      };
+      social_page: { Args: { p_limit: number; p_rows: Json }; Returns: Json };
+      social_person_json: { Args: { p_user: string; p_viewer: string }; Returns: Json };
+      social_post_json: { Args: { p_post: string; p_viewer: string }; Returns: Json };
+      social_require_target: { Args: { p_me: string; p_user: string }; Returns: undefined };
+      social_require_user: { Args: Record<PropertyKey, never>; Returns: string };
+      social_sync_workout_post: { Args: { p_workout: string }; Returns: undefined };
+      social_training_days: { Args: { p_at: string; p_user: string }; Returns: number };
+      social_valid_media: {
+        Args: { p_media: Json; p_post: string; p_user: string };
+        Returns: Json;
+      };
+      social_workout_summary: { Args: { p_workout: string }; Returns: Json };
+      training_streak: { Args: { p_now: string; p_zone: string }; Returns: number };
+      try_uuid: { Args: { t: string }; Returns: string };
+      unblock_user: { Args: { p_user: string }; Returns: undefined };
+      unfollow_user: { Args: { p_user: string }; Returns: undefined };
       username_available: { Args: { name: string }; Returns: boolean };
+      valid_goal_target: { Args: { p_type: string; t: Json }; Returns: boolean };
+      visibility_rank: {
+        Args: { v: Database['public']['Enums']['profile_visibility'] };
+        Returns: number;
+      };
       workout_snapshot: { Args: { p_id: string }; Returns: Json };
     };
     Enums: {
+      challenge_kind: 'most_reps' | 'lift_frequency' | 'workouts';
       effort_metric: 'rir' | 'rpe' | 'both';
       equipment:
         | 'barbell'
@@ -1657,6 +2956,13 @@ export type Database = {
         | 'distance_duration';
       exercise_mechanic: 'compound' | 'isolation';
       experience_level: 'beginner' | 'intermediate' | 'advanced';
+      friendship_status: 'pending' | 'accepted' | 'declined';
+      league_division: 'rookie' | 'contender' | 'elite' | 'legend';
+      league_kind: 'ranked' | 'custom' | 'community';
+      league_outcome: 'promoted' | 'stayed' | 'demoted';
+      league_scoring: 'lp' | 'volume' | 'lift_improvement' | 'attendance';
+      league_status: 'open' | 'closed';
+      milestone_post_mode: 'auto' | 'ask' | 'never';
       muscle:
         | 'upper_chest'
         | 'mid_lower_chest'
@@ -1681,8 +2987,17 @@ export type Database = {
         | 'neck';
       muscle_region: 'chest' | 'shoulders' | 'arms' | 'back' | 'core' | 'legs';
       muscle_role: 'primary' | 'secondary' | 'stabiliser';
+      notification_kind:
+        | 'respect'
+        | 'comment'
+        | 'reply'
+        | 'mention'
+        | 'friend_request'
+        | 'friend_accepted'
+        | 'follow';
       plan_day_status: 'pending' | 'done' | 'missed' | 'moved';
       plan_status: 'active' | 'completed' | 'abandoned';
+      post_type: 'workout' | 'text' | 'photo' | 'pr' | 'rank_up' | 'goal' | 'league_result';
       pr_kind: 'e1rm' | 'weight' | 'reps_at_weight' | 'set_volume' | 'session_volume' | 'hold';
       primary_goal:
         'stronger' | 'muscle' | 'fat' | 'gain' | 'toned' | 'curvier' | 'calisthenics' | 'general';
@@ -1695,6 +3010,15 @@ export type Database = {
       rank_status: 'ranked' | 'placement';
       rank_tier:
         'iron' | 'bronze' | 'silver' | 'gold' | 'platinum' | 'diamond' | 'master' | 'champion';
+      report_reason:
+        | 'spam'
+        | 'harassment'
+        | 'hate'
+        | 'nudity'
+        | 'violence'
+        | 'self_harm'
+        | 'false_info'
+        | 'other';
       routine_source: 'manual' | 'plan' | 'copied' | 'generated';
       set_type: 'warmup' | 'working' | 'top' | 'backoff' | 'drop' | 'failure' | 'amrap';
       sex_for_standards: 'male' | 'female' | 'unspecified';
@@ -1815,6 +3139,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      challenge_kind: ['most_reps', 'lift_frequency', 'workouts'],
       effort_metric: ['rir', 'rpe', 'both'],
       equipment: [
         'barbell',
@@ -1838,6 +3163,13 @@ export const Constants = {
       ],
       exercise_mechanic: ['compound', 'isolation'],
       experience_level: ['beginner', 'intermediate', 'advanced'],
+      friendship_status: ['pending', 'accepted', 'declined'],
+      league_division: ['rookie', 'contender', 'elite', 'legend'],
+      league_kind: ['ranked', 'custom', 'community'],
+      league_outcome: ['promoted', 'stayed', 'demoted'],
+      league_scoring: ['lp', 'volume', 'lift_improvement', 'attendance'],
+      league_status: ['open', 'closed'],
+      milestone_post_mode: ['auto', 'ask', 'never'],
       muscle: [
         'upper_chest',
         'mid_lower_chest',
@@ -1863,8 +3195,18 @@ export const Constants = {
       ],
       muscle_region: ['chest', 'shoulders', 'arms', 'back', 'core', 'legs'],
       muscle_role: ['primary', 'secondary', 'stabiliser'],
+      notification_kind: [
+        'respect',
+        'comment',
+        'reply',
+        'mention',
+        'friend_request',
+        'friend_accepted',
+        'follow',
+      ],
       plan_day_status: ['pending', 'done', 'missed', 'moved'],
       plan_status: ['active', 'completed', 'abandoned'],
+      post_type: ['workout', 'text', 'photo', 'pr', 'rank_up', 'goal', 'league_result'],
       pr_kind: ['e1rm', 'weight', 'reps_at_weight', 'set_volume', 'session_volume', 'hold'],
       primary_goal: [
         'stronger',
@@ -1884,6 +3226,16 @@ export const Constants = {
       rank_scope: ['lift', 'muscle', 'region', 'overall', 'weightlifting', 'calisthenics'],
       rank_status: ['ranked', 'placement'],
       rank_tier: ['iron', 'bronze', 'silver', 'gold', 'platinum', 'diamond', 'master', 'champion'],
+      report_reason: [
+        'spam',
+        'harassment',
+        'hate',
+        'nudity',
+        'violence',
+        'self_harm',
+        'false_info',
+        'other',
+      ],
       routine_source: ['manual', 'plan', 'copied', 'generated'],
       set_type: ['warmup', 'working', 'top', 'backoff', 'drop', 'failure', 'amrap'],
       sex_for_standards: ['male', 'female', 'unspecified'],

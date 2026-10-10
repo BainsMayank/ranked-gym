@@ -5,7 +5,7 @@ Update this file at the end of every session (see CLAUDE.md → Session protocol
 
 ## Phases
 
-- [~] **0 · Foundation**: project, tooling, provisional theme and base components, navigation shell, docs
+- [x] **0 · Foundation**: project, tooling, theme/base components, navigation, docs and repeatable integrity checks (audit 2026-10-10)
 - [x] **0B · Design system**: final visual identity, restyled base components, game layer ready for rank art and avatars (see `MOBILE-DESIGN.md`)
 - [~] **1 · Backend, auth, onboarding**: built and verified locally; waiting on the hosted project + real-phone check (see Phase 1 below)
 - [x] **2 · Exercise library**: exercises, muscles taxonomy, equipment, search, local cache
@@ -13,10 +13,10 @@ Update this file at the end of every session (see CLAUDE.md → Session protocol
 - [x] **4 · Workout logging**: local-first logging, sync engine, rest timer, keypad, plates, random workouts, finish summary, history (user phone checks left; see Phase 4 below)
 - [x] **5 · Plan generator**: questionnaire → rules-based multi-week plan, My Plan card, overview, edits, planned sessions in the logger (user steps left; see Phase 5 below)
 - [x] **6 · Rank engine**: Postgres rank engine, standards tables, PRs, rank history, predictions, rewards on the workout summary (user steps left; see Phase 6 below)
-- [~] **7 · Rank tab** (next): My Ranks, Body Map, Leagues, Analysis, Records (+ Victory Native charts)
-- [ ] **8 · Home For You**: muscle analysis, recovery, goals, overview
-- [ ] **9 · Feed and Discover**: posts, published workouts, likes, comments, copy workout, discovery
-- [ ] **10 · Friends and leaderboards**: friends, search, invite and referrals, friend, regional and global boards
+- [x] **7 · Rank tab**: My Ranks, Body Map, Analysis, Records on server data; weekly leagues, seasons, custom leagues and challenges; dev seed and league simulator (user steps left; see Phase 7 below)
+- [~] **8 · Home For You**: implemented and verified locally; real-workout acceptance and hosted verification remain (league standing now wired)
+- [~] **9 · Feed and Discover**: social graph, posts, Respect, comments, copy workout, Discover ranking, notifications; built and verified locally (Android performance and hosted verification left; see Phase 9 below)
+- [ ] **10 · Friends and leaderboards** (next): search, invite and referrals, friend, regional and global boards (friends and requests landed in Phase 9)
 - [ ] **11 · Profile, XP, customisation**: XP and levels, badges, customisation, settings, units, export, delete account
 - [ ] **12 · Streaks, stakes, notifications**: streaks, stakes among friends, accountability pods, push notifications
 - [ ] **12B · Communities and battles**: college, hostel, society and gym communities; inter-community battles
@@ -24,7 +24,7 @@ Update this file at the end of every session (see CLAUDE.md → Session protocol
 - [ ] **14 · Polish, offline, performance, testing**: offline hardening, low-end Android performance, a11y audit, test coverage
 - [ ] **15 · Launch**: final name and branding, store assets, EAS builds, privacy policy, release
 
-## Phase 0 · Foundation (in progress)
+## Phase 0 · Foundation (done; integrity audit 2026-10-10)
 
 - [x] Expo SDK 57 project (TypeScript strict, pnpm, Expo Router), folder layout
 - [x] CLAUDE.md, docs/PRODUCT_SPEC.md (with Open decisions), docs/PROGRESS.md
@@ -49,7 +49,7 @@ Update this file at the end of every session (see CLAUDE.md → Session protocol
 - [x] Game layer: `src/lib/game` rank model, `RankBadge` with art registry, `DivisionLadder`, `RankGlow`, `Avatar` rings, levels and cosmetic frames
 - [x] Expo Go (iOS) Display P3 colour correction
 - [x] `MOBILE-DESIGN.md`, `src/theme/README.md`, gallery updated; verified in the iOS simulator (dark and light)
-- [ ] **User**: supply final rank badge art (register it in `src/components/game/artRegistry.ts`)
+- [x] Original rank and weekly-league art generated and registered in Phase 7 artwork pass (2026-10-09)
 
 ## Phase 1 · Backend, auth, onboarding (verified locally; user steps left)
 
@@ -103,7 +103,7 @@ Update this file at the end of every session (see CLAUDE.md → Session protocol
 Fixed: FINDING-001 (high) the default-rest setting was saved but unused; new exercises now use it. Open:
 
 - [ ] FINDING-002 (medium) Hub Routines heading (reorder icon + New folder + New routine) may crowd at 360dp; consider an icon or overflow for New folder
-- [ ] FINDING-003 (medium) `Chip` touch target is 40pt (32 + hitSlop 4); raise hitSlop to 6 in the base component
+- [x] FINDING-003 (medium) `Chip` target raised to 44pt including hitSlop in Phase 8
 - [x] FINDING-004 (medium) Training settings changed offline wait silently (fixed in Phase 4)
 - [ ] FINDING-005 (medium) `ReorderList` has no auto-scroll while dragging (Move up/down actions cover it for now)
 - [ ] FINDING-006 (polish) swipe says "Copy", menu says "Duplicate"
@@ -124,7 +124,7 @@ Fixed: FINDING-001 (high) the default-rest setting was saved but unused; new exe
 - [x] Start from a routine, empty, generator (live preview, reroll one or all, save as routine) and hub quick presets
 - [x] Tests: 298 Jest (sync engine offline/retry/duplicates, generator on the real library, 1RM, plates, calories, flow, deviation, keypad fields, logging screen: tick in ~36 ms incl. the rest sheet, rest, superset, keypad). `pnpm check` passes
 - [x] Verified in the iOS simulator against local Supabase with the stack stopped ("airplane mode"): started a generated routine, logged sets with the keypad and plate calculator, rest sheet and bar, killed the app twice mid-workout (mini bar, elapsed time and rest restored), finished; restarted Supabase and the workout reached Postgres within seconds exactly once (1 workout, 2 exercises, 3 sets; a relaunch and pull added nothing); edited it from History (revision 1, volume recomputed, revision 0 kept)
-- [ ] **User**: `pnpm db:push` (workouts migration + storage bucket) and `pnpm db:test:remote`; hosted Storage must be enabled
+- [ ] **User**: complete `pnpm db:test:remote` and device Storage checks; workout migration deployment confirmed by the 2026-10-10 dry run
 - [ ] **User**: on a real phone in airplane mode: a full ~60-minute session, kill mid-workout, restart the phone, finish, turn the network on, check it in Supabase once; allow notifications and confirm the rest buzz with the phone locked; add a photo and confirm it uploads
 - [ ] Android: logging at 360dp, back button on the logging, finish and edit screens, keypad, notification channel
 
@@ -148,7 +148,7 @@ Fixed: FINDING-010 (high) keyboard covered sheet inputs (base `Sheet` now avoids
 - [x] Planned sessions open the Phase 4 logger with `planDayId`, week-1 "find your working weight" hints, progressed loads from last time, deload loads
 - [x] Tests: 500 sampled profiles (overlap, time budget, ceilings and explained floors, equipment/bars/avoid, compound order, valid routines, deload ~60%, progression by level, A/B variety, determinism; floors and pattern coverage when time allows), 10 reference-profile snapshots + their explanations, schedule, calendar, progression, deload, start, edits, view, PlanCard and questionnaire screens. `pnpm check`: 378 Jest pass
 - [x] Verified in the iOS simulator against local Supabase: created a 4-day plan (questionnaire → preview → start), overview calendar, swapped an exercise for this session only (only that day changed in Postgres), started today's session (blank week-1 weights and hint), finished it: day done on the card, calendar and Home, `plan_day_id` set and the day `done` in Postgres
-- [ ] **User**: `pnpm db:push` (plans migration) and `pnpm db:test:remote`
+- [ ] **User**: complete `pnpm db:test:remote`; plan migration deployment confirmed by the 2026-10-10 dry run
 - [ ] **User**: on a real phone: create a plan, log a session offline, reconnect and check the plan and workout in Supabase; try a missed day (shift the week) and pause/resume across days
 - [ ] Android: questionnaire, calendar and sheets at 360dp
 - [ ] Check moving, regenerating and the missed-day flow in the simulator (covered by unit tests; not driven by hand this session)
@@ -181,9 +181,123 @@ Fixed: FINDING-010 (high) keyboard covered sheet inputs (base `Sheet` now avoids
   - seeded bench 60 × 5 (Silver I), then logged 72.5 × 5 in the app and saved
   - the summary revealed "Bench press ranked up · Gold II · Up from Silver I" with 3 PRs (e1RM 83.1 was 68.8, heaviest 72.5 was 60, set volume 362.5 was 300), arm/shoulder/chest region rank-ups and "Placement: 1/5 lifts"
   - Postgres has the matching records, baselines and `is_pr`; the History detail shows the same rewards
-- [ ] **User**: `pnpm db:push` (rank engine, library v2, standards v1; enables pg_cron on the hosted project) and `pnpm db:test:remote`
+- [ ] **User**: complete `pnpm db:test:remote`; rank engine/library/standards migrations confirmed deployed by the 2026-10-10 dry run
 - [ ] **User**: on a real phone, log a workout, check the reveal and haptic; turn on Reduce Motion and check the reveal is a plain fade (not driven in the simulator)
 - [ ] Calibrate standards against OpenPowerlifting and beta data before launch (standards v2)
+
+## Phase 7 · Rank tab and leagues (done; user steps left)
+
+- [x] Read functions (`*_rank_tab.sql`): `get_rank_history`, `get_rank_events` (timed by the workout), `get_personal_records`, `get_lift_bests`, `get_lift_detail` and `get_lift_percentile`. The percentile is a definer function that returns a percentage only, and nothing below 20 lifters. pgTAP `09_rank_tab` (28)
+- [x] Leagues (`*_leagues.sql`, RANK_SYSTEM.md §18):
+  - IST weeks and 8-week seasons; Rookie, Contender, Elite and Legend
+  - placement into groups of about 30 by overall score, and a mid-week first workout joins straight away
+  - the LP formula: effort and relative progress only
+  - top and bottom 20% move, with no promotion on 0 LP; season badges, and Elite and Legend frames
+  - custom leagues (4 scorings, invite code and link, up to 5 per owner) and challenges (3 kinds, 2 a week per group)
+  - `league_run_cycle(p_now)` on hourly pg_cron, idempotent; `league_now()` for tests and simulation; RLS so members read and nobody writes directly
+  - pgTAP `11_leagues` (64), including "an Iron and a Diamond lifter with the same training earn the same LP"
+- [x] `pnpm dev:seed`: 50 fake lifters plus `demo@fake.test` as onboarded local accounts (Mailpit sign-in), their history replayed through the engine in date order, and league history (one finished season, an open week with all 51 placed). `pnpm leagues:simulate --weeks N`: trains them through the open week, closes it and prints each group (verified over 4 weeks, through a season end with 51 rewards)
+- [x] Client `src/lib/ranks`:
+  - ladder and lift names, history, events, records, lift bests, detail and percentile hooks
+  - `useServerReads` gating, so the signed-out dev preview shows a sign-in prompt instead of anon errors
+  - pure helpers (muscle breakdown and weakest link, balance ratios, analysis buckets, chart series, record grouping), with tests
+- [x] Client `src/lib/leagues`: types, parsers, api, hooks, countdown and a local results reminder that respects `notification_prefs.league_results` and never asks for permission. The workout sync invalidates leagues
+- [x] My Ranks:
+  - hero with placement notches, Inactive state and points to the next division
+  - progression `LineChart` (Victory Native; 1M/3M/6M/1Y/All; any scope; tier bands; rank-up dots; caption)
+  - every rankable lift, with best set and next target
+  - lift detail (`/lift/[key]`: target loads and ETA, percentile, history chart, sets that counted, standards for you)
+  - How ranks work sheet
+- [x] Body Map: male or female outline (defaulting from the profile's standards), and a muscle sheet with the lifts behind it, their shares and the weakest link. `BodyMap` also replaces the exercise detail and workout summary placeholders
+- [x] Analysis: Weightlifting vs Calisthenics with month deltas; the 5 closest rank-ups with loads at 1/3/5/8 and ETA; rank-ups by weekday and time of day; region donut and muscles by tier; strengths, weaknesses and balance ratios with suggestions. Every card has a teaching empty state
+- [x] Records: grouped by exercise (ranked lifts first), current bests, expandable history with "was" values and baselines, kind and date filters, links to the workout, and Share as a Phase 9 toast. The exercise detail Records tab is filled from the same data
+- [x] Leagues UI:
+  - hero with a live countdown; standings with zones; LP breakdown; challenges; chat placeholder; friend leagues
+  - Monday results sheet, which also clears older results
+  - create (`/leagues/new`, with share invite), join (`/leagues/join?code=`), league detail (owner challenges, leave or delete), history, season recap with reward frame
+  - Season tag in the Rank header
+- [x] Home Today shows this week's league division and position (FINDING-038)
+- [x] Removed the Rank mocks, the mock chart and Phase 12B clash card, and the interim SVG badges (Codex's raster art stays)
+- [x] Tests: `pnpm check` passes (57 suites, 579 Jest), including 13 Rank-tab and Leagues screen tests and the lib tests. `pnpm db:test` passes 476 in 11 files
+- [ ] **User**: complete `pnpm db:test:remote`; Rank tab/leagues migrations confirmed deployed by the 2026-10-10 dry run
+- [ ] **User**: on a real phone (`EXPO_PUBLIC_DEV_AUTH_BYPASS=false`), sign in, check charts and pinch-zoom, and create and join a league from a second account
+- [ ] Android: Victory and Skia chart performance on a low-end phone (open decision #20), and the 360dp layouts of the Leagues and lift detail screens
+- [ ] Peak-rank badges (moved to the Phase 11 badges)
+
+## Phase 8 · Home For You (implemented; acceptance follow-ups)
+
+- [x] Read the required product, rank, schema and mobile design docs before planning; implementation plan in `docs/PHASE_8_PLAN.md`. Applied `mobile-taste` to each screen and `mobile-design-review` to all built/changed screens and flows.
+- [x] For You: Today with planned-session/resume/generate actions, actual streak, four live destination previews in a 2×2 grid, recent records/rank-ups and a weekday-aligned weekly comparison.
+- [x] Muscle Analysis: 7/30/90-day and validated custom ranges, reused Phase 7 `BodyMap`, sets/volume toggle, primary 1.0/secondary 0.5 weighting, ranked muscle list, PLAN_ENGINE weekly range bands, neglected-muscle callout and push/pull/legs distribution.
+- [x] Recovery: documented exponential model in `docs/RECOVERY_MODEL.md`, RIR/RPE/default-RIR-2 effort, muscle-specific half-lives, clamped recovery, least-recovered ordering, ready chips, slower/normal/faster setting, minute/foreground decay from cached fatigue and clear estimate copy. Pure-function tests cover effort, elapsed time, speed, bounds and warm-up/failed-set exclusions.
+- [x] Goals: all seven requested types, suggestions from rank predictions/current data, bodyweight-rate warning, progress rings, trend projection when enough observations exist, edit/archive, checkbox completion, reduced-motion-aware celebration and opt-in server feed post with once-only insertion.
+- [x] Overview: 7/14/30/90-day comparison, volume/sessions/duration/average/records/calorie estimate/bodyweight trend, daily volume bars, duration line, training calendar, weigh-in and calendar-based 7-day average lines, Log bodyweight sheet and virtualised full records list linking to workouts.
+- [x] Postgres views/RPCs aggregate authenticated data with owner RLS; generated database types. SQLite-backed query snapshots render immediately and refresh in the background; workout writes/sync invalidate them. Cold offline states have an actionable message instead of indefinite skeletons.
+- [x] Preserved the existing **account-free development preview**. Home and all four destinations read actual device SQLite workouts; local goals, weigh-ins and recovery speed persist. No server rank or feed post is fabricated. Production authentication remains required.
+- [x] Three additive migrations applied to local Supabase with `migration up --local`; no database reset or user-data deletion. Automatic approval review rejected the initially requested reset because it could erase data, so the non-destructive migration path was used instead.
+- [x] Validation: final `pnpm check` passes TypeScript, ESLint, formatting and **54 Jest suites / 561 tests / 20 snapshots**; local pgTAP passes **412 assertions in 10 files**, including 51 Phase 8 assertions. SQLite integration tests execute real aggregate SQL; screen tests cover entry routes, measure/speed controls, goal completion, validation, offline state and weigh-in entry.
+- [x] Account-free iOS walkthrough: fresh Home launch, Workout tab, Muscle Analysis/map/Back, Recovery and speed persistence, create/complete/celebrate/archive goal, Overview/charts and Log bodyweight form. The synthetic walkthrough goal was archived; no synthetic bodyweight was saved.
+
+### Arithmetic spot-checks (test workouts, not the user's workouts)
+
+The user confirmed they have **no account**. The current simulator has no completed workouts, so the original acceptance condition against their own logged data is still unchecked. The SQLite fixture uses three completed 50 kg × 10 bench sets; warm-ups, failed, unticked and draft sets are excluded:
+
+1. Chest working sets: `3 × 1.0 = 3`.
+2. Triceps weighted volume: `3 × 50 × 10 × 0.5 = 750 kg` (1.5 weighted sets).
+3. Triceps after one hour at RIR 2 / normal speed: fatigue `1.5 × 0.5^(1/24) = 1.4573`; recovery `100 × (1 − 1.4573/10) = 85.43%`. Further elapsed hours increase recovery without another workout.
+
+The same fixture's authoritative total workout volume is 1,500 kg. Muscle totals overlap and must never be summed to derive workout volume; the server tests deliberately use a separate authoritative total to catch that error.
+
+### Acceptance and design follow-ups
+
+- [ ] Spot-check three numbers against the user's own newly logged workouts when available; verify hourly recovery over a real session and goal completion from those workouts. Fixture results do not fulfil this acceptance item.
+- [ ] Complete remote RLS/RPC verification. The 2026-10-10 hosted dry run confirms all migrations are deployed; the remote suite was interrupted by SSL/DNS failures. `.env` was not redirected. Local migration/type checks passed.
+  - 2026-10-09 audit: hosted dry run returned `AccessTokenRequiredError`; Supabase CLI login is required. Concrete deployment/sync instructions are in `docs/BACKEND_SETUP.md`.
+- [x] **FINDING-038 (medium):** Today shows the league division and position from `get_league_home` (Phase 7 completion session).
+- [ ] **FINDING-029 (medium, inherited):** BodyMap chest/delt/hip partitions remain schematic; exact named rows accompany them.
+- [ ] **FINDING-039 (medium):** Replace validated YYYY-MM-DD custom-range/deadline inputs with a platform date picker when the stack supports it.
+- [ ] **FINDING-040 (medium):** The existing labelled sample Feed stories/social actions await Phase 9 and retain older press feedback. The real goal milestone strip is distinct.
+- [ ] **FINDING-041 (polish):** Check the requested 2×2 previews at maximum font scale and narrow Android widths.
+- [ ] Android/back/keyboard/insets, native light mode, VoiceOver, long-list performance, direct deep-link startup and software-keyboard submit visibility. Edit goal and Feed received static review; they were not driven natively.
+- [ ] Expo Go crashed natively during earlier editing/reloads (Hermes and permission-module startup stacks; no proven single root cause). After restarting Metro with a cleared cache, a fresh bundle opened Home and the subsequent detail walkthrough stayed open. **Fresh launch is verified; hot-reload stability is not yet established.** Restart guidance is in `docs/DEVELOPMENT.md`.
+
+High findings 034–035 fixed; medium 036–037 and 042 fixed; prior shared-target findings 003/028 fixed. Remaining findings are listed above. Scoped review: **Design A (3.8), AI Slop A (3.95)**; full evidence in `docs/design/phase8/REVIEW.md` and `design-baseline.json`. Phase 7 findings 030–033 remain in their original scope. Phase 8 stays in progress until its acceptance dependencies are met. Phase 9 has since been implemented; see below.
+
+## Phase 9 · Feed and Discover (built and verified locally; Android and hosted steps left)
+
+- [x] Read CLAUDE.md, PRODUCT_SPEC, PROGRESS, SCHEMA and MOBILE-DESIGN before planning. Decided with the user: Friends hub requests and list go real now, `expo-image` + `expo-image-manipulator` approved, goal and experience are ranking signals only. Rules in PRODUCT_SPEC §10I; ranking in `docs/DISCOVER_RANKING.md`.
+- [x] Migration `20261010090000_social.sql`:
+  - friendships, follows, blocks; `are_friends` is real (was a stub); `is_blocked`, `can_view_profile`, `can_view_post_row`, `can_view_post`, `can_view_comment`
+  - posts (workout, text, photo, pr, rank_up, goal, league_result) with the "more restrictive of post and profile visibility" rule, Respect (`post_likes`), comments with one level of replies, reports, notifications, `user_settings.milestone_posts`
+  - workout posts kept by a trigger from the summary's visibility; milestones built only from the user's own server data; Phase 8 `goal_posts` moved into posts
+  - `post-media` bucket and a workout-photo read policy, both following post visibility; Realtime publication for posts and notifications
+  - read RPCs: `get_feed` (keyset), `get_post`, `get_user_posts`, `get_profile`, `get_discover` (scored, 2 per author per page), `get_people_suggestions`, `search_profiles`, friend requests, friends, notifications
+  - `routines.source_label` for "Copied from @user" (SQLite `drizzle/0005`)
+- [x] pgTAP `12_social` (131 assertions): visibility matrix (post × profile visibility × friend / follower / stranger / blocked / anon), a non-friend gets nothing for a friends-only post through the table, `get_post`, comments, Respect, reports, storage and the workout photo; counters, one-level replies, notifications only when visible, block cleanup both ways, Discover never shows private / friends-only / blocked and caps authors. `pnpm db:test`: **607 pass in 12 files**. `supabase db diff` against a fresh shadow database: no schema changes (the migration files match the local database).
+- [x] `src/lib/social`: parsers, RPC API, TanStack hooks (infinite Feed / Discover / profile posts / notifications), optimistic Respect and comments (`patchPost`), batched signed URLs, mentions, caught-up marker, Realtime (new-posts pill, bell). `src/lib/photos/compressPhoto` re-encodes at 1600 px (EXIF and GPS stripped); workout photos use it too.
+- [x] Screens (`src/features/social`): Feed (composer prompt, caught-up divider, new-posts pill, offline notice), Discover (people search, 6 filters, "People to train with", reason overlines), post detail (workout breakdown, threaded comments, pinned reply box, mention autocomplete), composer (4 photos, workout or PR attachment, visibility with profile-cap note, edit mode, discard confirm), Copy workout (rename, keep or blank weights, save or open the builder), user profile (Add friend / Accept / Requested / Friends, Follow, Block), notifications (requests answered in place). Milestone cards for records, rank-ups, goals and league results.
+- [x] Wiring: bell with unread count on Home; Rewards "Share" prompts (Ask me); Records and league results Share; Settings → Privacy → Share milestones; goal share toggle hidden when "Never"; Finish explains what each visibility posts; routine editor shows "Copied from @user"; Friends hub requests, sent and friends are real.
+- [x] Dev seed: friendships, follows, text posts, respects and comments around demo, plus **social.a / social.b / social.c@fake.test** (A and B friends, C a public stranger). `pnpm social:acceptance` signs in as all three over the real API and passes **27 checks**: friends see each other's friends-only and public posts; C sees only public posts in Discover and gets nothing for A's friends-only post (table read, `get_post`, Respect); B copies A's workout into a routine B owns and can edit; after A blocks C, neither sees the other's posts, profile, search or Discover entries, and C can't follow or request; Realtime tells B about A's new post and never tells C.
+- [x] iOS simulator against the local stack (demo account): Feed, post detail, comment with @mention (notification created in Postgres), mention autocomplete, Discover, notifications, profile Add friend, composer (text post, discard confirm, two-photo post), copy workout → builder with credit, Friends hub, light mode. **EXIF**: a test photo tagged with Delhi GPS coordinates was posted from the picker; both stored JPEGs have no GPS block.
+- [x] `pnpm check`: TypeScript, ESLint, Prettier and **62 Jest suites / 612 tests** (parsers, mentions, caught-up, optimistic cache, Feed / post detail / composer / copy screens).
+- [x] Feed query timing on the seeded demo account: first page 20 posts in ~70 ms, Discover ~12 ms, people suggestions ~6 ms.
+- [ ] **Android performance (open)**: the Pixel 6a emulator exists but Expo Go isn't installed on it (installing it needs a download). Scrolling 100 posts smoothly on a mid-range Android is **not verified**. The feed uses FlashList v2 with item types, memoised rows, `expo-image` with recycling keys and one batched signed-URL request per screen.
+- [ ] **User**: complete `pnpm db:test:remote` and real-device social checks. Social migration deployment was confirmed by the 2026-10-10 dry run; remote tests remain incomplete because of SSL/DNS failures. The migration adds the tables to Realtime.
+- [ ] **User**: on a real phone, three accounts (or social.a/b/c on the local stack): post with photos and check they arrive without location, Respect and comment offline (rollback toast), the new-posts pill.
+- [x] Simulator cache caveat: the 2026-10-10 audit added backend identity to the exercise cache, forcing a refresh across local/hosted projects even at matching library versions. Sign out before changing backend configuration; account data remains device-wide.
+
+### Design review (mobile-design-review, `design-baseline.json`)
+
+Scoped to Phase 9 screens; static grep pass (no em dashes, emoji, hex colours or JS-thread animation; every `Alert.alert` is a destructive confirmation) plus the live simulator pass above. Trunk Test PASS on all eight screens, including deep-linked post, copy, profile and notifications. **Design A (3.95), AI Slop A.**
+
+Fixed in this session: FINDING-043 (high) Friends hub add-friend cards collapsed to slivers (pre-existing `flex-1` on a pressable `Card`), FINDING-047 (high) copy → builder opened "Routine not found", FINDING-048 (high) copy preview left out every exercise when device ids differed, FINDING-044 / 045 / 046 / 049 / 050 (medium: post layout, loud comment actions, orange row actions and counts, "1 reps", misleading profile empty state). Open:
+
+- [ ] FINDING-051 (medium, tell 13) Post detail renders up to 300 comments in a ScrollView; move to FlashList with the post as header.
+- [ ] FINDING-052 (polish) Group repeated respects in notifications ("Aarav and 4 others").
+- [ ] FINDING-053 (polish) The whole post body is one pressable, so long posts scale on press and the photo pager sits inside it.
+- [ ] FINDING-054 (polish) Editing a photo post can remove photos but not add new ones.
+- [ ] FINDING-055 (polish) Real avatar images in lists untested (seed accounts use initials).
+- [ ] Unverified: Android scroll performance, 1.3x / 1.6x font scale, the new-posts pill and live bell on screen (Realtime delivery itself is verified by the acceptance script), VoiceOver, Android keyboard on the comment box and composer.
 
 ## Session log
 
@@ -509,3 +623,166 @@ Fixed: FINDING-010 (high) keyboard covered sheet inputs (base `Sheet` now avoids
 - XP (`xp_placeholder`) in Phase 11.
 
 **Next (Phase 7, Rank tab)**: My Ranks, Body Map, Leagues (open decision #6 first), Analysis, Records on real data; add Victory Native + Skia.
+
+### Session 11 — 2026-10-09 — Phase 7 artwork and licensed anatomy
+
+**Scope completed**
+
+- Eight original transparent rank masters (Iron through Champion), plus four distinct weekly-league emblems (Rookie, Contender, Elite, Legend). Central registry, reusable `LeagueBadge`, accessible labels, live SVG division pips; no divisions on Champion. Existing theme palette used for art direction; no product colours or fonts added.
+- Replaced provisional Rank body shapes with MIT-licensed male/female front/back contours from `react-native-body-highlighter`. Full licence, pinned revision, import script and canonical mapping notes in `assets/body/`. All 20 canonical muscles represented, optional neck neutral by default. The shared generic `BodyMap` supports values/colour scale, selection, press callbacks and zoom for Home/recovery reuse.
+- Body Map reads actual ranks through the existing TanStack Query hook. Added skeleton, retry, unranked teaching copy, legend, cosmetic outline toggle, grouped accessible muscle rows and rank sheet. Corrected female cropping and reversed right glute/abductor fragment order after rendering.
+- Repaired the incomplete overview/discipline prop integration, reduced long hero labels to the existing display token, and removed mock tier-strip highlighting. Explicit preview labels now distinguish unfinished progression/lifts/analysis/leagues from queried ranks. Removed dead league event buttons and Phase 12B community mock from the Phase 7 Leagues screen; standings consistently say LP.
+- Review board: `docs/design/artwork/preview.html`; contact sheet: `emblems-review.png`; anatomy board: `anatomy-review.svg`; generation brief: `PROMPTS.md`. Provenance in `docs/CREDITS.md`. Root design rules updated and `docs/MOBILE-DESIGN.md` links to them.
+
+**Design review**
+
+Applied `mobile-taste` and `mobile-design-review` to My Ranks, Body Map, Leagues, Analysis and changed shared art. Static + rendered asset review; native authenticated screens were not reached. High findings 026–027 fixed. Full evidence and mechanical score calculation in `docs/design/artwork/REVIEW.md`; prior Phase 4 baseline retained in `design-baseline.json`.
+
+Remaining findings (all medium): 028 base segmented controls are 40pt; 029 chest/deltoid partitions and hip abductors are schematic; 030 full-resolution masters need production sizing/memory checks; 031 several Phase 7 sections are still labelled examples; 032 muscle contributing lifts/weakest-link sheet content remains; 033 sample progression chart needs real data, three-division semantics and token label sizing.
+
+**Validation**
+
+- Focused artwork/anatomy tests: 13 passing (all tiers/divisions, both canonical maps, fragment fill/press behavior, chart accessibility). Full `pnpm check` passed: TypeScript, ESLint, formatting, 49 Jest suites / 526 tests / 20 snapshots. Existing workout-editor gesture worklet warnings remain in Jest output; no failed checks.
+- All masters verified as transparent RGBA, 1254 × 1254. Dark/light contact sheets and all four anatomy contours visually inspected. No generated masters edited after generation.
+- Not verified: authenticated native screens, pinch/pan, VoiceOver, large text, Android, low-end bitmap decoding/scroll performance. The simulator was signed out; local browser file previews were blocked by browser policy, so inspection used rendered asset boards.
+
+**Phase 7 remains in progress**
+
+This pass completes design assets and anatomy integration, not the original full Phase 7 brief. Continue the existing dirty Phase 7 work: wire progression/lift detail/analysis/records to real queries; contributing-lift/weakest-link details; weekly LP formula and scheduler, promotion/demotion/results, custom leagues, challenges, seasons/rewards/recap, create/join/history/chat placeholder. The `leagues:simulate` script currently references an absent `simulateLeagues.ts`; a seeded 50-user weekly-cycle simulation is **not yet verified or complete**. No backend migrations or league scoring were changed in this artwork pass.
+
+### Session 12 — 2026-10-09 — Phase 8 Home For You
+
+**Built and verified**
+
+- Implemented the four insights destinations, Home summaries, persistent goals, recovery model/settings, weigh-in flow and opt-in goal milestones. Added owner-protected Postgres aggregate/goal functions, device cache and tests. Details and arithmetic checks are in the Phase 8 checklist above.
+- Reused the Phase 7 BodyMap, existing fonts/theme tokens and base components; extended shared controls for guidance bands, accessible targets, refresh and reduced motion. Updated PRODUCT_SPEC, SCHEMA, RECOVERY_MODEL, MOBILE-DESIGN and the design-review baseline. Existing dirty Phase 7 work was preserved; no commit was created.
+
+**Preview correction and startup investigation**
+
+- The user clarified there is no account. My initial sign-in-only insights state removed the existing development preview entry points; corrected it to actual SQLite data and device-only goals/weigh-ins/settings. No sign-in is needed to open the current development preview.
+- Investigated the reported failure to open, including the earlier ExpoAsset error and native Expo Go crash reports. Restarted the existing Metro server with a cleared cache, connected Expo Go to the fresh bundle, and verified Home and detail navigation. Two native crash reports from earlier editing remain diagnostic evidence; this is not a claim that every hot reload is stable.
+- Native goal creation, completion, one celebration and archive were exercised. UI checks used an empty account-free device; database/SQLite arithmetic uses isolated test fixtures, never presented as the user’s logged workouts.
+
+**Next**
+
+- Finish Phase 8 acceptance with real logged workouts, hosted migrations and the Phase 7 league standing dependency. Carry the explicit design/device follow-ups above. Local migrations were applied without a reset; the reset was rejected by automatic approval review for data-loss risk.
+
+### Session 13 — 2026-10-09 — Phase 7 handoff and backend audit
+
+- Read the previous “Build rank tab and leagues UI” chat. That pass completed badges/licensed anatomy and explicitly left the full leagues backend pending. Confirmed the original Phase 7 requirement was larger than the completed artwork scope.
+- Confirmed implementation gaps in files: mock Leagues/Records and progression/analysis sections, empty league seed, absent league simulation script and absent league backend migration/Edge Function. These are missing engineering work, not a consequence of the user forgetting a sync command.
+- Checked the installed CLI's deployment/login/link commands. A hosted `db push --dry-run` stopped at `AccessTokenRequiredError`; no hosted data changed. Added `docs/BACKEND_SETUP.md` with the exact deployment, app sign-in/sync verification and local migration commands, plus the missing-feature limitations. No app code changed in this audit.
+
+### Session 14 — 2026-10-09 — Phase 7 completion (after the Codex pass)
+
+**Audit of the uncommitted tree**
+
+Codex's work while the earlier chat was paused:
+
+- Phase 7 art: raster rank masters, league emblems and licensed anatomy in `BodyMap`.
+- Most of Phase 8.
+- Phase 7 data wiring was left unfinished. There was no leagues backend, and `leagues:simulate` pointed at a missing script.
+
+Inconsistencies found and fixed:
+
+- dead interim SVG badges
+- Rank mocks still imported, and the mock chart left in place
+- a "League standing unavailable" chip on Home
+- MOBILE-DESIGN still said IV → I
+- BACKEND_SETUP still described Phase 7 as missing
+- test 09's percentile cohort broke once the dev seed existed (it now uses a lift the seed never trains)
+
+**Built**: everything in the Phase 7 checklist above.
+
+**Decisions** (PRODUCT_SPEC.md §10H; with the user at the start of the phase):
+
+- pg_cron and SQL instead of an Edge Function.
+- Results in the app plus a local reminder.
+- Auto-placement for anyone active in the last 14 days.
+- The whole phase built in milestones.
+- LP never uses absolute strength.
+- The volume scoring of custom leagues is the one opt-in exception.
+
+**Gotchas**:
+
+- `position` is reserved in Postgres (`returns table(... position ...)` fails); the ranking column is `place`.
+- STABLE plpgsql can't create temp tables at runtime.
+- In plpgsql a record variable named like a table alias makes columns ambiguous.
+- Thousands of engine runs in one DO block exhaust the lock table: commit per workout.
+- Fake-user ids from different scripts must not share a hash namespace.
+- `league_now()` (a GUC) is how a test looks at a future week, since `now()` is fixed per transaction.
+- Never `db:reset` to iterate on league SQL (it wipes the seed): tear down the league objects and run `supabase migration up --local`, or `create or replace` the function.
+- RNTL 14 has no `UNSAFE_` queries: give SVG paths a testID.
+- Jest mock factories may only touch `mock*` variables.
+- Expo typed routes regenerate only while Metro runs.
+
+**Follow-ups**:
+
+- The user steps above (`db:push`, phone checks, Android chart performance).
+- Peak-rank badges move to Phase 11.
+- Push notifications for results arrive in Phase 12.
+- Community leagues and battles arrive in Phase 12B (`community_id` is ready).
+- Smaller production derivatives of the 1254px rank PNGs (12 MB of art in the bundle; Codex finding 030).
+
+**Next**: finish Phase 8 acceptance (real logged workouts, hosted migrations), then Phase 9.
+
+### Session 15 — 2026-10-10 — Phase 9 Feed and Discover
+
+**Built**: everything in the Phase 9 checklist above, planned first (plan approved by the user) and built in milestones: social SQL and pgTAP, read RPCs and the ranking doc, `src/lib/social`, Feed and post detail, composer and milestone sharing, Discover / profile / Friends hub, notifications and Realtime, copy workout, dev seed and the acceptance script, then a simulator walkthrough and design review.
+
+**Decisions** (PRODUCT_SPEC §10I): with the user: Friends requests and list real now; `expo-image` and `expo-image-manipulator` approved; goal and experience never printed on cards. Derived from existing rules: the more restrictive of post and profile visibility wins; a private workout gets no post; milestone sharing defaults to "Ask me"; reports are stored and reviewed in Phase 13.
+
+**Gotchas**:
+
+- A trigger on `workouts` fires before `save_workout` writes the sets; the summary is rebuilt when `refresh_workout_totals` updates the row and again when `workout_rewards` is written.
+- `personal_records` ids are rebuilt on every recompute, so milestone keys are content-based.
+- Realtime `postgres_changes` delivers nothing until the socket carries the user's token: call `realtime.setAuth(session.access_token)` before subscribing (`subscribeAs` in `lib/social/hooks.ts`).
+- `db:start` used to exclude Realtime; it now runs locally.
+- pgTAP runs against the live local database, so assertions about "everything visible" must be scoped to the test's own rows once the dev seed has public posts.
+- `flex-1` on a pressable `Card` collapses its height (PressableScale's wrapper is a column); put `flex-1` on a wrapping View.
+- The routine editor treated a never-saved routine with a draft as "not found"; it now opens it as a new routine (needed by Copy → builder).
+- Expo typed routes regenerate only while Metro runs; start it briefly after adding routes.
+
+**Follow-ups**: the open checklist items and design findings above; Phase 10 (search, invites, leaderboards) builds on `search_profiles`, `get_friends` and the graph RPCs.
+
+**Next**: Phase 10. Phase 8 and Phase 9 keep their user and device steps open.
+
+### Session 16 — 2026-10-10 — Project integrity audit and hardening
+
+- Audited the current working tree while preserving the pre-existing changes. Full findings and
+  remaining risks: [INTEGRITY_AUDIT.md](INTEGRITY_AUDIT.md).
+- Fixed truncated sync listings, unauthenticated preview pushes, retry cancellation, stale pulls,
+  sign-out/account-switch cleanup ordering, leftover private caches and in-memory workout drafts.
+- Exercise caches now record backend identity. Database types generate atomically, with a drift
+  check and a verified failure-preservation case. Removed the unreferenced legacy Home mock cards.
+- Added root setup documentation, integrity/SQLite replay checks and GitHub CI. Aligned package/app
+  versions and pinned pnpm. Upgraded the six compatible Expo patches Doctor recommended and aligned
+  React DOM, Metro config and test-renderer peers; peer validation now runs in `pnpm check`.
+- Local database suite: 607 assertions across 12 files passed. All 15 local migrations are recorded;
+  all public tables have RLS and all public security-definer functions pin their search path.
+- Hosted dry run: every migration deployed, no push required. First remote test run lost its SSL
+  connection during rank tests after 272 assertions; retry could not resolve a usable direct
+  database address. Hosted types were read into a temporary file; no migration push/reset occurred.
+- Expo Doctor: 21/21 checks pass. Both final Android and iOS production bundles export successfully.
+  Generated local types match. Six transitive dependency advisories remain (2 high, 4 moderate);
+  upstream fixes/compatibility review and native-device acceptance remain open.
+- Final `pnpm check` passed: 67 suites, 629 tests, 20 snapshots, typecheck, lint, formatting, peer checks and integrity checks. CI is defined but has not run on GitHub.
+- Foundation is complete. Phases 8/9 retain their acceptance follow-ups; Phase 10 is next feature work
+  and was not started by this audit.
+
+### Session 17 — 2026-10-10 — GitHub checkpoint and exercise-picker diagnosis
+
+- Prepared the current project for a GitHub checkpoint, excluding ignored environment files and
+  local backend credentials.
+- Traced the empty-workout exercise picker to the account-free development bypass: no session
+  means `useExerciseLibrarySync` is disabled, so a fresh device has no exercises in SQLite.
+- Confirmed the configured hosted backend rejects an anonymous library-version read with HTTP
+  401 / Postgres 42501 (permission denied). Being online alone cannot download the library.
+- Documented the existing workaround in DEVELOPMENT.md: restart with the auth bypass disabled,
+  sign in and download once; the official library remains available from the device cache.
+- Follow-up: the library empty state should explain the sign-in requirement; supporting first-run
+  account-free exercises would require a separate preview-data or public-library access decision.
+- Phase 10 remains next feature work; this session does not change backend access policies.
+- Verification: `pnpm check` passed (67 suites, 629 tests, 20 snapshots, plus types, lint,
+  formatting, peer dependencies and integrity). No matching private-key/token patterns or files
+  over 50 MB were found in the files prepared for this checkpoint.

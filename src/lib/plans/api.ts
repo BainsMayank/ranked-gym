@@ -1,3 +1,4 @@
+import { readAllRows } from '@/lib/pagination';
 import { getSupabase } from '@/lib/supabase';
 import type { Database, Json } from '@/types/database';
 
@@ -80,8 +81,13 @@ export async function pushPlan(doc: PlanDoc): Promise<string> {
 }
 
 export async function fetchRemotePlanVersions(): Promise<Map<string, string>> {
-  const { data, error } = await getSupabase().from('plans').select('id, updated_at');
-  if (error) throw error;
+  const data = await readAllRows((from, to) =>
+    getSupabase()
+      .from('plans')
+      .select('id, updated_at', { count: 'exact' })
+      .order('id')
+      .range(from, to),
+  );
   return new Map(data.map((r) => [r.id, r.updated_at]));
 }
 

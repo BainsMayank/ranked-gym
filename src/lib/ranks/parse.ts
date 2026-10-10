@@ -1,12 +1,13 @@
-import { rankFromServer } from '@/lib/game/ranks';
 import { prKinds } from '@/lib/game/engine/records';
 import { rankScopes } from '@/lib/game/engine/types';
-import { rankTiers, type RankTier } from '@/theme';
+
+import { arr, isObj, num, oneOf, rank, str } from './json';
 
 import type {
   CurrentRank,
   PersonalRecord,
   Placement,
+  PlacementProgress,
   PredictionEta,
   RankChange,
   RankChangeKind,
@@ -18,20 +19,6 @@ import type {
  * Narrowing parsers for the JSON the rank engine returns. Anything malformed is dropped rather than
  * shown, so an older or newer server can never crash the summary screen.
  */
-
-type Obj = Record<string, unknown>;
-
-const isObj = (v: unknown): v is Obj => typeof v === 'object' && v !== null && !Array.isArray(v);
-const num = (v: unknown): number | null => {
-  const n = typeof v === 'string' ? Number(v) : v;
-  return typeof n === 'number' && Number.isFinite(n) ? n : null;
-};
-const str = (v: unknown): string | null => (typeof v === 'string' ? v : null);
-const arr = (v: unknown): unknown[] => (Array.isArray(v) ? v : []);
-const oneOf = <T extends string>(list: readonly T[], v: unknown): T | null =>
-  typeof v === 'string' && (list as readonly string[]).includes(v) ? (v as T) : null;
-const tier = (v: unknown): RankTier | null => oneOf(rankTiers, v);
-const rank = (t: unknown, d: unknown) => rankFromServer(tier(t), num(d));
 
 const CHANGE_KINDS = ['placed', 'rank_up', 'rank_down'] as const satisfies RankChangeKind[];
 
@@ -103,6 +90,14 @@ export function parseRewards(v: unknown): WorkoutRewards | null {
   };
 }
 
+function parsePlacementProgress(v: unknown): PlacementProgress | null {
+  if (!isObj(v)) return null;
+  const lifts = num(v.lifts);
+  const needLifts = num(v.need_lifts);
+  if (lifts === null || needLifts === null) return null;
+  return { lifts, needLifts, regions: num(v.regions), needRegions: num(v.need_regions) };
+}
+
 export function parseCurrentRank(v: unknown): CurrentRank | null {
   if (!isObj(v)) return null;
   const scope = oneOf(rankScopes, v.scope);
@@ -117,6 +112,7 @@ export function parseCurrentRank(v: unknown): CurrentRank | null {
     status,
     lastSetAt: str(v.last_set_at),
     inactive: v.inactive === true,
+    details: parsePlacementProgress(v.details),
   };
 }
 

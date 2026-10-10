@@ -1,79 +1,46 @@
 import { View } from 'react-native';
 
-import {
-  Avatar,
-  Button,
-  IconButton,
-  ListGroup,
-  ListItem,
-  RankTag,
-  Screen,
-  SectionHeader,
-} from '@/components';
+import { Screen } from '@/components';
+import { useServerReads } from '@/lib/ranks';
+import { useFriendRequests, useFriends } from '@/lib/social';
 
 import { AddFriendOptions } from '../components/AddFriendOptions';
+import { FriendRequestsSection } from '../components/FriendRequestsSection';
+import { FriendsListSection } from '../components/FriendsListSection';
 import { InviteCard } from '../components/InviteCard';
 import { StandingsSummary } from '../components/StandingsSummary';
-import { friends, requests, summary } from '../mocks';
 
-/** Friends hub: invite, add friends, standings, requests and your friends' activity. */
+/** Friends hub: invite, add friends, standings, requests and your friends. */
 export function FriendsScreen() {
+  const signedIn = useServerReads();
+  const friends = useFriends();
+  const requests = useFriendRequests();
+  const count = friends.data?.length;
   return (
     <Screen
       title="Friends"
-      subtitle={`${summary.friends} friends · ${summary.activeNow} active now`}
+      subtitle={count !== undefined ? `${count} ${count === 1 ? 'friend' : 'friends'}` : undefined}
       scroll
+      onRefresh={
+        signedIn
+          ? () => {
+              void friends.refetch();
+              void requests.refetch();
+            }
+          : undefined
+      }
+      refreshing={friends.isRefetching || requests.isRefetching}
     >
       <View className="gap-lg">
         <InviteCard />
         <AddFriendOptions />
         <StandingsSummary />
-
-        <SectionHeader title="Requests" count={requests.length} />
-        <ListGroup>
-          {requests.map((r) => (
-            <ListItem
-              key={r.name}
-              title={r.name}
-              subtitle={r.meta}
-              titleAccessory={<RankTag tier={r.rank.tier} division={r.rank.division} />}
-              leading={<Avatar name={r.name} size="md" />}
-              trailing={
-                <View className="flex-row items-center gap-xs">
-                  <Button label="Accept" variant="secondary" size="sm" onPress={() => undefined} />
-                  <IconButton
-                    icon="close"
-                    accessibilityLabel={`Decline ${r.name}`}
-                    size="sm"
-                    variant="surface"
-                  />
-                </View>
-              }
-            />
-          ))}
-        </ListGroup>
-
-        <SectionHeader title="Your friends" />
-        <ListGroup>
-          {friends.map((f) => (
-            <ListItem
-              key={f.name}
-              title={f.name}
-              titleAccessory={<RankTag tier={f.rank.tier} division={f.rank.division} />}
-              subtitle={f.status}
-              leading={
-                <Avatar
-                  name={f.name}
-                  size="md"
-                  ring={f.training ? { tier: f.rank.tier } : undefined}
-                />
-              }
-              trailing={
-                <Button label={f.action} variant="outline" size="sm" onPress={() => undefined} />
-              }
-            />
-          ))}
-        </ListGroup>
+        {signedIn ? (
+          <>
+            <FriendRequestsSection />
+            <FriendsListSection />
+          </>
+        ) : null}
       </View>
     </Screen>
   );

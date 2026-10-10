@@ -68,6 +68,8 @@ export interface Routine {
   source: RoutineSource;
   /** Where it came from: 'template:<slug>', a plan id, a post id. */
   sourceRef: string | null;
+  /** Credit for a copy, e.g. '@aarav' (shown as "Copied from @aarav"). */
+  sourceLabel?: string | null;
   sortOrder: number;
   archived: boolean;
   updatedAt: string;

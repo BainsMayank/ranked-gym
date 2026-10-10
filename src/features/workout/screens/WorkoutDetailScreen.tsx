@@ -2,7 +2,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo } from 'react';
 import { Alert, View } from 'react-native';
 
-import { EmptyState, IconButton, Screen, Tag, Text } from '@/components';
+import { EmptyState, IconButton, Screen, Tag, Text, LoggedExercise } from '@/components';
 import { useExercises } from '@/lib/exercises';
 import { useProfile } from '@/lib/profile';
 import {
@@ -15,7 +15,6 @@ import {
 
 import { WorkoutStats } from '../finish/WorkoutStats';
 import { formatWorkoutDate } from '../history/format';
-import { LoggedExercise } from '../history/LoggedExercise';
 import { WorkoutPhoto } from '../history/WorkoutPhoto';
 import { WorkoutRewardsSection } from '../rewards/WorkoutRewardsSection';
 

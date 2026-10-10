@@ -12,6 +12,7 @@ import type { Exercise, ExerciseUsage } from './types';
  */
 
 const LIBRARY_VERSION_KEY = 'exercise_library_version';
+const LIBRARY_SOURCE_KEY = 'exercise_library_source';
 const CHUNK = 100;
 
 type Tx = Parameters<Parameters<LocalDb['transaction']>[0]>[0];
@@ -64,7 +65,11 @@ export async function countOfficialExercises(): Promise<number> {
 }
 
 /** Replaces the whole official library in one transaction and records its version. */
-export async function replaceOfficialExercises(list: Exercise[], version: number): Promise<void> {
+export async function replaceOfficialExercises(
+  list: Exercise[],
+  version: number,
+  source: string,
+): Promise<void> {
   const db = await ensureDb();
   db.transaction((tx) => {
     const old = tx
@@ -80,6 +85,10 @@ export async function replaceOfficialExercises(list: Exercise[], version: number
     tx.insert(meta)
       .values({ key: LIBRARY_VERSION_KEY, value: String(version) })
       .onConflictDoUpdate({ target: meta.key, set: { value: String(version) } })
+      .run();
+    tx.insert(meta)
+      .values({ key: LIBRARY_SOURCE_KEY, value: source })
+      .onConflictDoUpdate({ target: meta.key, set: { value: source } })
       .run();
   });
 }
@@ -122,6 +131,11 @@ export async function readLocalLibraryVersion(): Promise<number | null> {
   const db = await ensureDb();
   const row = db.select().from(meta).where(eq(meta.key, LIBRARY_VERSION_KEY)).get();
   return row ? Number(row.value) : null;
+}
+
+export async function readLocalLibrarySource(): Promise<string | null> {
+  const db = await ensureDb();
+  return db.select().from(meta).where(eq(meta.key, LIBRARY_SOURCE_KEY)).get()?.value ?? null;
 }
 
 /** Counts a pick (or, from Phase 4, a logged exercise) for recent and most-used lists. */

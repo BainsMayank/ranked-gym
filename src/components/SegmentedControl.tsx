@@ -1,8 +1,9 @@
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 
 import { cn } from '@/lib/utils';
 
 import { Text } from './Text';
+import { PressableScale } from './PressableScale';
 
 export interface SegmentOption<T extends string> {
   value: T;
@@ -34,21 +35,21 @@ export function SegmentedControl<T extends string>({
       {options.map((opt) => {
         const selected = opt.value === value;
         return (
-          <Pressable
+          <PressableScale
             key={opt.value}
             accessibilityRole="radio"
             accessibilityLabel={opt.label}
             accessibilityState={{ selected, checked: selected }}
             onPress={() => onChange(opt.value)}
             className={cn(
-              'min-h-10 flex-1 items-center justify-center rounded-md px-sm',
+              'min-h-12 flex-1 items-center justify-center rounded-md px-sm',
               selected ? 'bg-text' : 'active:opacity-70',
             )}
           >
             <Text variant="label" tone={selected ? 'inverse' : 'muted'}>
               {opt.label}
             </Text>
-          </Pressable>
+          </PressableScale>
         );
       })}
     </View>

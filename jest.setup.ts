@@ -18,3 +18,25 @@ jest.mock('@shopify/flash-list/dist/recyclerview/utils/measureLayout', () => {
     measureItemLayout: jest.fn(box(400, 300)),
   };
 });
+
+// Skia and Victory Native draw natively; under Jest charts render a placeholder view.
+jest.mock('@shopify/react-native-skia', () => {
+  const React = jest.requireActual<typeof import('react')>('react');
+  const passthrough = ({ children }: { children?: React.ReactNode }) =>
+    React.createElement(React.Fragment, null, children);
+  return {
+    useFont: () => null,
+    Circle: () => null,
+    Rect: () => null,
+    Text: () => null,
+    Group: passthrough,
+  };
+});
+jest.mock('victory-native', () => {
+  const React = jest.requireActual<typeof import('react')>('react');
+  const { View } = jest.requireActual<typeof import('react-native')>('react-native');
+  return {
+    CartesianChart: () => React.createElement(View, { testID: 'cartesian-chart' }),
+    Line: () => null,
+  };
+});

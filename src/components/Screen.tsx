@@ -1,6 +1,6 @@
 import { BottomTabBarHeightContext } from 'expo-router/js-tabs';
 import { useContext, type ReactNode } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, RefreshControl, ScrollView, View } from 'react-native';
 import { SafeAreaView, type Edge } from 'react-native-safe-area-context';
 
 import { cn } from '@/lib/utils';
@@ -37,6 +37,8 @@ export interface ScreenProps {
   /** Safe-area edges to inset. Defaults to top; inside tabs the content is padded past the glass tab bar. */
   edges?: Edge[];
   className?: string;
+  onRefresh?: () => void;
+  refreshing?: boolean;
 }
 
 /**
@@ -62,6 +64,8 @@ export function Screen({
   avoidKeyboard = false,
   bleedBottom = false,
   className,
+  onRefresh,
+  refreshing = false,
 }: ScreenProps) {
   // The tab bar floats over content (glass), so pad by its height. Undefined outside the tab navigator.
   const tabBarHeight = useTabBarInset();
@@ -103,6 +107,11 @@ export function Screen({
       >
         {scroll ? (
           <ScrollView
+            refreshControl={
+              onRefresh ? (
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+              ) : undefined
+            }
             className="flex-1"
             contentContainerClassName={cn(padded && 'px-lg', className)}
             contentContainerStyle={{ paddingBottom: bottomInset + 32 }}

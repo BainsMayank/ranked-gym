@@ -59,6 +59,15 @@ export interface WorkoutRewards {
   xpPlaceholder: null;
 }
 
+/** Placement progress on overall (lifts + regions) and discipline (lifts only) rows. */
+export interface PlacementProgress {
+  lifts: number;
+  needLifts: number;
+  /** Null on discipline rows, which only need lifts. */
+  regions: number | null;
+  needRegions: number | null;
+}
+
 export interface CurrentRank {
   scope: RankScope;
   key: string;
@@ -67,6 +76,7 @@ export interface CurrentRank {
   status: 'ranked' | 'placement';
   lastSetAt: string | null;
   inactive: boolean;
+  details: PlacementProgress | null;
 }
 
 export type PredictionEta =

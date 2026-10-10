@@ -139,7 +139,7 @@ export function RoutineBuilderScreen() {
   return (
     <EditorEnvProvider value={env}>
       <Screen
-        title={session.isNew ? 'New routine' : 'Edit routine'}
+        title={session.isNew || session.draftOnly ? 'New routine' : 'Edit routine'}
         onBack={() => router.back()}
         headerRight={doc && !session.notFound ? headerRight : undefined}
         edges={['top', 'bottom']}
